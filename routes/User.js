@@ -14,14 +14,14 @@ const keys = require('../config/keys');
 //Load user model
 const User = require('../models/User');
 
-// @route GET api/users/test
-// @desc Tests users route
+// @route GET User/test
+// @desc Tests User route
 // @access Public route
 router.get('/test', (req, res) => res.json({
     msg: "Users Works"
 }));
 
-// @route GET api/users/register
+// @route GET User/register
 // @desc Register a user
 // @access Public route
 router.post('/register', (req, res) => {
@@ -66,7 +66,7 @@ router.post('/register', (req, res) => {
     });
 });
 
-// @route GET api/users/login
+// @route GET User/login
 // @desc Login User / Returning JWT Token
 // @access Public
 
@@ -122,7 +122,7 @@ router.post('/login', (req, res) => {
 
 });
 
-// @route GET api/users/current
+// @route GET User/current
 // @desc Return current user
 // @access Private
 router.get('/current', passport.authenticate('jwt', {

@@ -9,7 +9,7 @@ const ProfileSchema = new Schema({
     // user has an ID associated with it.
     user: {
         type: Schema.Types.ObjectId,
-        ref: 'users',
+        ref: 'user',
     },
     handle: {
         type: String,

@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 
-const users = require('./routes/users');
-const profile = require('./routes/profile');
-const tag = require('./routes/tag');
+const users = require('./routes/User');
+const profile = require('./routes/Profile');
+const tag = require('./routes/Tag');
 const keys = require('./config/keys');
 const router = express.Router();
 
