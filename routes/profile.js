@@ -4,15 +4,15 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const fs = require('fs');
 // Load validation
-const validateProfleInput = require('../../validation/profile');
+const validateProfleInput = require('../validation/profile');
 
 const validate = require('uuid-validate');
 // load profile model
 const uuidv1 = require('uuid/v1');
 const PDFDocument = require('pdfkit');
-const Profile = require('../../models/Profile');
-const User = require('../../models/User');
-const Post = require('../../models/Tag');
+const Profile = require('../models/Profile');
+const User = require('../models/User');
+const Post = require('../models/Tag');
 const QRCode = require('qrcode');
 const path = require('path');
 

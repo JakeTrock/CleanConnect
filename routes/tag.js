@@ -5,16 +5,16 @@ const passport = require('passport');
 const validate = require('uuid-validate');
 
 //Post model
-const Post = require('../../models/Tag');
+const Post = require('../models/Tag');
 
 // Profile Model
-const Profile = require('../../models/Profile');
+const Profile = require('../models/Profile');
 
 const uuidv1 = require('uuid/v1');
 
 // Validation Part for input
 
-const validatePostInput = require('../../validation/tag');
+const validatePostInput = require('../validation/tag');
 var app = express();
 // @route GET api/posts/test
 // @desc Tests post route
