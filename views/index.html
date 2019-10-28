@@ -1,0 +1,879 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+    /*!
+     * jQuery Cookie Plugin v1.4.1
+     * https://github.com/carhartl/jquery-cookie
+     *
+     * Copyright 2006, 2014 Klaus Hartl
+     * Released under the MIT license
+     */
+    (function(factory) {
+        if (typeof define === 'function' && define.amd) {
+            // AMD (Register as an anonymous module)
+            define(['jquery'], factory);
+        } else if (typeof exports === 'object') {
+            // Node/CommonJS
+            module.exports = factory(require('jquery'));
+        } else {
+            // Browser globals
+            factory(jQuery);
+        }
+    }(function($) {
+
+        var pluses = /\+/g;
+
+        function encode(s) {
+            return config.raw ? s : encodeURIComponent(s);
+        }
+
+        function decode(s) {
+            return config.raw ? s : decodeURIComponent(s);
+        }
+
+        function stringifyCookieValue(value) {
+            return encode(config.json ? JSON.stringify(value) : String(value));
+        }
+
+        function parseCookieValue(s) {
+            if (s.indexOf('"') === 0) {
+                // This is a quoted cookie as according to RFC2068, unescape...
+                s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+            }
+
+            try {
+                // Replace server-side written pluses with spaces.
+                // If we can't decode the cookie, ignore it, it's unusable.
+                // If we can't parse the cookie, ignore it, it's unusable.
+                s = decodeURIComponent(s.replace(pluses, ' '));
+                return config.json ? JSON.parse(s) : s;
+            } catch (e) {}
+        }
+
+        function read(s, converter) {
+            var value = config.raw ? s : parseCookieValue(s);
+            return $.isFunction(converter) ? converter(value) : value;
+        }
+
+        var config = $.cookie = function(key, value, options) {
+
+            // Write
+
+            if (arguments.length > 1 && !$.isFunction(value)) {
+                options = $.extend({}, config.defaults, options);
+
+                if (typeof options.expires === 'number') {
+                    var days = options.expires,
+                        t = options.expires = new Date();
+                    t.setMilliseconds(t.getMilliseconds() + days * 864e+5);
+                }
+
+                return (document.cookie = [
+                    encode(key), '=', stringifyCookieValue(value),
+                    options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
+                    options.path ? '; path=' + options.path : '',
+                    options.domain ? '; domain=' + options.domain : '',
+                    options.secure ? '; secure' : ''
+                ].join(''));
+            }
+
+            // Read
+
+            var result = key ? undefined : {},
+                // To prevent the for loop in the first place assign an empty array
+                // in case there are no cookies at all. Also prevents odd result when
+                // calling $.cookie().
+                cookies = document.cookie ? document.cookie.split('; ') : [],
+                i = 0,
+                l = cookies.length;
+
+            for (; i < l; i++) {
+                var parts = cookies[i].split('='),
+                    name = decode(parts.shift()),
+                    cookie = parts.join('=');
+
+                if (key === name) {
+                    // If second argument (value) is a function it's a converter...
+                    result = read(cookie, value);
+                    break;
+                }
+
+                // Prevent storing a cookie that we couldn't decode.
+                if (!key && (cookie = read(cookie)) !== undefined) {
+                    result[name] = cookie;
+                }
+            }
+
+            return result;
+        };
+
+        config.defaults = {};
+
+        $.removeCookie = function(key, options) {
+            // Must not alter options, thus extending a fresh object...
+            $.cookie(key, '', $.extend({}, options, { expires: -1 }));
+            return !$.cookie(key);
+        };
+
+    }));
+    </script>
+    <script type="text/javascript">
+    (function($) {
+        $.fn.easyTabs = function(option) {
+            var param = jQuery.extend({ fadeSpeed: "fast", defaultContent: 1, activeClass: 'active' }, option);
+            $(this).each(function() {
+                var thisId = "#" + this.id;
+                if (param.defaultContent == '') { param.defaultContent = 1; }
+                if (typeof param.defaultContent == "number") { var defaultTab = $(thisId + " .tabs li:eq(" + (param.defaultContent - 1) + ") a").attr('href').substr(1); } else { var defaultTab = param.defaultContent; }
+                $(thisId + " .tabs li a").each(function() {
+                    var tabToHide = $(this).attr('href').substr(1);
+                    $("#" + tabToHide).addClass('easytabs-tab-content');
+                });
+                hideAll();
+                changeContent($.cookie("window")||defaultTab);
+
+                function hideAll() { $(thisId + " .easytabs-tab-content").hide(); }
+
+                function changeContent(tabId) {
+                    hideAll();
+                    $.removeCookie("window");
+                    $.cookie("window",tabId);
+                    $(thisId + " .tabs li").removeClass(param.activeClass);
+                    $(thisId + " .tabs li a[href=#" + tabId + "]").closest('li').addClass(param.activeClass);
+                    if (param.fadeSpeed != "none") { $(thisId + " #" + tabId).fadeIn(param.fadeSpeed); } else { $(thisId + " #" + tabId).show(); }
+                }
+                $(thisId + " .tabs li").click(function() {
+                    var tabId = $(this).find('a').attr('href').substr(1);
+                    changeContent(tabId);
+                    return false;
+                });
+            });
+        };
+    })(jQuery);
+    
+    //     $.cookie("test", 1, {
+    //    expires : 10,           // Expires in 10 days
+
+    //    path    : '/',          // The value of the path attribute of the cookie
+    //                            // (Default: path of page that created the cookie).
+
+    // domain : 'jquery.com', // The value of the domain attribute of the cookie
+    // // (Default: domain of page that created the cookie).
+    // secure : true // If set to true the secure attribute of the cookie
+    // // will be set and the cookie transmission will
+    // // require a secure protocol (defaults to false).
+    // });
+    </script>
+    <style type="text/css">
+    html,
+    body,
+    div,
+    span,
+    applet,
+    object,
+    iframe,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    blockquote,
+    pre,
+    a,
+    abbr,
+    acronym,
+    address,
+    big,
+    cite,
+    code,
+    del,
+    dfn,
+    em,
+    font,
+    img,
+    ins,
+    kbd,
+    q,
+    s,
+    samp,
+    small,
+    strike,
+    strong,
+    sub,
+    sup,
+    tt,
+    var,
+    b,
+    u,
+    i,
+    center,
+    dl,
+    dt,
+    dd,
+    ol,
+    ul,
+    li,
+    fieldset,
+    form,
+    label,
+    legend,
+    table,
+    caption,
+    tbody,
+    tfoot,
+    thead,
+    tr,
+    th,
+    td {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        outline: 0;
+        font-size: 100%;
+        vertical-align: baseline;
+        background: transparent;
+    }
+
+    ol,
+    ul {
+        list-style: none;
+    }
+
+    blockquote,
+    q {
+        quotes: none;
+    }
+
+    blockquote:before,
+    blockquote:after,
+    q:before,
+    q:after {
+        content: '';
+        content: none;
+    }
+
+    :focus {
+        outline: 0;
+    }
+
+    ins {
+        text-decoration: none;
+    }
+
+    del {
+        text-decoration: line-through;
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+
+
+
+    body {
+        color: #000;
+        background-color: #dcdcdc;
+    }
+
+    a {
+        text-decoration: none;
+        color: #1883ba;
+    }
+
+    h1 {
+        font-size: 32px;
+        font-weight: normal;
+        font-style: normal;
+        margin-bottom: 18px;
+    }
+
+    h2 {
+        font-size: 18px;
+    }
+
+    #container {
+        width: 865px;
+        margin: 0px auto;
+    }
+
+
+    #header {
+        padding: 20px;
+        font-size: 36px;
+        background-color: #002339;
+        color: #fff;
+    }
+
+    #header span {
+        color: #666;
+    }
+
+    #main_content {
+        background-color: #fff;
+        padding: 60px 20px 20px;
+    }
+
+
+    #footer p {
+        margin: 0;
+        padding-top: 10px;
+        padding-bottom: 50px;
+        color: #333;
+        font: 10px Arial, sans-serif;
+    }
+
+    .tabs {
+        width: 100%;
+        height: 31px;
+        background-color: #2f7093;
+    }
+
+    .tabs li {
+        float: left;
+        margin: 0;
+        overflow: hidden;
+        background-color: #2f7093;
+    }
+
+    .tabs li a {
+        display: block;
+        color: #fff;
+        text-decoration: none;
+        font: bold 11px/11px 'Arial';
+        text-transform: uppercase;
+        padding: 10px 15px;
+        border-right: 1px solid #fff;
+    }
+
+    .tabs li a:hover {
+        background-color: #2a6484;
+
+    }
+
+    .tabs li.active a {
+        color: #000;
+        background-color: #fff;
+    }
+
+
+
+    div.huge {
+
+        font-size: 300px;
+        line-height: 1em;
+        padding: 0;
+        letter-spacing: -.02em;
+        overflow: hidden;
+    }
+
+    div.glyph_range {
+        font-size: 72px;
+        line-height: 1.1em;
+    }
+
+    .size10 {
+        font-size: 10px;
+    }
+
+    .size11 {
+        font-size: 11px;
+    }
+
+    .size12 {
+        font-size: 12px;
+    }
+
+    .size13 {
+        font-size: 13px;
+    }
+
+    .size14 {
+        font-size: 14px;
+    }
+
+    .size16 {
+        font-size: 16px;
+    }
+
+    .size18 {
+        font-size: 18px;
+    }
+
+    .size20 {
+        font-size: 20px;
+    }
+
+    .size24 {
+        font-size: 24px;
+    }
+
+    .size30 {
+        font-size: 30px;
+    }
+
+    .size36 {
+        font-size: 36px;
+    }
+
+    .size48 {
+        font-size: 48px;
+    }
+
+    .size60 {
+        font-size: 60px;
+    }
+
+    .size72 {
+        font-size: 72px;
+    }
+
+    .size90 {
+        font-size: 90px;
+    }
+
+
+    .psample_row1 {
+        height: 120px;
+    }
+
+    .psample_row1 {
+        height: 120px;
+    }
+
+    .psample_row2 {
+        height: 160px;
+    }
+
+    .psample_row3 {
+        height: 160px;
+    }
+
+    .psample_row4 {
+        height: 160px;
+    }
+
+    .psample {
+        overflow: hidden;
+        position: relative;
+    }
+
+    .psample p {
+        line-height: 1.3em;
+        display: block;
+        overflow: hidden;
+        margin: 0;
+    }
+
+    .psample span {
+        margin-right: .5em;
+    }
+
+    .white_blend {
+        width: 100%;
+        height: 61px;
+        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAVkAAAA9CAYAAAAH4BojAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAO1JREFUeNrs3TsKgFAMRUE/eer+NxztxMYuEWQG3ECKwwUF58ycAKixOAGAyAKILAAiCyCyACILgMgCiCyAyAIgsgAiCyCyAIgsgMgCiCwAIgsgsgAiC4DIAogsACIL0CWuZ3UGgLrIhjMA1EV2OAOAJQtgyQLwjOzmDAAiCyCyAIgsQFtkd2cAEFkAkQVAZAHaIns4A4AlC2DJAiCyACILILIAiCzAV5H1dQGAJQsgsgCILIDIAvwisl58AViyAJYsACILILIAIgvAe2T9EhxAZAFEFgCRBeiL7HAGgLrIhjMAWLIAliwAt1OAAQDwygTBulLIlQAAAABJRU5ErkJggg==);
+        position: absolute;
+        bottom: 0;
+    }
+
+    .black_blend {
+        width: 100%;
+        height: 61px;
+        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAVkAAAA9CAYAAAAH4BojAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPJJREFUeNrs3TEKhTAQRVGjibr/9QoxhY2N3Ywo50A28IrLwP9g6b1PAMSYTQAgsgAiC4DIAogsgMgCILIAIgsgsgCILIDIAogsACILILIAIguAyAKILIDIAiCyACILgMgCZCnjLWYAiFGvB0BQZJsZAFyyAC5ZAO6RXc0AILIAIguAyAKkRXYzA4DIAogsACILkBbZ3QwALlkAlywAIgsgsgAiC4DIArwVWf8uAHDJAogsACILILIAv4isH74AXLIALlkARBZAZAFEFoDnyPokOIDIAogsACILkBfZZgaAuMhWMwC4ZAE+p4x3mAEgxinAAJ+XBbPWGkwAAAAAAElFTkSuQmCC);
+        position: absolute;
+        bottom: 0;
+    }
+
+    .fullreverse {
+        background: #000 !important;
+        color: #fff !important;
+        margin-left: -20px;
+        padding-left: 20px;
+        margin-right: -20px;
+        padding-right: 20px;
+        padding: 20px;
+        margin-bottom: 0;
+    }
+
+
+    .sample_table td {
+        padding-top: 3px;
+        padding-bottom: 5px;
+        padding-left: 5px;
+        vertical-align: middle;
+        line-height: 1.2em;
+    }
+
+    .sample_table td:first-child {
+        background-color: #eee;
+        text-align: right;
+        padding-right: 5px;
+        padding-left: 0;
+        padding: 5px;
+        font: 11px/12px "Courier New", Courier, mono;
+    }
+
+    code {
+        white-space: pre;
+        background-color: #eee;
+        display: block;
+        padding: 10px;
+        margin-bottom: 18px;
+        overflow: auto;
+    }
+
+
+    .bottom,
+    .last {
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    .box {
+        padding: 18px;
+        margin-bottom: 18px;
+        background: #eee;
+    }
+
+    .reverse,
+    .reversed {
+        background: #000 !important;
+        color: #fff !important;
+        border: none !important;
+    }
+
+    #bodycomparison {
+        position: relative;
+        overflow: hidden;
+        font-size: 72px;
+        height: 90px;
+        white-space: nowrap;
+    }
+
+    #bodycomparison div {
+        font-size: 72px;
+        line-height: 90px;
+        display: inline;
+        margin: 0 15px 0 0;
+        padding: 0;
+    }
+
+    #bodycomparison div span {
+        font: 10px Arial;
+        position: absolute;
+        left: 0;
+    }
+
+    #xheight {
+        float: none;
+        position: absolute;
+        color: #d9f3ff;
+        font-size: 72px;
+        line-height: 90px;
+    }
+
+    .fontbody {
+        position: relative;
+    }
+
+    .arialbody {
+        font-family: Arial;
+        position: relative;
+    }
+
+    .verdanabody {
+        font-family: Verdana;
+        position: relative;
+    }
+
+    .georgiabody {
+        font-family: Georgia;
+        position: relative;
+    }
+
+    /* @group Layout page
+ */
+
+    #layout h1 {
+        font-size: 36px;
+        line-height: 42px;
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    #layout h2 {
+        font-size: 24px;
+        line-height: 23px;
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    #layout h3 {
+        font-size: 22px;
+        line-height: 1.4em;
+        margin-top: 1em;
+        font-weight: normal;
+        font-style: normal;
+    }
+
+
+    #layout p.byline {
+        font-size: 12px;
+        margin-top: 18px;
+        line-height: 12px;
+        margin-bottom: 0;
+    }
+
+    #layout p {
+        font-size: 14px;
+        line-height: 21px;
+        margin-bottom: .5em;
+    }
+
+    #layout p.large {
+        font-size: 18px;
+        line-height: 26px;
+    }
+
+    #layout .sidebar p {
+        font-size: 12px;
+        line-height: 1.4em;
+    }
+
+    #layout p.caption {
+        font-size: 10px;
+        margin-top: -16px;
+        margin-bottom: 18px;
+    }
+
+    /* @end */
+
+    /* @group Glyphs */
+
+    #glyph_chart div {
+        background-color: #d9f3ff;
+        color: black;
+        float: left;
+        font-size: 36px;
+        height: 1.2em;
+        line-height: 1.2em;
+        margin-bottom: 1px;
+        margin-right: 1px;
+        text-align: center;
+        width: 1.2em;
+        position: relative;
+        padding: .6em .2em .2em;
+    }
+
+    #glyph_chart div p {
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: block;
+        text-align: center;
+        font: bold 9px Arial, sans-serif;
+        background-color: #3a768f;
+        width: 100%;
+        color: #fff;
+        padding: 2px 0;
+    }
+
+
+    #glyphs h1 {
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        font-family: 'tahoma';
+    }
+
+    #price li::before {
+        content: "\2b21";
+        color: blue;
+
+        margin-right: 10px;
+        /* Optional tweak */
+    }
+    </style>
+    <title>CleanConnect</title>
+    <script type="text/javascript" charset="utf-8">
+    $(document).ready(function() {
+        $('#container').easyTabs({ defaultContent: 1 });
+    });
+
+    function convertFormToJSON(form) {
+        var array = $(form).serializeArray();
+        var json = {};
+
+        $.each(array, function() {
+            json[this.name] = this.value || '';
+        });
+
+        return json;
+    }
+
+    function submitAsJSON(form) {
+        var JSONString = JSON.stringify(convertFormToJSON(form)),
+            HackyJSONString = JSONString.slice(0, -1) + ', "trash": "';
+
+        var hackyForm = "<form method='POST'  enctype='text/plain' action='" + $(form).attr('action') + "'>" +
+            "<input name='" + HackyJSONString + "' value='\"}'>" +
+            "</form>"
+        $(hackyForm).appendTo('body').submit();
+    }
+    </script>
+</head>
+
+<body>
+    <div id="container">
+        <div id="header">CleanConnect</div>
+        <ul class="tabs">
+            <li><a href="#About">About</a></li>
+            <li><a href="#Login">Login</a></li>
+            <li><a href="#ControlPanel">Control Panel</a></li>
+            <li><a href="#TagManagment">Tag Managment</a></li>
+        </ul>
+        <div id="main_content">
+            <div id="About">
+                <div class="section">
+                    <div class="grid12 firstcol">
+                        <center>
+                            <div id="slideshow"></div>
+                        </center>
+                    </div>
+                </div>
+                <div class="section">
+                    <div class="grid12 firstcol">
+                        <tr>
+                            <td class="size20 box">
+                                <p>
+                                    CleanConnect is a software solution for occupants of buildings large or small to report anything from an empty soap dispenser to a broken window. Issues can be categorized by severity allowing for faster response to bigger issues. A user reports an issue by scanning one of our qr-code stickers with a phone and detailing the issue in a fast, efficient manner. Each sticker is location-specific so each report can be tracked to where it occured. Pricing for this system is listed below:
+                                </p>
+                            </td>
+                            <td>
+                                <ul id="price">
+                                    &nbsp;
+                                    &nbsp;
+                                    <li>Simple-5 tags, for home-renters and small business-$3/tag/year</li>
+                                    <li>Business-50 tags, for small chain stores, schools or motels-$5/tag/quarter</li>
+                                    <li>Enterprise-1000+ tags, for large chain restaurants, corporations and malls-$10/tag/month</li>
+                                </ul>
+                            </td>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="Login">
+            <div class="section">
+                <div class="grid12 firstcol">
+                    <h1>Login</h1>
+                </div>
+            </div>
+            <div class="section">
+                <div class="grid8 firstcol box">
+                    <form id="form" action="user/login">
+                        <span>
+                            <h4>Email:</h4><input type="text" class="email">
+                        </span><br>
+                        <span>
+                            <h4>Password:</h4><input type="password" class="password">
+                        </span><br>
+                        <input type="submit" name="submit" value="login">
+                    </form>
+                </div>
+            </div>
+            <hr>
+            <div class="section">
+                <div class="grid12 firstcol">
+                    <h1>Register</h1>
+                </div>
+            </div>
+            <div class="section">
+                <div class="grid8 firstcol box">
+                    <form id="form" action="user/register">
+                        <span>
+                            <h4>Name:</h4><input type="text" class="name">
+                        </span><br>
+                        <span>
+                            <h4>Email:</h4><input type="text" class="email">
+                        </span><br>
+                        <span>
+                            <h4>Password:</h4><input type="password" class="password">
+                        </span><br>
+                        <span>
+                            <h4>Confirm Password:</h4><input type="password" class="password">
+                        </span><br>
+                        <input type="submit" name="submit" value="register">
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div id="ControlPanel">
+            <div class="section">
+                <h1>ControlPanel</h1>
+                <div class="grid12 firstcol">
+                    <table border="0" cellspacing="1" cellpadding="0">
+                        <tr>
+                            <th width="440" height="500" scope="col">
+                                <div id="box" style="border:3px solid black;border-radius: 3px;">
+                                    <div class="white_blend" height="10%" style="overflow: scroll;"></div>
+                                </div>
+                            </th>
+                            <th width="440" height="500" scope="col">
+                                <div id="box" style="border:3px solid black;border-radius: 3px;">
+                                    <div class="white_blend" height="10%" style="overflow: scroll;"></div>
+                                </div>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th scope="col"><span class="textcaption">bathroom a</span></th>
+                            <th scope="col"><span class="textcaption">bathroom a</span></th>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="TagManagment">
+            <div class="section">
+                <div class="grid7 firstcol" style="width:100%">
+                    <h1>TagManagment</h1>
+                    <p>Other than Login, I also enjoy TagManagment. I hope you can enjoy my reading my TagManagment as much as I enjoyed TagManagment it:</p>
+                    <p>&nbsp;</p>
+                    <table style="width:100%" border="0" cellspacing="1" cellpadding="0">
+                        <tr>
+                            <th scope="col"><a href="TagManagment/doc1.pdf"><img src="images/sc1.png"></a></th>
+                            <th scope="col"><a href="TagManagment/doc2.pdf"><img src="images/sc2.png"></a></th>
+                        </tr>
+                        <tr>
+                            <th scope="col"><span class="textcaption">Analysis of the underlying themes of two pieces.</span></th>
+                            <th scope="col"><span class="textcaption">A short play I wrote junior year.</span></th>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            <p id="notice"></p>
+        </div>
+    </div>
+</body>
+<script>
+$("login").submit(function(event) {
+    event.preventDefault();
+    submitAsJSON(this);
+});
+$(document).ready(function() {
+    $("#notice").text("Copyright 2019-" + (new Date()).getFullYear() + " Jacob Trock. Rights to page html content and server-side code reserved. Other rights include: CSS Reset by Eric Meyer - Released under Public Domain(http://meyerweb.com/eric/tools/css/reset/), HTML form as function-Created by Keith Hackbarth 2018, also features easyTabs");
+});
+</script>
+
+</html>
