@@ -5,7 +5,7 @@ const uuidv1 = require('uuid/v1');
 const PostSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
-        ref: 'user'
+        ref: 'User'
     },
     tagid: {
         type: String,
@@ -28,4 +28,4 @@ const PostSchema = new Schema({
     }]
 });
 
-module.exports = Post = mongoose.model('post', PostSchema);
+module.exports = Post = mongoose.model('Post', PostSchema);

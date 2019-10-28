@@ -9,7 +9,7 @@ const ProfileSchema = new Schema({
     // user has an ID associated with it.
     user: {
         type: Schema.Types.ObjectId,
-        ref: 'user',
+        ref: 'User',
     },
     handle: {
         type: String,
@@ -25,4 +25,4 @@ const ProfileSchema = new Schema({
     }
 });
 
-module.exports = Profile = mongoose.model('profile', ProfileSchema);
+module.exports = Profile = mongoose.model('Profile', ProfileSchema);

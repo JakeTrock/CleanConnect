@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 
-const users = require('./routes/User');
+const user = require('./routes/User');
 const profile = require('./routes/Profile');
 const tag = require('./routes/Tag');
 const keys = require('./config/keys');
@@ -33,7 +33,7 @@ app.use(passport.initialize());
 require('./config/passport')(passport);
 //Use Routes
 
-app.use('/user', users);
+app.use('/user', user);
 app.use('/profile', profile);
 app.use('/tag', tag);
 
