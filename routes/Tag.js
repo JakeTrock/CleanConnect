@@ -20,7 +20,7 @@ var app = express();
 // @desc Tests post route
 // @access Public route
 router.get('/test', (req, res) => res.json({
-    msg: "Posts Works"
+    msg: "Tag Works"
 }));
 // @route GET api/posts
 // @desc Get all the post

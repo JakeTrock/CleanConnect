@@ -48,48 +48,48 @@ router.get('/', passport.authenticate('jwt', {
 // @route GET api/profile/all
 // @desc GET all the profiles in the database
 // @access  Public route
-
-router.get('/all', (req, res) => {
-    const errors = {};
-    Profile.find()
-        .populate('user', ['name'])
-        .then(profiles => {
-            if (!profiles) {
-                errors.noprofiles = 'There are no profiles'
-                return res.status(404).json(errors);
-            }
-            res.json(profiles);
-        }).catch(err => res.status(404).json({
-            profile: 'There are no profiles'
-        }));
-});
+//  REMOVED DUE TO SECURITY CONCERNS
+// router.get('/all', (req, res) => {
+//     const errors = {};
+//     Profile.find()
+//         .populate('user', ['name'])
+//         .then(profiles => {
+//             if (!profiles) {
+//                 errors.noprofiles = 'There are no profiles'
+//                 return res.status(404).json(errors);
+//             }
+//             res.json(profiles);
+//         }).catch(err => res.status(404).json({
+//             profile: 'There are no profiles'
+//         }));
+// });
 
 // @route GET api/profile/handle/ :handle
 // @desc Get profile by handle
 // @access Public route
+//  REMOVED DUE TO SECURITY CONCERNS
+// router.get('/handle/:handle', (req, res) => {
 
-router.get('/handle/:handle', (req, res) => {
-
-    const errors = {}
-    Profile.findOne({
-            handle: req.params.handle
-        })
-        .populate('user', ['name'])
-        .then(profile => {
-            if (!profile) {
-                errors.noprofile = "There isn't any such profile";
-                res.status(404).json(errors)
-            }
-            res.json(profile);
-        }).catch(err => res.status(404).json(err));
-});
+//     const errors = {}
+//     Profile.findOne({
+//             handle: req.params.handle
+//         })
+//         .populate('user', ['name'])
+//         .then(profile => {
+//             if (!profile) {
+//                 errors.noprofile = "There isn't any such profile";
+//                 res.status(404).json(errors)
+//             }
+//             res.json(profile);
+//         }).catch(err => res.status(404).json(err));
+// });
 
 
 // @route GET api/profile/user/:user_id
 // @desc Get profile by user ID
 // @access Public
 
-router.get('/user/:user_id', (req, res) => {
+router.get('/:user_id', (req, res) => {
 
     const errors = {};
     Profile.findOne({
