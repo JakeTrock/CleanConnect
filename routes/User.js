@@ -38,9 +38,6 @@ router.post('/register', (req, res) => {
     if (!isValid) {
         return res.status(400).json(errors);
     }
-
-
-
     User.findOne({
         email: req.body.email
     }).then(user => {
@@ -199,7 +196,7 @@ router.get('/:user_id', (req, res) => {
 
 router.get('/pdf/:uuid', (req, res) => {
     var uu = req.params.uuid.split(".")[0];
-    if (validate(uu)) res.sendFile('../../temp/' + uu + '.pdf');
+    if (validate(uu)) res.sendFile('../temp/' + uu + '.pdf');
     else res.status(404).json({
         error: "This pdf has been deleted to preserve the privacy of its user, or never existed in the first place. Pdf files are erased from the server one week after their creation, if you'd like to re-generate this pdf, please go to https://jancoord.co/profile/print"
     });
