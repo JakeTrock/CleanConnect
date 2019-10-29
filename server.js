@@ -7,7 +7,6 @@ const user = require('./routes/User');
 const profile = require('./routes/Profile');
 const tag = require('./routes/Tag');
 const keys = require('./config/keys');
-const router = express.Router();
 
 
 const app = express();
