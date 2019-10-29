@@ -11,9 +11,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
-    "busboy": "^0.3.1",
     "concurrently": "^3.6.1",
-    "electron-prebuilt": "^1.4.13",
     "express": "^4.16.3",
     "hummus-recipe": "^1.8.20",
     "jsonwebtoken": "^8.3.0",
@@ -22,13 +20,11 @@
     "passport-jwt": "^4.0.0",
     "pdfkit": "^0.10.0",
     "qrcode": "^1.4.2",
-    "qrcode-svg": "^1.0.0",
     "uuid": "^3.3.3",
     "uuid-validate": "0.0.3",
     "validator": "^10.4.0"
   },
   "devDependencies": {
-    "electron-rebuild": "^1.8.6",
     "nodemon": "^1.18.3"
   }
 }
