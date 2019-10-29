@@ -1,11 +1,16 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const uuidv1 = require('uuid/v1');
 
 // Create Schema
 const UserSchema = new Schema({
-    user: {
+    internalId: {
         type: Schema.Types.ObjectId,
         ref: 'User',
+    },
+    externalId: {
+        type: String,
+        default: uuidv1().toString()
     },
     tags: [{
         type: String

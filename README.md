@@ -32,6 +32,12 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 
 ## Issue board
 
-* add email verification for both information change and signup
+### soon
+* add email verification for both information change, delete user and signup
 * re-do comments to make code more legible
 * possible migrate /print and /pdf to tags
+* possible change to status codes
+
+### future
+* add email notifications of errors
+* wireframe floorplans with color status

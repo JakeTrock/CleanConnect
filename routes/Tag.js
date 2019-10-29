@@ -23,16 +23,16 @@ router.get('/test', (req, res) => res.json({
 // @route GET api/posts
 // @desc Get all the post
 // @access Public
-router.get('/', (req, res) => {
-    Post.find()
-        .sort({
-            date: -1
-        })
-        .then(posts => res.json(posts))
-        .catch(err => res.status(404).json({
-            nopostsfound: "No posts found!!"
-        }));
-});
+// router.get('/', (req, res) => {
+//     Post.find()
+//         .sort({
+//             date: -1
+//         })
+//         .then(posts => res.json(posts))
+//         .catch(err => res.status(404).json({
+//             nopostsfound: "No posts found!!"
+//         }));
+// });
 
 // @route GET api/posts/:id
 // @desc Get all the post
@@ -44,15 +44,23 @@ router.get('/:id', (req, res) => {
             })
             .then(post => {
                 if (!post) {
-                    res.status(404).json({ error: "Room not found(maybe it was deleted?)." });
+                    res.status(404).json({
+                        success: false,
+                        error: "Room not found(maybe it was deleted?).",
+                        moreDetailed: "404 room not found"
+                    });
                 }
                 res.json(post);
             }).catch(err => res.status(404).json({
-                error: 'Room not found(maybe it was deleted?).'
+                success: false,
+                reason: "Room not found(maybe it was deleted?).",
+                moreDetailed: err
             }));
     } else {
         res.status(404).json({
-            error: 'Room not found. Url invalid.'
+            success: false,
+            reason: "Room not found(maybe it was deleted?).",
+            moreDetailed: err
         });
     }
 });
@@ -81,25 +89,30 @@ router.delete('/:id', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     //current user
-    User.findOne({
+    Post.findOne({
             user: req.user.id
         })
         .then(profile => {
-            Post.findById(req.params.id)
+            Post.findOne({
+                    tagid: req.params.id
+                })
                 .then(post => {
                     //Check the post owner
                     if (post.user.toString() !== req.user.id) {
                         return res.status(401).json({
-                            notauthorized: "User not authorized"
-                        })
+                            success: false,
+                            reason: "User not authorized"
+                        });
                     }
                     // Delete
                     post.remove().then(() => res.json({
                         success: true
-                    }))
+                    }));
                 })
                 .catch(err => res.status(404).json({
-                    postnotfound: "Post not found"
+                    success: false,
+                    reason: "Post not found",
+                    moreDetailed: err
                 }));
         });
 
