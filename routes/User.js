@@ -3,15 +3,15 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
-const validate = require('uuid-validate');
-// load profile model
+
+// stuff for pdf handling
 const uuidv1 = require('uuid/v1');
+const validate = require('uuid-validate');
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
 // Load input validation
 const validateRegisterInput = require('../validation/register');
 const validateLoginInput = require('../validation/login');
-const validateProfleInput = require('../validation/profile');
 
 
 const keys = require('../config/keys');
@@ -136,8 +136,8 @@ router.get('/current', passport.authenticate('jwt', {
         id: req.user.id,
         name: req.user.name,
         email: req.user.email
-    })
-})
+    });
+});
 router.delete('/', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
@@ -146,27 +146,18 @@ router.delete('/', passport.authenticate('jwt', {
 });
 
 
+
+
 router.post('/changeinfo', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
 
-    const {
-        errors,
-        isValid
-    } = validateProfleInput(req.body);
-
-    // Check validation
-    if (!isValid) {
-        // Return an errors with 400 status
-        return res.status(400).json(errors);
-    }
     // Get fields
 
     const profileFields = {};
     profileFields.user = req.user.id;
     if (req.body.name) profileFields.name = req.body.name;
     if (req.body.email) profileFields.email = req.body.email;
-
 
     User.findOne({
             user: req.user.id
@@ -184,6 +175,10 @@ router.post('/changeinfo', passport.authenticate('jwt', {
             }
         });
 });
+
+
+
+
 router.get('/:user_id', (req, res) => {
 
     const errors = {};
