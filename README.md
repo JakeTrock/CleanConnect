@@ -29,3 +29,9 @@ Note to Justin, As you are building the mid-end(basically the nodejs part which 
 For every server api path, in insomnia, you will have to create an account, using the create account tab(If you haven't already), then login using the login tab and copy the bearer key(the part that says bearer is included too, just copy the whole thing), and then move to your desired tab and go into its headers(in the menu right under the url bar, it's the tab called "Header"), and paste it into the box next to the row labeled "Authorization"
 
 In production, most likely, we would store the bearer key in a cookie. The bearer key is only valid to the server for 24 hours, so the cookie should be set accordingly.
+
+## Issue board
+
+* add email verification for both information change and signup
+* re-do comments to make code more legible
+* possible migrate /print and /pdf to tags
