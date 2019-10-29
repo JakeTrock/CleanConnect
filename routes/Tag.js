@@ -7,8 +7,6 @@ const validate = require('uuid-validate');
 //Post model
 const Post = require('../models/Tag');
 
-// Profile Model
-const Profile = require('../models/Profile');
 
 const uuidv1 = require('uuid/v1');
 
@@ -83,7 +81,7 @@ router.delete('/:id', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     //current user
-    Profile.findOne({
+    User.findOne({
             user: req.user.id
         })
         .then(profile => {
