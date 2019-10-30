@@ -127,7 +127,7 @@ router.post('/comment/:id', (req, res) => {
     const {
         errors,
         isValid
-    } = apr(req.body.text);
+    } = apr(req);
     if (!req.body.sev||!isValid) {
         return res.status(400).json(errors);
     }
