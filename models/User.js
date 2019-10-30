@@ -31,7 +31,10 @@ const UserSchema = new Schema({
         type: Date,
         default: Date.now
     },
-
+    tier: {
+        type: Number,
+        default: 0//can be 0,1 or 2 for different tiers
+    },
 });
 
 module.exports = User = mongoose.model('User', UserSchema);

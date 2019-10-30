@@ -13,12 +13,10 @@ Janitorial coordination system
 The api is seperated into 2 sections, these sections determine the proper input for each request:
 
 ### Models
-* [Profile](/models/Profile.js)
 * [Tag](/models/Tag.js)
 * [User](/models/User.js)
 
 ### Routes
-* [Profile](/routes/profile.js)
 * [Tag](/routes/tag.js)
 * [User](/routes/user.js)
     
@@ -37,6 +35,13 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * re-do comments to make code more legible
 * possible migrate /print and /pdf to tags
 * possible change to status codes
+* add .catch with error logging to all promise functions with .catch((e)=>console.error(e));
+* make all errors this style:
+	success: false,
+	reason: "Post not found",
+	moreDetailed: err
+* add more swears to [comment validation](/validation/apr.js)
+* use uuid validate to check url based uuids for validity
 
 ### future
 * add email notifications of errors

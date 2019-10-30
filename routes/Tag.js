@@ -3,7 +3,6 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const passport = require('passport');
 const validate = require('uuid-validate');
-
 //Post model
 const Post = require('../models/Tag');
 
@@ -11,9 +10,10 @@ const Post = require('../models/Tag');
 const uuidv1 = require('uuid/v1');
 
 // Validation Part for input
-
 const validatePostInput = require('../validation/tag');
-var app = express();
+const apr = require('../validation/apr');
+
+const app = express();
 // @route GET api/posts/test
 // @desc Tests post route
 // @access Public route
@@ -123,30 +123,31 @@ router.delete('/:id', passport.authenticate('jwt', {
 // @desc Add comment to post
 // @access Privte Route
 
-router.post('/comment/:id'), (req, res) => {
+router.post('/comment/:id', (req, res) => {
     const {
         errors,
         isValid
-    } = validatePostInput(req.body);
-    if (!isValid) {
+    } = apr(req.body.text);
+    if (!req.body.sev||!isValid) {
         return res.status(400).json(errors);
     }
-    Post.findById(req.params.id)
-        .then(post => {
-            const newComment = {
-                text: req.body.text,
-                name: req.body.name
-            };
+    Post.findOne({
+        tagid: req.params.id
+    }).then(post => {
+        const newComment = {
+            text: req.body.text,
+            sev: req.body.sev//severity 0 to 2, 0 being green, 2 being red
+        };
 
-            // Add comment to the array
-            post.comments.unshift(newComment);
+        // Add comment to the array
+        post.comments.unshift(newComment);
 
-            //save
-            post.save().then(post => res.json(post))
-        }).catch(err => res.status(404).json({
-            postnotfound: "no post found"
-        }));
-};
+        //save
+        post.save().then(post => res.json(post))
+    }).catch(err => res.status(404).json({
+        postnotfound: "room not found"
+    }));
+});
 
 // @route DELETE api/posts/comment/:id/:comment_id
 // @desc DELETE a comment

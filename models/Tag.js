@@ -21,6 +21,10 @@ const PostSchema = new Schema({
             type: String,
             required: true
         },
+        sev: {
+            type: Number,
+            required: true
+        },
         date: {
             type: Date,
             default: Date.now
