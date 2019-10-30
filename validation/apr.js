@@ -1,3 +1,4 @@
+const swear = require('./swearWord').list;
 const Validator = require('validator');
 const isEmpty = require('./is-empty');
 
@@ -8,7 +9,7 @@ module.exports = function validatePostInput(data) {
     if (Validator.isEmpty(data.body.text)) {
         errors.text = 'problem is required';
     }
-    if (data.body.text.indexOf(["ass"])>-1) {
+    if (swear.indexOf(data.body.text.toLowerCase())>-1) {
         errors.text = "You'll have to clean up your language before we clean up this room.";
     }
     return {
