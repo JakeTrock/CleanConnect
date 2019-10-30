@@ -128,7 +128,7 @@ router.post('/comment/:id', (req, res) => {
         errors,
         isValid
     } = apr(req);
-    if (!req.body.sev||!isValid) {
+    if (!req.body.sev || !isValid) {
         return res.status(400).json(errors);
     }
     Post.findOne({
@@ -136,7 +136,7 @@ router.post('/comment/:id', (req, res) => {
     }).then(post => {
         const newComment = {
             text: req.body.text,
-            sev: req.body.sev//severity 0 to 2, 0 being green, 2 being red
+            sev: req.body.sev //severity 0 to 2, 0 being green, 2 being red
         };
 
         // Add comment to the array
@@ -156,29 +156,47 @@ router.post('/comment/:id', (req, res) => {
 router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
-    Post.findById(req.params.id)
-        .then(post => {
-            // Check if the comment exists
-            if (post.comments.filter(comment => comment._id.toString() === req.params.comment_id).length === 0) {
-                return res.status(404).json({
-                    commentnotfound: "Your comment doesn't exist"
-                })
-            }
-            // Get remove index
+    Post.findOne({
+        tagid: req.params.id
+    }).then(post => {
+        // Check if the comment exists
+        if (post.comments.filter(comment => comment._id.toString() === req.params.comment_id).length === 0) {
+            return res.status(404).json({
+                commentnotfound: "Your comment doesn't exist"
+            })
+        }
+        // Get remove index
 
-            const removeIndex = post.comments
-                .map(item => item._id.toString())
-                .indexOf(req.params.comment_id);
+        const removeIndex = post.comments
+            .map(item => item._id.toString())
+            .indexOf(req.params.comment_id);
 
-            // Splice comment out of the array
-            post.comments.splice(removeIndex, 1);
+        // Splice comment out of the array
+        post.comments.splice(removeIndex, 1);
 
-            post.save().then(res.json(post));
-        }).catch(err => res.status(404).json({
-            postnotfound: "Post not found!!"
-        }));
+        post.save().then(res.json(post));
+    }).catch(err => res.status(404).json({
+        postnotfound: "Post not found!!"
+    }));
 });
 
-
+router.get('/comment/:id/:comment_id', passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
+    Post.findOne({
+        tagid: req.params.id
+    }).then(post => {
+        // Check if the comment exists
+        if (post.comments.filter(comment => comment._id.toString() === req.params.comment_id).length === 0) {
+            return res.status(404).json({
+                commentnotfound: "Your comment doesn't exist"
+            });
+        }
+        // Get remove index
+        res.json(post.comments.filter(comment => comment._id.toString() === req.params.comment_id));
+    }).catch(err => res.status(404).json({
+        postnotfound: "Post not found!!"
+    }));
+});
 
 module.exports = router;
