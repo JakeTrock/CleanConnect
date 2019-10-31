@@ -11,6 +11,7 @@ const uuidv1 = require('uuid/v1');
 
 // Validation Part for input
 const validatePostInput = require('../validation/tag');
+
 const apr = require('../validation/apr');
 
 const app = express();
@@ -124,17 +125,18 @@ router.delete('/:id', passport.authenticate('jwt', {
 // @access Privte Route
 
 router.post('/comment/:id', (req, res) => {
-    const {
-        errors,
-        isValid
-    } = apr(req);
-    if (!req.body.sev || !isValid) {
-        return res.status(400).json(errors);
-    }
+    // const {
+    //     errors,
+    //     isValid
+    // } = apr(req.body.text);
+    // if (!req.body.sev || !isValid) {
+    //     return res.status(400).json(errors);
+    // }
     Post.findOne({
         tagid: req.params.id
     }).then(post => {
         const newComment = {
+            img: req.files.img,//need to fix '<p>Image: <input type="file" name="image" /></p>'
             text: req.body.text,
             sev: req.body.sev //severity 0 to 2, 0 being green, 2 being red
         };
@@ -144,9 +146,7 @@ router.post('/comment/:id', (req, res) => {
 
         //save
         post.save().then(post => res.json(post))
-    }).catch(err => res.status(404).json({
-        postnotfound: "room not found"
-    }));
+    }).catch(err => console.log(err));
 });
 
 // @route DELETE api/posts/comment/:id/:comment_id
