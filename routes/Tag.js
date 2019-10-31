@@ -125,13 +125,13 @@ router.delete('/:id', passport.authenticate('jwt', {
 // @access Privte Route
 
 router.post('/comment/:id', (req, res) => {
-    // const {
-    //     errors,
-    //     isValid
-    // } = apr(req.body.text);
-    // if (!req.body.sev || !isValid) {
-    //     return res.status(400).json(errors);
-    // }
+    const {
+        errors,
+        isValid
+    } = apr(req.body.text);
+    if (!req.body.sev || !isValid) {
+        return res.status(400).json(errors);
+    }
     Post.findOne({
         tagid: req.params.id
     }).then(post => {
