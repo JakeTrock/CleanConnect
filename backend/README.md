@@ -33,18 +33,20 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 ### soon
 * add email verification for both information change, delete user and signup
 * re-do comments to make code more legible
-* possible migrate /print and /pdf to tags
-* possible change to status codes
-* add .catch with error logging to all promise functions with .catch((e)=>console.error(e));
-* make all errors this style:
-	success: false,
-	reason: "Post not found",
-	moreDetailed: err
 * use uuid validate to check url based uuids for validity
 
 ### future
 * add email notifications of errors
 * wireframe floorplans with color status
 
-### Resolved
+### Resolved (keep in mind when new code is written)
 * add more swears to [comment validation](/validation/apr.js)
+* make all errors this style:
+	success: false,
+	reason: "Post not found",
+	moreDetailed: err
+* add .catch with error logging to all promise functions with .catch((e)=>console.error(e));
+
+### Resolved permanently
+* possible migrate /print and /pdf to tags
+* possible change to status codes
