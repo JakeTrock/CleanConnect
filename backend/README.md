@@ -40,9 +40,11 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 	success: false,
 	reason: "Post not found",
 	moreDetailed: err
-* add more swears to [comment validation](/validation/apr.js)
 * use uuid validate to check url based uuids for validity
 
 ### future
 * add email notifications of errors
 * wireframe floorplans with color status
+
+### Resolved
+* add more swears to [comment validation](/validation/apr.js)

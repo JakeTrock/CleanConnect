@@ -5,8 +5,9 @@ const passport = require('passport');
 
 const user = require('./routes/User');
 const tag = require('./routes/Tag');
-const keys = require('./config/keys');
+const file = require('./File.js');
 
+const keys = require('./config/keys');
 
 const app = express();
 
@@ -23,7 +24,6 @@ mongoose
     .connect(keys.url)
     .then(() => console.log('Mongodb Connected'))
     .catch(err => console.log(err));
-
 //Passport Middleware
 app.use(passport.initialize());
 
@@ -33,6 +33,7 @@ require('./config/passport')(passport);
 
 app.use('/user', user);
 app.use('/tag', tag);
+app.use('/file', file);
 
 const port = process.env.PORT || 5000;
 

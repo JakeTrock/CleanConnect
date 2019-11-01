@@ -1,5 +1,7 @@
 const express = require('express');
+const fileUpload = require('express-fileupload');
 const router = express.Router();
+router.use(fileUpload());
 const mongoose = require('mongoose');
 const passport = require('passport');
 const validate = require('uuid-validate');
@@ -15,6 +17,7 @@ const validatePostInput = require('../validation/tag');
 const apr = require('../validation/apr');
 
 const app = express();
+
 // @route GET api/posts/test
 // @desc Tests post route
 // @access Public route
@@ -128,15 +131,18 @@ router.post('/comment/:id', (req, res) => {
     const {
         errors,
         isValid
-    } = apr(req.body.text);
-    if (!req.body.sev || !isValid) {
+    } = apr(req.body);
+    if (!req.body.sev || !isValid || !req.files) {
         return res.status(400).json(errors);
     }
     Post.findOne({
         tagid: req.params.id
     }).then(post => {
+        let image = req.files.img;
+        const name = uuidv1() + "." + image.name.split(".")[1];
+        image.mv('./temp/' + name);
         const newComment = {
-            img: req.files.img,//need to fix '<p>Image: <input type="file" name="image" /></p>'
+            img: name,
             text: req.body.text,
             sev: req.body.sev //severity 0 to 2, 0 being green, 2 being red
         };
@@ -145,7 +151,7 @@ router.post('/comment/:id', (req, res) => {
         post.comments.unshift(newComment);
 
         //save
-        post.save().then(post => res.json(post))
+        post.save().then(post => res.json(post));
     }).catch(err => console.log(err));
 });
 
