@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Route, BrowserRouter } from "react-router-dom";
+import { Route, Switch } from "react-router-dom";
 
 import Home from "./pages/home";
 import Login from "./pages/login";
@@ -16,10 +16,10 @@ class App extends Component {
       <React.Fragment>
       <Navbar/>
       <main className="container">
-        <BrowserRouter>
+        <Switch>
         <Route path="/login" component={Login}/>
         <Route path="/" component={Home} />
-        </BrowserRouter>
+        </Switch>
       </main>
       </React.Fragment>
     );
