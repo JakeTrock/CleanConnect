@@ -1,6 +1,6 @@
 import jwtDecode from "jwt-decode";
-import http from "./httpService";
-import { apiUrl } from "../config.json";
+import http from "./httpService"; //Will be used for http requests
+import { apiUrl } from "../config.json"; // Url of the server
 
 const apiEndpoint = apiUrl + "/user";
 const tokenKey = "token";
@@ -12,7 +12,7 @@ export async function login(email, password) {
   //localStorage.setItem(tokenKey, jwt);
 }
 
-export function getJwt() {
+export function getJwt() { //Session is stored in localhost
   return localStorage.getItem(tokenKey);
 }
 

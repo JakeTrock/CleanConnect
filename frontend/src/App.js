@@ -14,9 +14,9 @@ class App extends Component {
   render() { 
     return (  
       <React.Fragment>
-      <Navbar/>
+      <Navbar/> {/* Displays navbar on all pages (may change later) */}
       <main className="container">
-        <Switch>
+        <Switch> {/* Allows a single page website to connect to all pages */}
         <Route path="/login" component={Login}/>
         <Route path="/" component={Home} />
         </Switch>

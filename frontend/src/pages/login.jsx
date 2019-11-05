@@ -1,15 +1,15 @@
 import React, {Component} from 'react';
 import { Redirect } from "react-router-dom";
 import Joi from "joi-browser";
-import Form from "../components/form";
+import Form from "../components/form"; //allows you to render Input, initalizing login form as a form
 import * as auth from "../services/authentication";
 
 class Login extends Form {
-  state = { 
+  state = {  //data stored in the form
     data: { email: "", password: "" },
     errors: {}
   }
-  schema = {
+  schema = { //using Joi for form creation and errors (change?)
     email: Joi.string()
       .required()
       .label("Username"),
