@@ -1,4 +1,4 @@
-{/* Initial file, calls App.js and sets up React */}
+// Initial file, calls App.js and sets up React
 
 import React from 'react';
 import ReactDOM from 'react-dom';
