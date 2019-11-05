@@ -33,7 +33,6 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 ### soon
 * add email verification for both information change, delete user and signup
 * re-do comments to make code more legible
-* use uuid validate to check url based uuids for validity
 
 ### future
 * add email notifications of errors
@@ -46,6 +45,8 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 	reason: "Post not found",
 	moreDetailed: err
 * add .catch with error logging to all promise functions with .catch((e)=>console.error(e));
+* use uuid validate to check url based uuids for validity
+
 
 ### Resolved permanently
 * possible migrate /print and /pdf to tags
