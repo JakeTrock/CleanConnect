@@ -5,6 +5,7 @@ env PORT="5000"
 #enter dir
 cd ~
 #install everything
+#https://web.archive.org/web/20180316023122/https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-postfix-on-ubuntu-16-04
 sudo apt install -y git mongodb node npm postfix nginx python-certbot-nginx
 #pull code
 git clone git://github.com/$USERNAME/$PROGNAME.git $PROGNAME
