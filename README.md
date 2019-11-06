@@ -31,7 +31,7 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 ## Issue board
 
 ### soon
-* add email verification for both information change, delete user and signup
+* add email verification for both information change, delete user and signup -- use this npm mod for this: https://nodemailer.com/about/
 * re-do comments to make code more legible
 
 ### future
