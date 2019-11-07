@@ -52,8 +52,8 @@ class Form extends Component {
       </button>
     );
   }
-  renderInput(name, type) {
-    const { data, errors } = this.state;
+  renderInput(name, error,type) {
+    const { data} = this.state;
     return (
       <div className="form-group">
       <label htmlFor={name}>{name[0].toUpperCase()+name.slice(1)}</label>
@@ -65,7 +65,7 @@ class Form extends Component {
         className="form-control" 
         onChange={this.handleChange}
         />
-      {errors.products && errors.products.map(error => <div className="alert alert-danger">{error}</div>)}
+      {error && <div className="alert alert-danger">{error}</div>}
       </div>
     );
   }
