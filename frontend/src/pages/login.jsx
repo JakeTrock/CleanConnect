@@ -21,10 +21,11 @@ class Login extends Form {
     try {
       const { data } = this.state;
       await auth.login(data.email, data.password);
-      //const { state } = this.props.location;
-      //window.location = state ? state.from.pathname : "/";
+      const { state } = this.props.location;
+      window.location = state ? state.from.pathname : "/";
     } 
     catch (ex) {
+      console.clear()
       if (ex.response && ex.response.status === 400) {
         const errors = { ...this.state.errors };
         errors.email = ex.response.data.email;
