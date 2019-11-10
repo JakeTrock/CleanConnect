@@ -1,5 +1,4 @@
-import React, {Component} from 'react';
-import { Redirect } from "react-router-dom";
+import React from 'react';
 import Joi from "joi-browser";
 import Form from "../components/form"; //allows you to render Input, initalizing login form as a form
 import * as auth from "../services/authentication";
@@ -40,8 +39,8 @@ class Login extends Form {
       <div>
         <h1>Login</h1>
         <form onSubmit={this.handleSubmit}>
-          {this.renderInput("email", errors.email)}
-          {this.renderInput("password", errors.password,"password")}
+          {this.renderInput("email", "Email",errors.email)}
+          {this.renderInput("password", "Password",errors.password,"password")}
           {this.renderButton("Login")}
         </form>
       </div>

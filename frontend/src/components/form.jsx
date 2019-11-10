@@ -52,11 +52,11 @@ class Form extends Component {
       </button>
     );
   }
-  renderInput(name, error,type) {
+  renderInput(name, label, error,type) {
     const { data} = this.state;
     return (
       <div className="form-group">
-      <label htmlFor={name}>{name[0].toUpperCase()+name.slice(1)}</label>
+      <label>{label}</label>
       <input 
         type={type} 
         name={name} 
