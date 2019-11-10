@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, NavLink } from "react-router-dom";
 //Link and NavLink are react specific tools allowing you to move through pages of a single paged website
-const Navbar = () => {
+const Navbar = ({ user }) => {
   //Temporary navbar, subject to change
   return ( 
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
@@ -21,12 +21,26 @@ const Navbar = () => {
     </button>
     <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div className="navbar-nav">
-        <NavLink className="nav-item nav-link" to="/login"> 
-          Login
-        </NavLink>
-        <NavLink className="nav-item nav-link" to="/register">
-          Register
-        </NavLink>
+      {!user && (
+            <React.Fragment>
+              <NavLink className="nav-item nav-link" to="/login">
+                Login
+              </NavLink>
+              <NavLink className="nav-item nav-link" to="/register">
+                Register
+              </NavLink>
+            </React.Fragment>
+          )}
+          {user && (
+            <React.Fragment>
+              <NavLink className="nav-item nav-link" to="/profile">
+                {user.name}
+              </NavLink>
+              <NavLink className="nav-item nav-link" to="/logout">
+                Logout
+              </NavLink>
+            </React.Fragment>
+          )}
       </div>
     </div>
   </nav>
