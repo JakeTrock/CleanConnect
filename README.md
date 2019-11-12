@@ -30,11 +30,7 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 
 ## Issue board
 * maybe put "use strict"; at the top of some files temporarily to find some goofs
-* if account is unverified for more than x days, delete it
-
-
-### soon
-* add email verification for both information change, delete user and signup -- use this npm mod for this: https://nodemailer.com/about/
+* if account is unverified for more than x days, delete it, use findoneanddelete, find if boolean is false, and if date>certain thingymabobber. maybe you could have a central boolean array that is shortened whenever a person verifies their account, maybe it could be their internalids rather than a bool....
 * re-do comments to make code more legible
 
 ### future
