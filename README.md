@@ -29,6 +29,9 @@ For every server api path, in insomnia, you will have to create an account, usin
 In production, most likely, we would store the bearer key in a cookie. The bearer key is only valid to the server for 24 hours, so the cookie should be set accordingly.
 
 ## Issue board
+* maybe put "use strict"; at the top of some files temporarily to find some goofs
+* if account is unverified for more than x days, delete it
+
 
 ### soon
 * add email verification for both information change, delete user and signup -- use this npm mod for this: https://nodemailer.com/about/
@@ -51,3 +54,6 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 ### Resolved permanently
 * possible migrate /print and /pdf to tags
 * possible change to status codes
+
+### Jake-specific:
+/home/bluushift/Desktop/CleanConnect/backend/config,/home/bluushift/Desktop/CleanConnect/backend/models,/home/bluushift/Desktop/CleanConnect/backend/routes,/home/bluushift/Desktop/CleanConnect/backend/temp,/home/bluushift/Desktop/CleanConnect/backend/TESTING,/home/bluushift/Desktop/CleanConnect/backend/validation

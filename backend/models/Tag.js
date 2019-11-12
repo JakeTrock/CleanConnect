@@ -10,7 +10,8 @@ const PostSchema = new Schema({
     tagid: {
         type: String,
         default: uuidv1().toString(),
-        required: true
+        required: true,
+        index:true
     },
     name: {
         type: String,

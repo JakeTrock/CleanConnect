@@ -112,7 +112,7 @@ router.delete('/:id', passport.authenticate('jwt', {
                             });
                         }
                         // Delete
-                        post.remove().then(() => res.json({
+                        post.deleteOne().then(() => res.json({
                             success: true
                         }));
                     })

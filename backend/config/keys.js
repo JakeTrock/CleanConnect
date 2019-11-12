@@ -1,6 +1,6 @@
 module.exports = {
 	mailuser: "cldev",
-	mailpass: "a2:c2:c7:85:77:34",
+	mailpass: "temppass",
     url: "mongodb://localhost/CleanConnectDev",
     secretOrKey: '78:5f:4d:4e:a8:6a'
 };

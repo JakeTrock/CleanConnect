@@ -3,6 +3,8 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
+const nodemailer = require('nodemailer');
+const randomBytes = require('randombytes');
 
 // stuff for pdf handling
 const uuidv1 = require('uuid/v1');
@@ -16,13 +18,41 @@ const keys = require('../config/keys');
 
 //Load user model
 const User = require('../models/User');
+const Token = require('../models/Token');
 
+
+//testing
+
+const smtpTransport = nodemailer.createTransport({
+    host: 'smtp.ethereal.email',
+    port: 587,
+    auth: {
+        user: 'lilian.bernhard@ethereal.email',
+        pass: 'fCc7CKMVv1VvuvrsaR'
+    }
+});
+smtpTransport.verify(function(error, success) {
+    if (error) {
+        console.log(error);
+    } else {
+        console.log("mailserver online.");
+    }
+});
+
+//https://codemoto.io/coding/nodejs/email-verification-node-express-mongodb
+
+//production
+// const smtpTransport = nodemailer.createTransport({
+//          name: 'localhost'
+// })
 // @route GET User/test
 // @desc Tests User route
 // @access Public route
 // router.get('/test', (req, res) => res.json({
 //     msg: "User Works"
 // }));
+
+
 
 // @route GET User/register
 // @desc Register a user
@@ -56,15 +86,48 @@ router.post('/register', (req, res) => {
                     }
                     newUser.password = hash;
                     newUser
-                        .save()
-                        .then(res.json({ "status": "success" }))
-                        //.then(user => res.json(user))
-                        .catch(err => console.log(err));
+                        .save(function(err) {
+                            if (err) {
+                                return res.status(500).json({
+                                    success: false,
+                                    reason: "Failed to save user.",
+                                    moreDetailed: err.message
+                                });
+                            }
+                            // Create a verification token for this user
+                            User.findOne({
+                                email: req.body.email
+                            }, 'internalId').exec(function(err, id) {
+                                if (err) {
+                                    return res.status(500).json({
+                                        success: false,
+                                        reason: "Failed to find user.",
+                                        moreDetailed: err.message
+                                    });
+                                }
+                                var token = new Token({ _userId: id._id, token: randomBytes(16).toString('hex') });
+                                console.log(token);
+                                token.save().then(function() {
+                                    // Send the email
+                                    var mailOptions = { from: 'no-reply@' + req.headers.host, to: req.body.email, subject: 'Account Verification Token', text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/user\/confirmation\/' + token.token + '.\n' };
+                                    smtpTransport.sendMail(mailOptions, function(err) {
+                                        if (err) {
+                                            return res.status(500).json({
+                                                success: false,
+                                                reason: "Failed to send mail.",
+                                                moreDetailed: err.message
+                                            });
+                                        }
+                                    });
+                                }).then(res.json({ "status": "A verification email has been sent to " + req.body.email + "." })).catch(err => console.log(err));
+                            });
+                        });
                 });
             });
         }
     }).catch((e) => console.error(e));
 });
+
 
 // @route GET User/login
 // @desc Login User / Returning JWT Token
@@ -103,6 +166,7 @@ router.post('/login', (req, res) => {
                             id: user.id,
                             name: user.name
                         }; // create jwt payload
+                        if (!user.isVerified) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
                         //Sign token
                         jwt.sign(payload, keys.secretOrKey, {
                             expiresIn: "1d"
@@ -126,6 +190,68 @@ router.post('/login', (req, res) => {
 
 });
 
+
+router.get('/confirmation/:token', (req, res, next) => {
+    // const {
+    //     errors,
+    //     isValid
+    // } = validateLoginInput(req.body);
+    // //check validation
+    // if (!isValid) {
+    //     return res.status(400).json(errors);
+    // }
+    // Find a matching token
+    Token.findOne({ token: req.params.token }, function(err, token) {
+        if (!token) return res.status(400).send({ type: 'not-verified', msg: 'We were unable to find a valid token. Your token my have expired.' });
+        console.log(token);
+        // If we found a token, find a matching user
+        User.findOne({_id: token._userId}, function(err, user) {
+            console.log(user);
+            if (!user) return res.status(400).send({ msg: 'We were unable to find a user for this token.'});
+            if (user.isVerified) return res.status(400).send({ type: 'already-verified', msg: 'This user has already been verified.' });
+
+            // Verify and save the user
+            user.isVerified = true;
+            user.save(function(err) {
+                if (err) { return res.status(500).send({ msg: err.message }); }
+                res.status(200).send("The account has been verified. Please log in.");
+            });
+        });
+    });
+});
+
+router.post('/resend', (req, res, next) => {
+    // req.assert('email', 'Email is not valid').isEmail();
+    // req.assert('email', 'Email cannot be blank').notEmpty();
+    // req.sanitize('email').normalizeEmail({ remove_dots: false });
+
+    // // Check for validation errors    
+    // var errors = req.validationErrors();
+    // if (errors) return res.status(400).send(errors);
+
+    User.findOne({ email: req.body.email }, function(err, user) {
+        if (!user) return res.status(400).send({ msg: 'We were unable to find a user with that email.' });
+        if (user.isVerified) return res.status(400).send({ msg: 'This account has already been verified. Please log in.' });
+
+        // Create a verification token, save it, and send email
+        var token = new Token({ _userId: user._id, token: randomBytes(16).toString('hex') });
+
+        // Save the token
+        token.save(function(err) {
+            if (err) { return res.status(500).send({ msg: err.message }); }
+
+            // Send the email
+            var mailOptions = { from: 'no-reply@' + req.headers.host, to: user.email, subject: 'Account Verification Token', text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/confirmation\/' + token.token + '.\n' };
+            smtpTransport.sendMail(mailOptions, function(err) {
+                if (err) { return res.status(500).send({ msg: err.message }); }
+                res.status(200).send('A verification email has been sent to ' + user.email + '.');
+            });
+        });
+
+    });
+});
+
+
 // @route GET User/current
 // @desc Return current user
 // @access Private
@@ -138,10 +264,12 @@ router.get('/current', passport.authenticate('jwt', {
         email: req.user.email
     });
 });
+
+
 router.delete('/', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
-    User.findOneAndRemove({ _id: req.user.id })
+    User.findOneAndRemove({ internalId: req.user.id })
         .then(() => res.json({ success: true })).catch((e) => console.error(e));
 });
 
@@ -160,13 +288,13 @@ router.post('/changeinfo', passport.authenticate('jwt', {
     if (req.body.email) profileFields.email = req.body.email;
 
     User.findOne({
-            user: req.user.id
+            internalId: req.user.id
         })
         .then(profile => {
             if (profile) {
                 //update a profile
                 Profile.findOneAndUpdate({
-                    user: req.user.id
+                    internalId: req.user.id
                 }, {
                     $set: profileFields
                 }, {

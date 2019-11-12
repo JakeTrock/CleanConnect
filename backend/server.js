@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const passport = require('passport');
-const cors = require('cors');//maybe placebo
+const cors = require('cors'); //maybe placebo?
 
 
 const user = require('./routes/User');
@@ -24,10 +24,14 @@ app.use(bodyParser.json());
 
 // Connect to MongoDB
 
-mongoose
-    .connect(keys.url)
+mongoose.connect(keys.url, { useNewUrlParser: true })
     .then(() => console.log('Mongodb Connected'))
     .catch(err => console.log(err));
+/// dodge deprication warnings
+mongoose.set('useNewUrlParser', true)
+    .set('useFindAndModify', false)
+    .set('useCreateIndex', true);
+///
 //Passport Middleware
 app.use(passport.initialize());
 

@@ -6,7 +6,7 @@ const uuidv1 = require('uuid/v1');
 const UserSchema = new Schema({
     internalId: {
         type: Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'User'
     },
     externalId: {
         type: String,
@@ -21,7 +21,9 @@ const UserSchema = new Schema({
     },
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true,
+        index:true
     },
     password: {
         type: String,
@@ -31,9 +33,13 @@ const UserSchema = new Schema({
         type: Date,
         default: Date.now
     },
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
     tier: {
         type: Number,
-        default: 0//can be 0,1 or 2 for different tiers
+        default: 0 //can be 0,1 or 2 for different tiers
     },
 });
 
