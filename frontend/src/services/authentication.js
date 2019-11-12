@@ -4,15 +4,40 @@ import { apiUrl } from "../config.json"; // Url of the server
 
 const apiEndpoint = apiUrl + "/user";
 const tokenKey = "token";
-axios.defaults.headers.common["x-auth-token"] = getJwt();
+
 
 export async function login(email, password) {
   const { data: jwt } = await axios.post(apiEndpoint+"/login", { email, password });
-  console.log(jwt)
-  localStorage.setItem(tokenKey, jwt);
+  localStorage.setItem(tokenKey, jwt.token); //get expiration date 
 }
 
-export function getJwt() { //Session is stored in localhost
-  return localStorage.getItem(tokenKey);
+export async function register(name, email, password, password2) {
+  await axios.post(apiEndpoint+"/register", { name, email, password, password2 });
+  await login(email,password)
+   //registers then logins current user 
+   //will change when email verification is completed
 }
 
+export function logout(){
+  localStorage.removeItem(tokenKey);
+}
+
+export function getCurrentUser() { //Session is stored in localhost
+  try {
+    const jwt = localStorage.getItem(tokenKey); //searches local storage for jwt key
+    if(jwtDecode(jwt).exp*1000<Date.now()){ //if passed expiration, delete
+      logout()
+      return null
+    }
+    return jwtDecode(jwt);
+  } 
+  catch (ex) {
+    return null;
+  }
+}
+
+export default {
+  login,
+  getCurrentUser,
+  logout,
+};

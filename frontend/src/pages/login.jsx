@@ -1,5 +1,4 @@
-import React, {Component} from 'react';
-import { Redirect } from "react-router-dom";
+import React from 'react';
 import Joi from "joi-browser";
 import Form from "../components/form"; //allows you to render Input, initalizing login form as a form
 import * as auth from "../services/authentication";
@@ -21,24 +20,27 @@ class Login extends Form {
     try {
       const { data } = this.state;
       await auth.login(data.email, data.password);
-      //const { state } = this.props.location;
-      //window.location = state ? state.from.pathname : "/";
+      const { state } = this.props.location;
+      window.location = state ? state.from.pathname : "/";
     } 
     catch (ex) {
+      console.clear()
       if (ex.response && ex.response.status === 400) {
         const errors = { ...this.state.errors };
-        errors.email = ex.response.data;
+        errors.email = ex.response.data.email;
+        errors.password = ex.response.data.password;
         this.setState({ errors });
       }
     }
   };
   render() { 
+    const errors=this.state.errors
     return ( 
       <div>
         <h1>Login</h1>
         <form onSubmit={this.handleSubmit}>
-          {this.renderInput("email")}
-          {this.renderInput("password", "password")}
+          {this.renderInput("email", "Email",errors.email)}
+          {this.renderInput("password", "Password",errors.password,"password")}
           {this.renderButton("Login")}
         </form>
       </div>
