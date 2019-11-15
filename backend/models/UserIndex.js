@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const TokenSchema = new mongoose.Schema({
+
+const UserIndexSchema = new Schema({
     _userId: {
         type: Schema.Types.ObjectId,
         required: true,
@@ -10,6 +11,10 @@ const TokenSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    isCritical: {
+        type: Boolean,
+        required: true
+    },
     createdAt: {
         type: Date,
         required: true,
@@ -17,4 +22,5 @@ const TokenSchema = new mongoose.Schema({
         expires: 43200
     }
 });
-module.exports = Token = mongoose.model('Token', TokenSchema);
+
+module.exports = UserIndex = mongoose.model('UserIndex', UserIndexSchema);
