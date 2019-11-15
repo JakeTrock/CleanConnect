@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 23.0.4, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 1920 1080" style="enable-background:new 0 0 1920 1080;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFFFF;}
+	.st1{fill:none;}
+	.st2{fill:#33A3FF;}
+	.st3{font-family:'Futura-Medium';}
+	.st4{font-size:70px;}
+	.st5{fill:#AFAEAE;}
+	.st6{fill:#64D3FF;}
+	.st7{fill:#AAAAAA;}
+	.st8{fill:#41BCF2;}
+	.st9{font-family:'Futura-CondensedMedium';}
+	.st10{font-size:34.9598px;}
+	.st11{fill:#FFFFFF;stroke:#000000;stroke-miterlimit:10;}
+	.st12{fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:10;}
+	.st13{font-size:44px;}
+	.st14{fill:#ED1C24;}
+	.st15{fill:none;stroke:#CCCCCC;stroke-width:2;stroke-miterlimit:10;}
+	.st16{fill:#999999;}
+	.st17{font-size:30px;}
+</style>
+<g>
+	<rect x="0.5" y="0.5" class="st0" width="1919" height="76"/>
+	<path d="M1919,1v75H1V1H1919 M1920,0H0v77h1920V0L1920,0z"/>
+</g>
+<rect x="-0.5" y="0.5" class="st1" width="538" height="77"/>
+<text transform="matrix(1 0 0 1 -0.5 58.2285)"><tspan x="0" y="0" class="st2 st3 st4">C</tspan><tspan x="49.05" y="0" class="st5 st3 st4">lean</tspan><tspan x="185.56" y="0" class="st6 st3 st4">C</tspan><tspan x="234.61" y="0" class="st7 st3 st4">onnect</tspan></text>
+<rect x="454" y="35" class="st7" width="18.5" height="18"/>
+<rect x="491" y="35" class="st7" width="18.5" height="18"/>
+<rect x="472.5" y="17" class="st8" width="18.5" height="18"/>
+<rect x="509.5" y="17" class="st8" width="18.5" height="18"/>
+<g>
+	<path class="st8" d="M1896.5,3H1675c-9.67,0-17.5,7.84-17.5,17.5V56c0,9.67,7.84,17.5,17.5,17.5h221.49c9.67,0,17.5-7.84,17.5-17.5
+		V20.5C1914,10.84,1906.16,3,1896.5,3z"/>
+	<text transform="matrix(1.0186 0 0 1 1708.3545 49.0615)" class="st0 st9 st10">Account panel</text>
+</g>
+<g>
+	<path class="st8" d="M1374.5,3H1153c-9.67,0-17.5,7.84-17.5,17.5V56c0,9.67,7.84,17.5,17.5,17.5h221.49c9.67,0,17.5-7.84,17.5-17.5
+		V20.5C1392,10.84,1384.16,3,1374.5,3z"/>
+	<text transform="matrix(1.0186 0 0 1 1187.3545 50.0615)" class="st0 st9 st10">Issue Tracker</text>
+</g>
+<rect x="468.5" y="132.5" class="st11" width="986" height="1280"/>
+<line class="st12" x1="468.49" y1="130" x2="958.51" y2="130"/>
+<rect x="468.97" y="86.14" class="st1" width="455.03" height="41.86"/>
+<text transform="matrix(1 0 0 1 468.9707 122.6382)" class="st9 st13">Account Panel</text>
+<g>
+	<path class="st8" d="M1635.5,3H1414c-9.67,0-17.5,7.84-17.5,17.5V56c0,9.67,7.84,17.5,17.5,17.5h221.49c9.67,0,17.5-7.84,17.5-17.5
+		V20.5C1653,10.84,1645.16,3,1635.5,3z"/>
+	<text transform="matrix(1.0186 0 0 1 1496.3545 49.0615)" class="st0 st9 st10">Tags</text>
+</g>
+<g>
+	<path class="st14" d="M712.5,788H491c-9.67,0-17.5,7.84-17.5,17.5V841c0,9.67,7.84,17.5,17.5,17.5H712.5
+		c9.67,0,17.5-7.84,17.5-17.5V805.5C730,795.84,722.16,788,712.5,788z"/>
+	<text transform="matrix(1.0186 0 0 1 525.3545 835.0615)" class="st0 st9 st10">Delete Account</text>
+</g>
+<g>
+	<path class="st8" d="M712.5,585H491c-9.67,0-17.5,7.84-17.5,17.5V638c0,9.67,7.84,17.5,17.5,17.5H712.5c9.67,0,17.5-7.84,17.5-17.5
+		V602.5C730,592.84,722.16,585,712.5,585z"/>
+	<text transform="matrix(1.0186 0 0 1 525.3545 632.0615)" class="st0 st9 st10">Edit Account</text>
+</g>
+<g>
+	<path class="st8" d="M712.5,353H491c-9.67,0-17.5,7.84-17.5,17.5V406c0,9.67,7.84,17.5,17.5,17.5H712.5c9.67,0,17.5-7.84,17.5-17.5
+		V370.5C730,360.84,722.16,353,712.5,353z"/>
+	<text transform="matrix(1.0186 0 0 1 525.3545 400.0615)" class="st0 st9 st10">Change Tier</text>
+</g>
+<rect x="468.97" y="144.14" class="st1" width="455.03" height="41.86"/>
+<text transform="matrix(1 0 0 1 468.9707 180.6382)" class="st9 st13">(name)’s profile</text>
+<line class="st15" x1="470" y1="209.1" x2="1454" y2="205.9"/>
+<rect x="468.97" y="225.14" class="st1" width="969.03" height="41.86"/>
+<text transform="matrix(1 0 0 1 468.9707 261.6382)" class="st9 st13">You are currently a tier (1/2/3) member, you have (# of tags)</text>
+<rect x="468.97" y="277.14" class="st1" width="969.03" height="41.86"/>
+<text transform="matrix(1 0 0 1 468.9707 313.6382)" class="st9 st13">You will be billed next on (mm/dd)</text>
+<rect x="477.97" y="429.14" class="st1" width="969.03" height="112.86"/>
+<text transform="matrix(1 0 0 1 477.9707 454.0244)"><tspan x="0" y="0" class="st16 st9 st17">To use this option, please make sure that you have few enough tags to downgrade, you must delete </tspan><tspan x="0" y="36" class="st16 st9 st17">some tags otherwise. </tspan></text>
+<rect x="477.97" y="665.14" class="st1" width="969.03" height="112.86"/>
+<text transform="matrix(1 0 0 1 477.9707 690.0244)"><tspan x="0" y="0" class="st16 st9 st17">This option requires email verification. Please have your preferred email client open to recieve the </tspan><tspan x="0" y="36" class="st16 st9 st17">change link </tspan></text>
+<rect x="477.97" y="864.14" class="st1" width="969.03" height="112.86"/>
+<text transform="matrix(1 0 0 1 477.9707 889.0244)"><tspan x="0" y="0" class="st16 st9 st17">WARNING: THIS OPTION WILL PERMANATELY DELETE YOUR ACCOUNT. YOU WILL NEED TO VERIFY THIS </tspan><tspan x="0" y="36" class="st16 st9 st17">CHOICE VIA EMAIL</tspan></text>
+</svg>
