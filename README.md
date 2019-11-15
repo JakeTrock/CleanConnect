@@ -54,3 +54,11 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 
 ### Jake-specific:
 /home/bluushift/Desktop/CleanConnect/backend/config,/home/bluushift/Desktop/CleanConnect/backend/models,/home/bluushift/Desktop/CleanConnect/backend/routes,/home/bluushift/Desktop/CleanConnect/backend/temp,/home/bluushift/Desktop/CleanConnect/backend/TESTING,/home/bluushift/Desktop/CleanConnect/backend/validation
+
+
+### Justin-specific:
+
+The email provider I am using dosne't actually send emails, it just intercepts them. To look at the intercepted emails go [here](https://ethereal.email/login)
+and use these credentials:
+* Username: lilian.bernhard@ethereal.email
+* Password: fCc7CKMVv1VvuvrsaR
