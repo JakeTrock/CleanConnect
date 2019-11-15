@@ -30,15 +30,16 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 
 ## Issue board
 * maybe put "use strict"; at the top of some files temporarily to find some goofs
-* if account is unverified for more than x days, delete it, use findoneanddelete, find if boolean is false, and if date>certain thingymabobber. maybe you could have a central boolean array that is shortened whenever a person verifies their account, maybe it could be their internalids rather than a bool....
 * re-do comments to make code more legible
 * verif for delete/mod account
 
 ### future
 * add email notifications of errors
 * wireframe floorplans with color status
+* add payment with [this](https://developers.braintreepayments.com/guides/payment-methods/node)
 
 ### Resolved (keep in mind when new code is written)
+* if account is unverified for more than x days, delete it, use findoneanddelete, find if boolean is false, and if date>certain thingymabobber. maybe you could have a central boolean array that is shortened whenever a person verifies their account, maybe it could be their internalids rather than a bool....
 * add more swears to [comment validation](/validation/apr.js)
 * make all errors this style:
 	success: false,
