@@ -11,7 +11,7 @@ class Register extends Form {
   schema = { //using Joi for form creation and errors (change?)
     name: Joi.string()
       .required(),
-    email: Joi.string()
+    email: Joi.string().email()
       .required(),
     password: Joi.string()
       .required(),
