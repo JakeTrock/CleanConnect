@@ -22,6 +22,10 @@ systemctl enable mongod.service
 #nodejs config
 cd backend && sudo npm install && cd ..
 cd frontend && sudo npm install && cd ..
+npm i nodemon -g
+#https://constituteweb.com/nodejs-with-reactjs
+
+
 #config postfix
 #unfinished-fix letsencrypt too
 # echo "
