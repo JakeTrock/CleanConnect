@@ -183,7 +183,7 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
         if (post.comments.filter(comment => comment._id.toString() === req.params.comment_id).length === 0) {
             return res.status(404).json({
                 commentnotfound: "Your comment doesn't exist"
-            })
+            });
         }
         // Get remove index
 
@@ -277,8 +277,8 @@ router.get('/print/', passport.authenticate('jwt', {
     //     //https://www.npmjs.com/package/pdfkit
     // })();
     res.send("done");
+    //res.redirect("https://"+req.headers.host+"/pdf/" + fn + ".pdf");
 
-    //res.redirect("/pdf/" + fn + ".pdf");
 });
 
 module.exports = router;
