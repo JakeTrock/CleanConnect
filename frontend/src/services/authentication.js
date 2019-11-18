@@ -13,7 +13,6 @@ export async function login(email, password) {
 
 export async function register(name, email, password, password2) {
   await axios.post(apiEndpoint+"/register", { name, email, password, password2 });
-  await login(email,password)
    //registers then logins current user 
    //will change when email verification is completed
 }

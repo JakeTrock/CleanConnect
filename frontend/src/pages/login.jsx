@@ -25,12 +25,17 @@ class Login extends Form {
     } 
     catch (ex) {
       console.clear()
-      if (ex.response && ex.response.status === 400) {
-        const errors = { ...this.state.errors };
-        errors.email = ex.response.data.email;
-        errors.password = ex.response.data.password;
-        this.setState({ errors });
-      }
+      if (ex.response){
+        const errors = { ...this.state.errors };
+        if(ex.response.status === 400) {
+          errors.email = ex.response.data.email;
+          errors.password = ex.response.data.password;
+        }
+        if(ex.response.status==401){
+          errors.email=ex.response.data.msg;
+        }
+        this.setState({ errors });
+      }
     }
   };
   render() { 
