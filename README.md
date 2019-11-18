@@ -5,7 +5,7 @@ Janitorial coordination system
 1. clone this repo
 2. required software
     1. Grab yourself a copy of nodejs and insomnia request manager
-    2. run 'npm i' in the CleanConnect directory
+    2. run 'npm i' in the CleanConnect directories
     3. start mongodb and the node server using 'node server.js'
     4. You're all set, go on to the usage instructions
     
@@ -32,6 +32,7 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * maybe put "use strict"; at the top of some files temporarily to find some goofs
 * re-do comments to make code more legible
 * verif for delete/mod account
+* I have a creeping suspicion that I may have created a glitch with the email being able to change
 
 ### future
 * add email notifications of errors

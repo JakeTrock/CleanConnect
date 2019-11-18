@@ -262,9 +262,6 @@ router.post('/changeinfo', passport.authenticate('jwt', {
 router.post('/change/:token', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
-
-    // Get fields
-
     const profileFields = {};
     profileFields.user = req.user.id;
     if (req.body.name) profileFields.name = req.body.name;
@@ -293,7 +290,24 @@ router.post('/change/:token', passport.authenticate('jwt', {
     });
 });
 
+router.post('/isValid/:token', passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
+    UserIndex.findOne({ token: req.params.token }).then(tk => {
+        if(!token)res.json({ success: false, reason: "Token does not exist." });
+        if (tk._userId == req.user.id) {
+            User.findOne({
+                    internalId: req.user.id
+                })
+                .then(profile => {
+                    if(!profile)res.json({ success: false, reason: "Profile does not exist." });
+                    if (!profile.isVerified) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
+                }).catch((e) => console.error(e));
 
+        } else res.json({ success: false, reason: "email token does not match current user cookie, please log into this computer to load the cookie into your memory" });
+
+    });
+});
 
 
 
