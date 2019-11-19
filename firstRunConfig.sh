@@ -35,7 +35,7 @@ After=network.target
 Environment=NODE_PORT=$PORT
 Type=simple
 User=ubuntu
-ExecStart=/usr/bin/node /home/ubuntu/$PROGNAME/index-unifying.js
+ExecStart=/usr/bin/bash ~/$PROGNAME/init.sh
 Restart=on-failure
 WorkingDirectory=/home/ubuntu/$PROGNAME
 [Install]
