@@ -64,3 +64,10 @@ The email provider I am using dosne't actually send emails, it just intercepts t
 and use these credentials:
 * Username: lilian.bernhard@ethereal.email
 * Password: fCc7CKMVv1VvuvrsaR
+
+
+### setup ci
+* https://codeforgeek.com/continuous-integration-deployment-jenkins-node-js/
+* https://resources.github.com/whitepapers/practical-guide-to-CI-with-Jenkins-and-GitHub/
+* https://developer.github.com/webhooks/
+* https://github.com/hokuco/CleanConnect/settings/hooks

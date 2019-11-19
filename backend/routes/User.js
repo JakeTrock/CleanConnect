@@ -22,6 +22,11 @@ const User = require('../models/User');
 const UserIndex = require('../models/UserIndex');
 const prefix = "http://";
 
+// @route GET User/test
+// @desc Tests User route
+// @access Public route
+router.get('/test', (req, res) => res.send("Routes Works"));
+
 //testing
 
 const smtpTransport = nodemailer.createTransport({
@@ -46,12 +51,8 @@ smtpTransport.verify(function(error, success) {
 // const smtpTransport = nodemailer.createTransport({
 //          name: 'localhost'
 // })
-// @route GET User/test
-// @desc Tests User route
-// @access Public route
-// router.get('/test', (req, res) => res.json({
-//     msg: "User Works"
-// }));
+
+
 
 
 

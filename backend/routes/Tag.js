@@ -23,9 +23,7 @@ const app = express();
 // @route GET api/posts/test
 // @desc Tests post route
 // @access Public route
-// router.get('/test', (req, res) => res.json({
-//     msg: "Tag Works"
-// }));
+router.get('/test', (req, res) => res.send("Tag Works"));
 // @route GET api/posts
 // @desc Get all the post
 // @access Public

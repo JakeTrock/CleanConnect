@@ -22,5 +22,10 @@
   "homepage": "https://github.com/hokuco/CleanConnect#readme",
   "dependencies": {
     "concurrently": "^5.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^6.2.2",
+    "should": "^13.2.3",
+    "supertest": "^4.0.2"
   }
 }
