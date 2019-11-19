@@ -31,7 +31,6 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 ## Issue board
 * maybe put "use strict"; at the top of some files temporarily to find some goofs
 * re-do comments to make code more legible
-* verif for delete/mod account
 * I have a creeping suspicion that I may have created a glitch with the email being able to change
 
 ### future
