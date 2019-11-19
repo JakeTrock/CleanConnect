@@ -379,36 +379,38 @@ router.get('/current', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     res.json({
-        id: req.user.id,
+        id: req.user.internalId,
         name: req.user.name,
-        email: req.user.email
+        email: req.user.email,
+        tier: req.user.tier,
+        tags:req.user.tags
     });
 });
 
-router.get('/:id', (req, res) => {
-    if (validate(req.params.id)) {
-        const errors = {};
-        User.findOne({
-                externalId: req.params.id
-            })
-            .populate('user', ['name'])
-            .then(profile => {
-                if (!profile) {
-                    errors.noprofile = "There isn't any such profile";
-                    res.status(404).json(errors)
-                }
-                res.json(profile);
-            }).catch(err => res.status(404).json({
-                success: false,
-                reason: "There is no profile for this user.",
-                moreDetailed: err
-            }));
-    } else res.status(400).json({
-        success: false,
-        reason: "Bad url",
-        moreDetailed: "please retype url, or check if the link you used was broken"
-    });
-});
+// router.get('/:id', (req, res) => {
+//     if (validate(req.params.id)) {
+//         const errors = {};
+//         User.findOne({
+//                 externalId: req.params.id
+//             })
+//             .populate('user','externalId', ['name'])
+//             .then(profile => {
+//                 if (!profile) {
+//                     errors.noprofile = "There isn't any such profile";
+//                     res.status(404).json(errors)
+//                 }
+//                 res.json(profile);
+//             }).catch(err => res.status(404).json({
+//                 success: false,
+//                 reason: "There is no profile for this user.",
+//                 moreDetailed: err
+//             }));
+//     } else res.status(400).json({
+//         success: false,
+//         reason: "Bad url",
+//         moreDetailed: "please retype url, or check if the link you used was broken"
+//     });
+// });
 
 const delExp = new CronJob('00 00 00 * * *', function() {
     console.log('Goodnight, time to delete some tags! (-_-)ᶻᶻᶻᶻ');
