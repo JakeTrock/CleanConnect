@@ -2,12 +2,12 @@
   "name": "CleanConnect",
   "version": "1.0.0",
   "description": "Janitorial coordination system",
-  "main": "index-unifying.js",
+  "main": "",
   "scripts": {
     "client": "cd frontend && npm start",
     "server": "cd backend && npm start",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently --kill-others \"npm run server\" \"npm run client\""
+    "dev": "concurrently --kill-others \"npm run server\" \"npm run client\" \"mongod\""
   },
   "repository": {
     "type": "git",
