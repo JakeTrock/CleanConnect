@@ -207,9 +207,9 @@ router.delete('/deleteinfo', passport.authenticate('jwt', {
         token: randomBytes(16).toString('hex'),
         isCritical: false
     });
-    vtoken.save().then(p => {
+    vToken.save().then(p => {
         // Send the email
-        var mailOptions = { from: 'no-reply@' + req.headers.host, to: req.body.email, subject: 'Account Deletion', text: 'Hello,\n\n' + 'Please delete your account by clicking the link: \n' + prefix + req.headers.host + '\/delete\/' + p.token + '.\n' };
+        var mailOptions = { from: 'no-reply@' + req.headers.host, to: req.user.email, subject: 'Account Deletion', text: 'Hello,\n\n' + 'Please delete your account by clicking the link: \n' + prefix + req.headers.host + '\/delete\/' + p.token + '.\n' };
         smtpTransport.sendMail(mailOptions, function(err) {
             if (err) {
                 return res.status(500).json({
@@ -220,7 +220,7 @@ router.delete('/deleteinfo', passport.authenticate('jwt', {
             }
         });
 
-    }).then(res.json({ "status": "A deletion email has been sent to " + req.body.email + "." })).catch(err => console.log(err));
+    }).then(res.json({ "status": "A deletion email has been sent to " + req.user.email + "." })).catch(err => console.log(err));
 });
 
 router.get('/delete/:token', passport.authenticate('jwt', {
@@ -246,7 +246,7 @@ router.post('/changeinfo', passport.authenticate('jwt', {
     });
     vToken.save().then(p => {
         // Send the email
-        var mailOptions = { from: 'no-reply@' + req.headers.host, to: req.body.email, subject: 'Account Changes', text: 'Hello,\n\n' + 'Please alter your account by clicking the link: \n' + prefix + req.headers.host + '\/change\/' + p.token + '.\n' };
+        var mailOptions = { from: 'no-reply@' + req.headers.host, to: req.user.email, subject: 'Account Changes', text: 'Hello,\n\n' + 'Please alter your account by clicking the link: \n' + prefix + req.headers.host + '\/change\/' + p.token + '.\n' };
         smtpTransport.sendMail(mailOptions, function(err) {
             if (err) {
                 return res.status(500).json({
@@ -257,7 +257,7 @@ router.post('/changeinfo', passport.authenticate('jwt', {
             }
         });
 
-    }).then(res.json({ "status": "A settings email has been sent to " + req.body.email + "." })).catch(err => console.log(err));
+    }).then(res.json({ "status": "A settings email has been sent to " + req.user.email + "." })).catch(err => console.log(err));
 });
 
 router.post('/change/:token', passport.authenticate('jwt', {
@@ -347,7 +347,10 @@ router.post('/login', (req, res) => {
                         //User matched
                         const payload = {
                             id: user.id,
-                            name: user.name
+                            name: user.name,
+                            email: user.email,
+                            tier: user.tier,
+                            isVerified: user.isVerified
                         }; // create jwt payload
                         if (!user.isVerified) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
                         //Sign token

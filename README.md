@@ -32,6 +32,9 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * maybe put "use strict"; at the top of some files temporarily to find some goofs
 * re-do comments to make code more legible
 * I have a creeping suspicion that I may have created a glitch with the email being able to change
+* replace post with tag in routes/tag
+* encrypt token
+* make delete/alter account email-less, does req.user.email work?
 
 ### future
 * add email notifications of errors
