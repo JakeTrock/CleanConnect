@@ -346,7 +346,7 @@ router.post('/login', (req, res) => {
                     if (isMatch) {
                         //User matched
                         const payload = {
-                            id: user.id,
+                            internalId: user.internalId,
                             name: user.name,
                             email: user.email,
                             tier: user.tier,
@@ -379,17 +379,17 @@ router.post('/login', (req, res) => {
 // @route GET User/current
 // @desc Return current user
 // @access Private
-router.get('/current', passport.authenticate('jwt', {
-    session: false
-}), (req, res) => {
-    res.json({
-        id: req.user.internalId,
-        name: req.user.name,
-        email: req.user.email,
-        tier: req.user.tier,
-        tags:req.user.tags
-    });
-});
+// router.get('/current', passport.authenticate('jwt', {
+//     session: false
+// }), (req, res) => {
+//     res.json({
+//         id: req.user.internalId,
+//         name: req.user.name,
+//         email: req.user.email,
+//         tier: req.user.tier,
+//         tags:req.user.tags
+//     });
+// });
 
 // router.get('/:id', (req, res) => {
 //     if (validate(req.params.id)) {

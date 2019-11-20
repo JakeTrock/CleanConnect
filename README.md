@@ -35,6 +35,8 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * replace post with tag in routes/tag
 * encrypt token
 * make delete/alter account email-less, does req.user.email work?
+* streamline indexing/data sorting         index:true
+* replace post(like post.findOne) with word "stag"
 
 ### future
 * add email notifications of errors

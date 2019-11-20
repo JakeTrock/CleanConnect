@@ -20,7 +20,8 @@ systemctl enable mongod.service
 #nodejs config
 cd backend && sudo npm install && cd ..
 cd frontend && sudo npm install && cd ..
-npm i nodemon mocha -g
+sudo npm install
+sudo npm i nodemon mocha -g
 #https://constituteweb.com/nodejs-with-reactjs
 
 

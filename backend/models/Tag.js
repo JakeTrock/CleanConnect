@@ -11,7 +11,7 @@ const PostSchema = new Schema({
         type: String,
         default: uuidv1().toString(),
         required: true,
-        index:true
+        index: true
     },
     name: {
         type: String,
@@ -38,7 +38,11 @@ const PostSchema = new Schema({
             type: Date,
             default: Date.now
         }
-    }]
+    }],
+    dateLastAccessed: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 module.exports = Post = mongoose.model('Post', PostSchema);
