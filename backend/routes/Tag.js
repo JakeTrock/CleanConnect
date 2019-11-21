@@ -112,14 +112,15 @@ router.get('/:user', (req, res) => {
 // @desc Create post
 // @access Private route
 
-router.post('/', passport.authenticate('jwt', {
+router.post('/new', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     //add tag node
     const newPost = new Post({
         name: req.body.name,
-        user: req.user.id
+        user: req.user.internalId
     });
+    console.log(newPost);
     newPost.save().then(post => res.json(post)).catch((e) => console.error(e));
 });
 

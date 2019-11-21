@@ -346,12 +346,13 @@ router.post('/login', (req, res) => {
                     if (isMatch) {
                         //User matched
                         const payload = {
-                            internalId: user.internalId,
+                            internalId: user._id,
                             name: user.name,
                             email: user.email,
                             tier: user.tier,
                             isVerified: user.isVerified
                         }; // create jwt payload
+                        console.log(payload);
                         if (!user.isVerified) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
                         //Sign token
                         jwt.sign(payload, keys.secretOrKey, {
