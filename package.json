@@ -4,8 +4,8 @@
   "description": "Janitorial coordination system",
   "main": "",
   "scripts": {
-    "client": "cd frontend && npm start",
-    "server": "cd backend && npm start",
+    "client": "cd frontend && nodemon --exec npm start",
+    "server": "cd backend && nodemon --exec npm start",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "concurrently --kill-others \"npm run server\" \"npm run client\""
   },
@@ -22,5 +22,10 @@
   "homepage": "https://github.com/hokuco/CleanConnect#readme",
   "dependencies": {
     "concurrently": "^5.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^6.2.2",
+    "should": "^13.2.3",
+    "supertest": "^4.0.2"
   }
 }

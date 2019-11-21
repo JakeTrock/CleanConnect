@@ -22,6 +22,11 @@ const User = require('../models/User');
 const UserIndex = require('../models/UserIndex');
 const prefix = "http://";
 
+// @route GET User/test
+// @desc Tests User route
+// @access Public route
+router.get('/test', (req, res) => res.send("Routes Works"));
+
 //testing
 
 const smtpTransport = nodemailer.createTransport({
@@ -46,12 +51,8 @@ smtpTransport.verify(function(error, success) {
 // const smtpTransport = nodemailer.createTransport({
 //          name: 'localhost'
 // })
-// @route GET User/test
-// @desc Tests User route
-// @access Public route
-// router.get('/test', (req, res) => res.json({
-//     msg: "User Works"
-// }));
+
+
 
 
 
@@ -206,9 +207,9 @@ router.delete('/deleteinfo', passport.authenticate('jwt', {
         token: randomBytes(16).toString('hex'),
         isCritical: false
     });
-    vtoken.save().then(p => {
+    vToken.save().then(p => {
         // Send the email
-        var mailOptions = { from: 'no-reply@' + req.headers.host, to: req.body.email, subject: 'Account Deletion', text: 'Hello,\n\n' + 'Please delete your account by clicking the link: \n' + prefix + req.headers.host + '\/delete\/' + p.token + '.\n' };
+        var mailOptions = { from: 'no-reply@' + req.headers.host, to: req.user.email, subject: 'Account Deletion', text: 'Hello,\n\n' + 'Please delete your account by clicking the link: \n' + prefix + req.headers.host + '\/delete\/' + p.token + '.\n' };
         smtpTransport.sendMail(mailOptions, function(err) {
             if (err) {
                 return res.status(500).json({
@@ -219,7 +220,7 @@ router.delete('/deleteinfo', passport.authenticate('jwt', {
             }
         });
 
-    }).then(res.json({ "status": "A deletion email has been sent to " + req.body.email + "." })).catch(err => console.log(err));
+    }).then(res.json({ "status": "A deletion email has been sent to " + req.user.email + "." })).catch(err => console.log(err));
 });
 
 router.get('/delete/:token', passport.authenticate('jwt', {
@@ -245,7 +246,7 @@ router.post('/changeinfo', passport.authenticate('jwt', {
     });
     vToken.save().then(p => {
         // Send the email
-        var mailOptions = { from: 'no-reply@' + req.headers.host, to: req.body.email, subject: 'Account Changes', text: 'Hello,\n\n' + 'Please alter your account by clicking the link: \n' + prefix + req.headers.host + '\/change\/' + p.token + '.\n' };
+        var mailOptions = { from: 'no-reply@' + req.headers.host, to: req.user.email, subject: 'Account Changes', text: 'Hello,\n\n' + 'Please alter your account by clicking the link: \n' + prefix + req.headers.host + '\/change\/' + p.token + '.\n' };
         smtpTransport.sendMail(mailOptions, function(err) {
             if (err) {
                 return res.status(500).json({
@@ -256,7 +257,7 @@ router.post('/changeinfo', passport.authenticate('jwt', {
             }
         });
 
-    }).then(res.json({ "status": "A settings email has been sent to " + req.body.email + "." })).catch(err => console.log(err));
+    }).then(res.json({ "status": "A settings email has been sent to " + req.user.email + "." })).catch(err => console.log(err));
 });
 
 router.post('/change/:token', passport.authenticate('jwt', {
@@ -345,9 +346,13 @@ router.post('/login', (req, res) => {
                     if (isMatch) {
                         //User matched
                         const payload = {
-                            id: user.id,
-                            name: user.name
+                            internalId: user._id,
+                            name: user.name,
+                            email: user.email,
+                            tier: user.tier,
+                            isVerified: user.isVerified
                         }; // create jwt payload
+                        console.log(payload);
                         if (!user.isVerified) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
                         //Sign token
                         jwt.sign(payload, keys.secretOrKey, {
@@ -375,17 +380,17 @@ router.post('/login', (req, res) => {
 // @route GET User/current
 // @desc Return current user
 // @access Private
-router.get('/current', passport.authenticate('jwt', {
-    session: false
-}), (req, res) => {
-    res.json({
-        id: req.user.internalId,
-        name: req.user.name,
-        email: req.user.email,
-        tier: req.user.tier,
-        tags:req.user.tags
-    });
-});
+// router.get('/current', passport.authenticate('jwt', {
+//     session: false
+// }), (req, res) => {
+//     res.json({
+//         id: req.user.internalId,
+//         name: req.user.name,
+//         email: req.user.email,
+//         tier: req.user.tier,
+//         tags:req.user.tags
+//     });
+// });
 
 // router.get('/:id', (req, res) => {
 //     if (validate(req.params.id)) {

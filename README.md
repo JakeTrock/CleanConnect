@@ -31,8 +31,12 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 ## Issue board
 * maybe put "use strict"; at the top of some files temporarily to find some goofs
 * re-do comments to make code more legible
-* verif for delete/mod account
 * I have a creeping suspicion that I may have created a glitch with the email being able to change
+* replace post with tag in routes/tag
+* encrypt token
+* make delete/alter account email-less, does req.user.email work?
+* streamline indexing/data sorting         index:true
+* replace post(like post.findOne) with word "stag"
 
 ### future
 * add email notifications of errors
@@ -64,3 +68,10 @@ The email provider I am using dosne't actually send emails, it just intercepts t
 and use these credentials:
 * Username: lilian.bernhard@ethereal.email
 * Password: fCc7CKMVv1VvuvrsaR
+
+
+### setup ci
+* https://codeforgeek.com/continuous-integration-deployment-jenkins-node-js/
+* https://resources.github.com/whitepapers/practical-guide-to-CI-with-Jenkins-and-GitHub/
+* https://developer.github.com/webhooks/
+* https://github.com/hokuco/CleanConnect/settings/hooks
