@@ -31,7 +31,7 @@ class Login extends Form {
           errors.email = ex.response.data.email;
           errors.password = ex.response.data.password;
         }
-        if(ex.response.status==401){
+        if(ex.response.status === 401){
           errors.email=ex.response.data.msg;
         }
         this.setState({ errors });
