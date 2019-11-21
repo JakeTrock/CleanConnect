@@ -1,0 +1,20 @@
+.carouselContainer{
+  width:100%;
+  background-color:#696969;
+  display: flex;
+
+
+}
+
+
+
+.left {
+  flex:1;
+  background-color:#000000;
+
+}
+.center {
+  margin: 0 3px;
+  padding: 3px;
+  border: 2px solid blue;
+}
