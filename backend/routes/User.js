@@ -295,13 +295,13 @@ router.post('/isValid/:token', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     UserIndex.findOne({ token: req.params.token }).then(tk => {
-        if(!token)res.json({ success: false, reason: "Token does not exist." });
+        if (!token) res.json({ success: false, reason: "Token does not exist." });
         if (tk._userId == req.user.id) {
             User.findOne({
                     internalId: req.user.id
                 })
                 .then(profile => {
-                    if(!profile)res.json({ success: false, reason: "Profile does not exist." });
+                    if (!profile) res.json({ success: false, reason: "Profile does not exist." });
                     if (!profile.isVerified) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
                 }).catch((e) => console.error(e));
 
@@ -349,8 +349,7 @@ router.post('/login', (req, res) => {
                             internalId: user._id,
                             name: user.name,
                             email: user.email,
-                            tier: user.tier,
-                            isVerified: user.isVerified
+                            tier: user.tier
                         }; // create jwt payload
                         console.log(payload);
                         if (!user.isVerified) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
