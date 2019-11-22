@@ -77,7 +77,8 @@ var pgsw = 0;
             // if (i == 7) {
             //     pgsw = 285.7;
             // }
-            doc.path(dpath).lineWidth(3).fillAndStroke("grey", "#0f0f0f")
+            doc.path(dpath).lineWidth(3).fillAndStroke("grey", "#0f0f0f");
+            doc
                 .text(gr[Math.ceil(Math.random() * (gr.length - 1))], pgsw, 50 + i * 108, {
                     width: 333.75,
                     align: 'right'

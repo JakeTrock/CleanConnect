@@ -264,30 +264,38 @@ router.post('/change/:token', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     const profileFields = {};
-    profileFields.user = req.user.id;
+    profileFields.user = req.user.internalId;
     if (req.body.name) profileFields.name = req.body.name;
     if (req.body.email) profileFields.email = req.body.email;
-    UserIndex.findOne({ token: req.params.token }).then(tk => {
-        if (tk._userId == req.user.id) {
-            User.findOne({
-                    internalId: req.user.id
-                })
-                .then(profile => {
-                    if (profile) {
-                        //update a profile
-                        Profile.findOneAndUpdate({
+    if (req.body.password) profileFields.password = req.body.password;
+    bcrypt.genSalt(10, (err, salt) => {
+        bcrypt.hash(profileFields.password, salt, (err, hash) => {
+            if (err) {
+                console.log(err);
+            }
+            profileFields.password = hash;
+            UserIndex.findOne({ token: req.params.token }).then(tk => {
+                if (tk._userId == req.user.id) {
+                    User.findOne({
                             internalId: req.user.id
-                        }, {
-                            $set: profileFields
-                        }, {
-                            new: true
-                        }).then(profile => res.json(profile)).catch((e) => console.error(e));
-                    }
-                }).then(UserIndex.findOneAndRemove({ _userId: tk._userId }))
-                .catch((e) => console.error(e));
+                        })
+                        .then(profile => {
+                            if (profile) {
+                                //update a profile
+                                Profile.findOneAndUpdate({
+                                    internalId: req.user.id
+                                }, {
+                                    $set: profileFields
+                                }, {
+                                    new: true
+                                }).then(profile => res.json(profile)).catch((e) => console.error(e));
+                            }
+                        }).then(UserIndex.findOneAndRemove({ _userId: tk._userId }))
+                        .catch((e) => console.error(e));
 
-        } else res.json({ success: false, reason: "email token does not match current user cookie, please log into this computer to load the cookie into your memory" });
-
+                } else res.json({ success: false, reason: "email token does not match current user cookie, please log into this computer to load the cookie into your memory" });
+            });
+        });
     });
 });
 
