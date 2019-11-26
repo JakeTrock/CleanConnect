@@ -8,9 +8,11 @@ import Home from "./pages/home";
 import Login from "./pages/login";
 import Logout from "./pages/logout";
 import Register from "./pages/register";
+import Change from "./pages/change";
 import Profile from "./pages/profile";
+import Tags from "./pages/tags";
 import NotFound from "./pages/notFound";
-
+import Change from "./pages/change";
 import Navbar from "./components/navbar";
 import ProtectedRoute from "./components/protectedRoute";
 import NoTokenRoute from "./components/noTokenRoute";
@@ -36,6 +38,7 @@ class App extends Component {
             <NoTokenRoute path="/login" component={Login} />
             <NoTokenRoute path="/register" component={Register} />
             <ProtectedRoute path="/logout" component={Logout} />
+            <ProtectedRoute path="/change/:token" component={Change} />
             <ProtectedRoute
               path="/profile"
               render={props => <Profile {...props} user={user} />}
@@ -47,6 +50,11 @@ class App extends Component {
                 render={props => <Dashboard {...props} user={user} />}
               />
             )}
+            {!user && <Route exact path="/" component={Home} />}
+            <ProtectedRoute
+              path="/tags"
+              render={props => <Tags {...props} user={user} />}
+            />
             <Route path="/notFound" component={NotFound} />
             <Redirect to="/notFound" />
           </Switch>
