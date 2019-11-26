@@ -309,7 +309,7 @@ router.post('/isValid/:token', passport.authenticate('jwt', {
                     internalId: req.user.id
                 })
                 .then(profile => {
-                    if (!profile) res.json({ success: false, reason: "Profile does not exist." });
+                    if (!profile) res.json({ success: false, reason: "Profile does not exist." });//
                     if (!profile.isVerified) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
                 }).catch((e) => console.error(e));
 
