@@ -7,71 +7,58 @@ const Post = require('../models/Tag');
 const fn = uuidv1();
 
 const docsettings = [{
-    size: LETTER,
-    margins: {
-        left: 12.65,
-        right: 12.65,
-        top: 43.5,
-        bottom: 43.5
-    }
+    size: LETTER
 }];
 const dpath = ``;
-
-
-const doc = new PDFDocument(docsettings);
-doc.pipe(fs.createWriteStream('../temp/' + fn + '.pdf'));
-var pgsw = 0;
-(async () => {
-    // const tl = [{
-    //         tagid: '9e87cfe0-e517-11e9-ad2d-59b6f467ed1e',
-    //         name: 'tag z',
-    //         comments: [],
-    //         __v: 0
-    //     },
-    //     {
-    //         tagid: '6c995810-e95d-11e9-8715-8fd31126566e',
-    //         name: 'tag a',
-    //         comments: [],
-    //         __v: 0
-    //     },
-    //     {
-    //         tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    //         name: 'tag b',
-    //         comments: [],
-    //         __v: 0
-    //     },
-    //     {
-    //         tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    //         name: 'tag c',
-    //         comments: [],
-    //         __v: 0
-    //     },
-    //     {
-    //         tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    //         name: 'tag d',
-    //         comments: [],
-    //         __v: 0
-    //     },
-    //     {
-    //         tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    //         name: 'tag e',
-    //         comments: [],
-    //         __v: 0
-    //     },
-    //     {
-    //         tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    //         name: 'tag f',
-    //         comments: [],
-    //         __v: 0
-    //     },
-    //     {
-    //         tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    //         name: 'tag g',
-    //         comments: [],
-    //         __v: 0
-    //     }
-    // ];
-        const tl = [{
+const tl = [{
+            tagid: '9e87cfe0-e517-11e9-ad2d-59b6f467ed1e',
+            name: 'tag z',
+            comments: [],
+            __v: 0
+        },
+        {
+            tagid: '6c995810-e95d-11e9-8715-8fd31126566e',
+            name: 'tag a',
+            comments: [],
+            __v: 0
+        },
+        {
+            tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
+            name: 'tag b',
+            comments: [],
+            __v: 0
+        },
+        {
+            tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
+            name: 'tag c',
+            comments: [],
+            __v: 0
+        },
+        {
+            tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
+            name: 'tag d',
+            comments: [],
+            __v: 0
+        },
+        {
+            tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
+            name: 'tag e',
+            comments: [],
+            __v: 0
+        },
+        {
+            tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
+            name: 'tag f',
+            comments: [],
+            __v: 0
+        },
+        {
+            tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
+            name: 'tag g',
+            comments: [],
+            __v: 0
+        },
+        {
             tagid: '9e90che0-e517-11e9-ad2d-55g5h577jl1e',
             name: 'tag z',
             comments: [],
@@ -84,6 +71,11 @@ var pgsw = 0;
             __v: 0
         }
     ];
+
+const doc = new PDFDocument(docsettings);
+doc.pipe(fs.createWriteStream('../temp/' + fn + '.pdf'));
+var pgsw = 0;
+(async () => {
     for (let i = 0; i < tl.length; i++) {
         // if (i % 7 == 0) doc.addPage(docsettings);
         QRCode.toDataURL("http://website.com/tag/" + tl[i].tagid, function(error, url) {
