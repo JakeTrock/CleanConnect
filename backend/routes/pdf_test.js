@@ -6,9 +6,8 @@ const fs = require('fs');
 const Post = require('../models/Tag');
 const fn = uuidv1();
 
-const gr = ["Sample Text", "Sample Text", "Sample Text", "Sample Text", "Sample Text", "Sample Text", "Sample Text", "Sample Text", "Sample Text"];
 const docsettings = [{
-    size: [595.28, 841.89],
+    size: LETTER,
     margins: {
         left: 12.65,
         right: 12.65,
