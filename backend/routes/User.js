@@ -304,9 +304,9 @@ router.post('/isValid/:token', passport.authenticate('jwt', {
 }), (req, res) => {
     UserIndex.findOne({ token: req.params.token }).then(tk => {
         if (!tk) res.json({ success: false, reason: "Token does not exist." });
-        if (tk._userId == req.user.id) {
+        if (tk._userId == req.user.internalId) {
             User.findOne({
-                    internalId: req.user.id
+                    internalId: req.user.internalId
                 })
                 .then(profile => {
                     if (!profile) res.json({ success: false, reason: "Profile does not exist." });
