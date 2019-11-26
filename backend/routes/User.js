@@ -303,7 +303,7 @@ router.post('/isValid/:token', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     UserIndex.findOne({ token: req.params.token }).then(tk => {
-        if (!token) res.json({ success: false, reason: "Token does not exist." });
+        if (!tk) res.json({ success: false, reason: "Token does not exist." });
         if (tk._userId == req.user.id) {
             User.findOne({
                     internalId: req.user.id
