@@ -1,20 +1,31 @@
 .carouselContainer{
-  width:100%;
-  background-color:#696969;
+  margin-top:1%;
+  --main-color:#000000;
+  opacity:.9;
+  border-color:var(--main-color);
+  background-color:var(--main-color);
+
   display: flex;
+  justify-content: center;
+  text-align:center;
+  align-items: center;
 
 
 }
 
-
-
-.left {
-  flex:1;
-  background-color:#000000;
+.direction{
+  color:#ffffff;
+  border: 5px solid var(--main-color);
+  width:5%;
+  font-size:200%;
 
 }
+
+
 .center {
-  margin: 0 3px;
-  padding: 3px;
-  border: 2px solid blue;
+  width:90%;
+  border: 2px solid var(--main-color);
+}
+.centerImg{
+  width:100%;
 }
