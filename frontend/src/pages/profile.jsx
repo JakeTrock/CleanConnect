@@ -4,7 +4,14 @@ import * as auth from "../services/authentication";
 
 class Profile extends Component {
   editAccount() {
-    //will be used to edit account
+    auth.changeInfo();
+    this.refs.editButton.setAttribute("disabled", "disabled");
+    //if success create success, if not create error
+    //disable button for certain time
+  }
+  deleteAccount() {
+    auth.deleteInfo();
+    this.refs.deleteButton.setAttribute("disabled", "disabled");
   }
   render() {
     const { user } = this.props;

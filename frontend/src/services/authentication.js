@@ -57,8 +57,38 @@ export function getCurrentUser(noDecode) {
   }
 }
 
+export function changeInfo() {
+  try {
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: getCurrentUser(true)
+    };
+    return axios.post(apiEndpoint + "/changeinfo", "", {
+      headers: headers
+    });
+  } catch (ex) {
+    return null;
+  }
+}
+
+export function deleteInfo() {
+  try {
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: getCurrentUser(true)
+    };
+    return axios.delete(apiEndpoint + "/deleteinfo", {
+      headers: headers
+    });
+  } catch (ex) {
+    return null;
+  }
+}
+
 export default {
   login,
   getCurrentUser,
-  logout
+  logout,
+  changeInfo,
+  deleteInfo
 };
