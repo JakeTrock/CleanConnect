@@ -71,6 +71,16 @@ export function changeInfo() {
   }
 }
 
+export async function validateChange(token) {
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: getCurrentUser(true)
+  };
+  return axios.post(apiEndpoint + "/isValid/" + token, "", {
+    headers: headers
+  });
+}
+
 export function deleteInfo() {
   try {
     const headers = {
@@ -90,5 +100,6 @@ export default {
   getCurrentUser,
   logout,
   changeInfo,
+  validateChange,
   deleteInfo
 };
