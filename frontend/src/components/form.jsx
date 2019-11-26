@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import Joi from "joi-browser";
 
-class Form extends Component {  
+class Form extends Component {
   state = {
     data: {},
     errors: {}
@@ -52,24 +52,24 @@ class Form extends Component {
       </button>
     );
   }
-  renderInput(name, label, error,type) {
-    const { data} = this.state;
+  renderInput(name, label, error, type) {
+    const { data } = this.state;
     return (
       <div className="form-group">
-      <label>{label}</label>
-      <input 
-        type={type} 
-        name={name} 
-        id={name} 
-        value={data[name]}
-        className="form-control" 
-        onChange={this.handleChange}
+        <label className="pageText">{label}</label>
+        <input
+          type={type}
+          name={name}
+          id={name}
+          value={data[name]}
+          className="form-control"
+          style={{ fontFamily: "arial" }}
+          onChange={this.handleChange}
         />
-      {error && <div className="alert alert-danger">{error}</div>}
+        {error && <div className="alert alert-danger">{error}</div>}
       </div>
     );
   }
 }
 
- 
 export default Form;
