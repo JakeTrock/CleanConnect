@@ -145,8 +145,8 @@ router.post('/resend', (req, res, next) => {
     // if (errors) return res.status(400).send(errors);
 
     User.findOne({ email: req.body.email }, function(err, user) {
-        if (!user) return res.status(400).send({ msg: 'We were unable to find a user with that email.' });
-        if (user.isVerified) return res.status(400).send({ msg: 'This account has already been verified. Please log in.' });
+        if (!user) return res.status(404).send({ msg: 'We were unable to find a user with that email.' });
+        if (user.isVerified) return res.redirect(prefix + req.headers.host + "/login");
         const vToken = new UserIndex({
             _userId: user._id,
             token: randomBytes(16).toString('hex'),
@@ -187,7 +187,7 @@ router.get('/confirmation/:token', (req, res, next) => {
         User.findOne({ _id: token._userId }, function(err, user) {
             console.log(user);
             if (!user) return res.status(400).send({ msg: 'We were unable to find a user for this token.' });
-            if (user.isVerified) return res.status(400).send({ type: 'already-verified', msg: 'This user has already been verified.' });
+            if (user.isVerified) return res.redirect(prefix + req.headers.host + "/login");
 
             // Verify and save the user
             user.isVerified = true;
@@ -231,7 +231,7 @@ router.get('/delete/:token', passport.authenticate('jwt', {
             User.findOneAndRemove({ internalId: tk._userId })
             .then(UserIndex.findOneAndRemove({ _userId: tk._userId }))
             .then(() => res.json({ success: true })).catch((e) => console.error(e));
-        else res.json({ success: false, reason: "email token does not match current user cookie, please log into this computer to load the cookie into your memory" });
+        else res.status(403).json({ success: false, reason: "email token does not match current user cookie, please log into this computer to load the cookie into your memory" });
     });
 });
 
@@ -293,7 +293,7 @@ router.post('/change/:token', passport.authenticate('jwt', {
                         }).then(UserIndex.findOneAndRemove({ _userId: tk._userId }))
                         .catch((e) => console.error(e));
 
-                } else res.json({ success: false, reason: "email token does not match current user cookie, please log into this computer to load the cookie into your memory" });
+                } else res.status(403).json({ success: false, reason: "email token does not match current user cookie, please log into this computer to load the cookie into your memory" });
             });
         });
     });
@@ -303,17 +303,18 @@ router.post('/isValid/:token', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     UserIndex.findOne({ token: req.params.token }).then(tk => {
-        if (!tk) res.json({ success: false, reason: "Token does not exist." });
+        if (!tk) res.status(404).json({ success: false, reason: "Token does not exist." });
         if (tk._userId == req.user.internalId) {
             User.findOne({
                     internalId: req.user.internalId
                 })
                 .then(profile => {
-                    if (!profile) res.json({ success: false, reason: "Profile does not exist." });
-                    if (!profile.isVerified) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
+                    if (!profile) res.status(404).json({ success: false, reason: "Profile does not exist." });
+                    if (!profile.isVerified) return res.status(401).json({ type: 'not-verified', reason: 'Your account has not been verified.' });
+                    res.status(200).json({success:true, msg:"acct is valid"});
                 }).catch((e) => console.error(e));
 
-        } else res.json({ success: false, reason: "email token does not match current user cookie, please log into this computer to load the cookie into your memory" });
+        } else res..status(403).json({ success: false, reason: "email token does not match current user cookie, please log into this computer to load the cookie into your memory" });
 
     });
 });
@@ -365,7 +366,7 @@ router.post('/login', (req, res) => {
                         jwt.sign(payload, keys.secretOrKey, {
                             expiresIn: "1d"
                         }, (err, token) => {
-                            if (err) res.json({
+                            if (err) res.status(500).json({
                                 success: false,
                                 reason: "unable to generate auth token.",
                                 moreDetailed: err

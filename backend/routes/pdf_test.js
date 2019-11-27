@@ -71,16 +71,15 @@ const tl = [{
             __v: 0
         }
     ];
-
+var linkList=[];
 const doc = new PDFDocument(docsettings);
 doc.pipe(fs.createWriteStream('../temp/' + fn + '.pdf'));
 var pgsw = 0;
 (async () => {
     for (let i = 0; i < tl.length; i++) {
-        // if (i % 7 == 0) doc.addPage(docsettings);
         QRCode.toDataURL("http://website.com/tag/" + tl[i].tagid, function(error, url) {
             if (error) console.error(error);
-            console.log(url);
+            linkList.push(url);
             // if (i == 7) {
             //     pgsw = 285.7;
             // }
@@ -98,4 +97,12 @@ var pgsw = 0;
     }
     //label spec: https://uk.onlinelabels.com/templates/eu30011-template-pdf.html
     //https://www.npmjs.com/package/pdfkit
-})();
+}).then(function(){
+if(linkList.length>10){
+for(var i = 0;i<linkList.length;i+=10){
+    doc.addPage(docsettings);
+}
+} else{
+
+}
+});
