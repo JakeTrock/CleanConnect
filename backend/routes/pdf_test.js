@@ -1263,10 +1263,10 @@ var pgsw = 0;
 (async () => {
     for (let i = 0; i =< tl.length; i++) {
         if(i==tl.length){
-for(var i = 0;i<linkList.length;i+=10){
-    doc.addPage(docsettings);//add fallback measures below VVVVV
-    doc.path(dpath[0]+(linkList[0]||fallback)+dpath[1]+(linkList[1]||fallback)+dpath[2]+(linkList[2]||fallback)+dpath[3]+(linkList[3]||fallback)+dpath[4]+(linkList[4]||fallback)+dpath[5]+(linkList[5]||fallback)+dpath[6]+(linkList[6]||fallback)+dpath[7]+(linkList[7]||fallback)+dpath[8]+(linkList[8]||fallback)+dpath[9]+(linkList[9]||fallback)+dpath[10]);
-}
+            for(var i = 0;i<linkList.length;i+=10){
+                doc.addPage(docsettings);//add fallback measures below VVVVV
+                doc.path(dpath[0]+(linkList[0]||fallback)+dpath[1]+(linkList[1]||fallback)+dpath[2]+(linkList[2]||fallback)+dpath[3]+(linkList[3]||fallback)+dpath[4]+(linkList[4]||fallback)+dpath[5]+(linkList[5]||fallback)+dpath[6]+(linkList[6]||fallback)+dpath[7]+(linkList[7]||fallback)+dpath[8]+(linkList[8]||fallback)+dpath[9]+(linkList[9]||fallback)+dpath[10]);
+            }
         }else{
         QRCode.toDataURL("http://website.com/tag/" + tl[i].tagid, function(error, url) {
             if (error) console.error(error);
