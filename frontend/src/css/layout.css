@@ -9,7 +9,6 @@
   text-align: center;
   --main-border: 1px;
   border: var(--main-border) solid #808080;
-  padding-right: 5px;
   width: 100%;
   height: 100%;
   position: relative;
@@ -17,12 +16,15 @@
 }
 
 .pageBody {
+  padding: 1%;
   text-align: left;
-  margin-left: 1%;
-  padding: 2px;
 }
 .label-header {
   margin-right: 50%;
+  border-bottom: solid #000000;
+}
+.label-complete {
+  text-align: center;
   border-bottom: solid #000000;
 }
 .label {
