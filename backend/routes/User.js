@@ -314,7 +314,7 @@ router.post('/isValid/:token', passport.authenticate('jwt', {
                     res.status(200).json({success:true, msg:"acct is valid"});
                 }).catch((e) => console.error(e));
 
-        } else res..status(403).json({ success: false, reason: "email token does not match current user cookie, please log into this computer to load the cookie into your memory" });
+        } else res.status(403).json({ success: false, reason: "email token does not match current user cookie, please log into this computer to load the cookie into your memory" });
 
     });
 });
