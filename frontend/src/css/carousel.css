@@ -1,31 +1,27 @@
-.carouselContainer{
-  margin-top:1%;
-  --main-color:#000000;
-  opacity:.9;
-  border-color:var(--main-color);
-  background-color:var(--main-color);
+.carouselContainer {
+  margin-top: 1%;
+  --main-color: #000000;
+  opacity: 0.9;
+  border-color: var(--main-color);
+  background-color: var(--main-color);
 
   display: flex;
   justify-content: center;
-  text-align:center;
+  text-align: center;
   align-items: center;
-
-
 }
 
-.direction{
-  color:#ffffff;
+.direction {
+  color: #ffffff;
   border: 5px solid var(--main-color);
-  width:5%;
-  font-size:200%;
-
+  width: 5%;
+  font-size: 200%;
 }
-
 
 .center {
-  width:90%;
+  width: 90%;
   border: 2px solid var(--main-color);
 }
-.centerImg{
-  width:100%;
+.centerImg {
+  width: 100%;
 }

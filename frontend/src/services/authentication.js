@@ -58,17 +58,13 @@ export function getCurrentUser(noDecode) {
 }
 
 export function changeInfo() {
-  try {
-    const headers = {
-      "Content-Type": "application/json",
-      Authorization: getCurrentUser(true)
-    };
-    return axios.post(apiEndpoint + "/changeinfo", "", {
-      headers: headers
-    });
-  } catch (ex) {
-    return null;
-  }
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: getCurrentUser(true)
+  };
+  return axios.post(apiEndpoint + "/changeinfo", "", {
+    headers: headers
+  });
 }
 
 export async function validateChange(token) {

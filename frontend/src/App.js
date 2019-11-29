@@ -12,7 +12,6 @@ import Change from "./pages/change";
 import Profile from "./pages/profile";
 import Tags from "./pages/tags";
 import NotFound from "./pages/notFound";
-import Change from "./pages/change";
 import Navbar from "./components/navbar";
 import ProtectedRoute from "./components/protectedRoute";
 import NoTokenRoute from "./components/noTokenRoute";
