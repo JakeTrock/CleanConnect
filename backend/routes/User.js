@@ -302,11 +302,10 @@ router.post('/change/:token', passport.authenticate('jwt', {
 router.post('/isValid/:token', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
+    console.log("xxxx"+req.params.token);
     UserIndex.findOne({ token: req.params.token }).then(tk => {
-        if (!tk) res.status(404).json({ success: false, reason: "Token does not exist." });
-        console.log(req.user);
-        console.log(tk._userId);
-        if (tk._userId == req.user.internalId) {
+        if (!tk) res.status(404).json({ success: false, reason: "Token does not exist." });      
+        if (String(tk._userId) == String(req.user._id)) {
             User.findOne({
                     internalId: req.user.internalId
                 })
@@ -315,9 +314,9 @@ router.post('/isValid/:token', passport.authenticate('jwt', {
                     if (!profile.isVerified) return res.status(401).json({ type: 'not-verified', reason: 'Your account has not been verified.' });
                     res.status(200).json({success:true, msg:"acct is valid"});
                 }).catch((e) => console.error(e));
-
-        } else res.status(403).json({ success: false, reason: "email token does not match current user cookie, please log into this computer to load the cookie into your memory" });
-
+        } else {
+            res.status(403).json({ success: false, reason: "email token does not match current user cookie, please log into this computer to load the cookie into your memory" });
+        }
     });
 });
 
