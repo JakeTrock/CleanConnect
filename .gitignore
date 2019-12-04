@@ -18,7 +18,7 @@ lib-cov
 coverage
 
 #temp dir
-backend/temp/*.pdf
+backend/temp/**.pdf
 # nyc test coverage
 .nyc_output
 
