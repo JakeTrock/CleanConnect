@@ -20,8 +20,12 @@ class Register extends Form {
     email: Joi.string()
       .email()
       .required(),
-    password: Joi.string().required(),
-    password2: Joi.string().required()
+    password: Joi.string()
+      .required()
+      .min(6),
+    password2: Joi.string()
+      .required()
+      .min(6)
   };
   doSubmit = async () => {
     try {

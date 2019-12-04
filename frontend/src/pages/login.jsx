@@ -20,6 +20,7 @@ class Login extends Form {
     password: Joi.string()
       .required()
       .label("Password")
+      .min(6)
   };
   doSubmit = async () => {
     try {
