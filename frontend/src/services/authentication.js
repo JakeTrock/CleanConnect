@@ -10,6 +10,7 @@ const tokenKey = "token";
 axios.interceptors.response.use(
   function(response) {
     console.clear();
+    console.log(response);
     if (response.data.status && response.data)
       toast.success(response.data.status);
     return response;
@@ -77,6 +78,25 @@ export async function validateChange(token) {
   });
 }
 
+export async function completeChange(token, name, email, password, password2) {
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: getCurrentUser(true)
+  };
+  return axios.post(
+    apiEndpoint + "/change/" + token,
+    {
+      name,
+      email,
+      password,
+      password2
+    },
+    {
+      headers: headers
+    }
+  );
+}
+
 export function deleteInfo() {
   try {
     const headers = {
@@ -97,5 +117,6 @@ export default {
   logout,
   changeInfo,
   validateChange,
+  completeChange,
   deleteInfo
 };
