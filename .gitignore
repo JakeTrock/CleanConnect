@@ -18,7 +18,7 @@ lib-cov
 coverage
 
 #temp dir
-temp/*
+backend/temp/*
 # nyc test coverage
 .nyc_output
 
