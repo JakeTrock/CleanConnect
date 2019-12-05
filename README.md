@@ -39,6 +39,7 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * replace post(like post.findOne) with word "stag"
 
 ### future
+* pdf is kinda jank, we will need to replace it
 * add email notifications of errors
 * wireframe floorplans with color status
 * add payment with [this](https://developers.braintreepayments.com/guides/payment-methods/node)
