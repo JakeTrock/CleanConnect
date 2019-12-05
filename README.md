@@ -29,6 +29,7 @@ For every server api path, in insomnia, you will have to create an account, usin
 In production, most likely, we would store the bearer key in a cookie. The bearer key is only valid to the server for 24 hours, so the cookie should be set accordingly.
 
 ## Issue board
+* template imgs are not in order(neither are names, fix later)
 * maybe put "use strict"; at the top of some files temporarily to find some goofs
 * re-do comments to make code more legible
 * I have a creeping suspicion that I may have created a glitch with the email being able to change
