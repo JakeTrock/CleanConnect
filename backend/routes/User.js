@@ -178,11 +178,9 @@ router.post("/resend", (req, res, next) => {
 
     User.findOne({ email: req.body.email }, function(err, user) {
         if (!user)
-            return res
-                .status(404)
-                .send({
-                    msg: "We were unable to find a user with that email."
-                });
+            return res.status(404).send({
+                msg: "We were unable to find a user with that email."
+            });
         if (user.isVerified)
             return res.redirect(prefix + req.headers.host + "/login");
         const vToken = new UserIndex({
@@ -244,23 +242,19 @@ router.get("/confirmation/:token", (req, res, next) => {
     // Find a matching token
     UserIndex.findOne({ token: req.params.token }, function(err, token) {
         if (!token)
-            return res
-                .status(400)
-                .send({
-                    type: "not-verified",
-                    msg:
-                        "We were unable to find a valid token. Your token my have expired."
-                });
+            return res.status(400).send({
+                type: "not-verified",
+                msg:
+                    "We were unable to find a valid token. Your token my have expired."
+            });
         console.log(token);
         // If we found a token, find a matching user
         User.findOne({ _id: token._userId }, function(err, user) {
             console.log(user);
             if (!user)
-                return res
-                    .status(400)
-                    .send({
-                        msg: "We were unable to find a user for this token."
-                    });
+                return res.status(400).send({
+                    msg: "We were unable to find a user for this token."
+                });
             if (user.isVerified)
                 return res.redirect(prefix + req.headers.host + "/login");
 
@@ -434,8 +428,10 @@ router.post(
                                             new: true
                                         }
                                     )
-                                        .then(profile => res.json(profile))
+                                        .then(res.json({ status: "success" }))
                                         .catch(e => console.error(e));
+                                } else {
+                                    res.json("profile not found"); //hack make compliant
                                 }
                             })
                             .then(
@@ -480,13 +476,10 @@ router.post(
                                 reason: "Profile does not exist."
                             });
                         if (!profile.isVerified)
-                            return res
-                                .status(401)
-                                .json({
-                                    type: "not-verified",
-                                    reason:
-                                        "Your account has not been verified."
-                                });
+                            return res.status(401).json({
+                                type: "not-verified",
+                                reason: "Your account has not been verified."
+                            });
                         res.status(200).json({
                             success: true,
                             msg: "acct is valid"
@@ -540,12 +533,10 @@ router.post("/login", (req, res) => {
                     }; // create jwt payload
                     console.log(payload);
                     if (!user.isVerified)
-                        return res
-                            .status(401)
-                            .send({
-                                type: "not-verified",
-                                msg: "Your account has not been verified."
-                            });
+                        return res.status(401).send({
+                            type: "not-verified",
+                            msg: "Your account has not been verified."
+                        });
                     //Sign token
                     jwt.sign(
                         payload,
