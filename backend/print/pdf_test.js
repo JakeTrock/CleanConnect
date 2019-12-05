@@ -84,21 +84,21 @@ fs.readFile( __dirname + '/template.svg', async function (err, data) {
     //console.log(data.toString());
     var svgbuff = data.toString();
     async.forEachOf(tl,function(pos, i, callback) {
+        QRCode.toDataURL("http://"+"localhost:3000"+"/tag/"+pos.tagid, function (err, url) {
         if (err) return callback(err);
         try {
-        console.log(i);
-        console.log(pos);
-        svgbuff = svgbuff.replace("Room "+i, pos.name);
-        QRCode.toDataURL("http://"+"localhost:3000"+"/tag/"+pos.tagid, function (err, url) {
-           console.log("image generated");
+            console.log(i);
+            console.log(pos);
+            svgbuff = svgbuff.replace("Room "+i, pos.name);
+            console.log("image generated");
             svgbuff = svgbuff.replace("Img"+(i+1), url);
-        });
         } catch (e) {
             return callback(e);
         }
         callback();
+    });
     },err=>{
-        if (err) throw err;
+        if (err) console.error(err.message);
         //console.log(svgbuff);
         SVGtoPDF(doc, svgbuff, 0, 0);
         doc.end();
