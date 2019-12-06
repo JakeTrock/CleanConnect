@@ -176,8 +176,7 @@ const docsettings = [
                 console.log(pdn);
         async.forEachOf(
             pdn,
-            function(pdv, b, cb) {
-                try {
+            function(pdv, b) {
                     var svgbuff = data.toString();
                     var tl = dat.slice(0 + (b*10), 10 + (b*10));
                     const doc = new PDFDocument(docsettings);
