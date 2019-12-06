@@ -431,7 +431,10 @@ router.post(
                                         .then(res.json({ status: "success" }))
                                         .catch(e => console.error(e));
                                 } else {
-                                    res.json("profile not found"); //hack make compliant
+                                    res.status(404).json({
+                                        success: false,
+                                        reason: "Profile does not exist."
+                                    });
                                 }
                             })
                             .then(
