@@ -140,96 +140,102 @@ const docsettings = [
 /*await*/ fs.readFile(__dirname + '/template.svg', async function (err, data) {
   if (err) {
     console.error(err)
-    }
+  }
   if (dat.length < 10) {
     var svgbuff = data.toString()
-        const doc = new PDFDocument(docsettings)
-        const fn = uuidv1()
-        doc.pipe(fs.createWriteStream('../temp/' + fn + '.pdf'))
-        async.forEachOf(
+    const doc = new PDFDocument(docsettings)
+    const fn = uuidv1()
+    doc.pipe(fs.createWriteStream('../temp/' + fn + '.pdf'))
+    async.forEachOf(
       dat,
       function (pos, i, callback) {
         console.log(i)
-                console.log(pos)
-                QRCode.toDataURL(
-          'http://' + 'localhost:3000' + '/tag/' + pos.tagid,
-          function (err, url) {
-            if (err) return callback(err)
-                        try {
-              svgbuff = svgbuff.replace('Room ' + i, pos.name)
-                            svgbuff = svgbuff.replace('Img' + (i + 1), url)
-                        } catch (e) {
-              return callback(e)
-                        }
-            callback()
-                    }
-        )
-            },
-      err => {
-        if (err) console.error(err.message)
-                SVGtoPDF(doc, svgbuff, 0, 0)
-                doc.end()
-                //res.redirect("https://" + "localhost:3000" + "/pdf/" + fn + ".pdf");
-                console.log(
-          'https://' + 'localhost:3000' + '/pdf/' + fn + '.pdf'
-        )
-            }
-    )
-    } else {
-    var svgbuff = data.toString()
-        let pagesArray = [Math.ceil(dat.length / 10)]
-        pagesArray.every((elem, index, arr) => {
-      arr[index] = svgbuff
-            return elem
-        })
-    var cbuff = 0
-        console.log(dat.length)
-        const doc = new PDFDocument(docsettings)
-        const fn = uuidv1()
-        doc.pipe(fs.createWriteStream('../temp/' + fn + '.pdf'))
-        async.forEachOf(
-      dat,
-      function (pos, i, callback) {
-        // console.log(pos);
+        console.log(pos)
         QRCode.toDataURL(
           'http://' + 'localhost:3000' + '/tag/' + pos.tagid,
           function (err, url) {
             if (err) return callback(err)
-                        try {
-              console.log(i)
-                            if (i != 0 && i % 10 == 0) {
-                                cbuff++
-                                console.log('up ' + cbuff)
-                            }
-              console.log(cbuff)
-                            console.log(pos.name)
-                            pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + i, pos.name)
-                            pagesArray[cbuff] = pagesArray[cbuff].replace('Img' + (i + 1), url)
-                        } catch (e) {
+            try {
+              svgbuff = svgbuff.replace('Room ' + i, pos.name)
+              svgbuff = svgbuff.replace('Img' + (i + 1), url)
+            } catch (e) {
               return callback(e)
-                        }
+            }
             callback()
-                    }
+          }
         )
-            },
+      },
       err => {
-        if (err) return console.error(err.message)
-                for (var g = 0; g < pagesArray.length; g++) {
-          doc.addPage()
-                    doc.on('pageAdded', () => SVGtoPDF(doc, svgbuff, 0, 0))
-                }
+        if (err) console.error(err.message)
+        SVGtoPDF(doc, svgbuff, 0, 0)
         doc.end()
-                //res.redirect("https://" + "localhost:3000" + "/pdf/" + fn + ".pdf");
-                console.log(
+        //res.redirect("https://" + "localhost:3000" + "/pdf/" + fn + ".pdf");
+        console.log(
           'https://' + 'localhost:3000' + '/pdf/' + fn + '.pdf'
         )
-            }
+      }
     )
+  } else {
+    //svg template file
+    var svgbuff = data.toString()
+    //array of pages defined
+    var pagesArray = [];
+    //populate pages array with templates one for each ten< of data
+    for (var h = 0; h < Math.ceil(dat.length / 10); h++) {
+      pagesArray.push(svgbuff);
     }
+    //cbuff stores page position
+    var cbuff = 0;
+    const doc = new PDFDocument(docsettings);
+    const fn = uuidv1();
+    //async qr generation
+    async.forEachOf(
+      dat,
+      function (pos, i, callback) {
+        //create data url, call insertion function
+        QRCode.toDataURL('http://' + 'localhost:3000' + '/tag/' + pos.tagid, function (err, url) {
+            if (err) return callback(err);
+            try {
+              //every tenth page, increment page position
+              if (i != 0 && i % 10 == 0) {
+                cbuff++
+                console.log('up ' + cbuff)
+              }
+              console.log(pos.name)
+              //replace image and room name dummy values with values from async function and json file
+              pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + i, pos.name)
+              pagesArray[cbuff] = pagesArray[cbuff].replace('Img' + (i + 1), url)
+            } catch (e) {
+              return callback(e)
+            }
+            //call callback when finished
+            callback();
+          }
+        )
+      },
+      err => {
+        if (err) return console.error(err.message);
+        //document write stream begins
+        doc.pipe(fs.createWriteStream('../temp/' + fn + '.pdf'));
+        //for each page, add new pdf page, convert svg into pdf page content data and put it into place.
+        for (var g = 0; g < pagesArray.length; g++) {
+          console.log(g);
+          doc.addPage().on('pageAdded', () => SVGtoPDF(doc, pagesArray[g], 0, 0))
+        }
+        //finish writing to document
+        doc.end()
+        //redirect user to pdf page
+        //res.redirect("https://" + "localhost:3000" + "/pdf/" + fn + ".pdf");
+        console.log(
+          'https://' + 'localhost:3000' + '/pdf/' + fn + '.pdf'
+        )
+      }
+    )
+  }
 })
 
 // });
 
 // https://github.com/alafr/SVG-to-PDFKit
 // label spec: https://www.avery.com/blank/labels/94207
-// https://www.npmjs.com/package/qrcode-svg
+// https://www.npmjs.com/package/qrcode
