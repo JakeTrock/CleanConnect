@@ -5,6 +5,9 @@ const uuidv1 = require('uuid/v1')
 const fs = require('fs')
 var async = require('async')
 const Post = require('../models/Tag')
+const fillImg=' data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKQAAACkAQMAAAAjexcCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAA1BMVEX///+nxBvIAAAAGUlEQVQYGe3BAQEAAACCoP6vdkjAAAAAuBYOGAABPIptXAAAAABJRU5ErkJggg==';
+
+
 const dat = [
   {
     tagid: '6c995810-e95d-11e9-8715-8fd31126566e',
@@ -121,12 +124,12 @@ const dat = [
     comments: [],
     __v: 0
   },
-  {
-    tagid: '6c993810-e35d-13e9-8215-3fd35126576e',
-    name: 'tag r',
-    comments: [],
-    __v: 0
-  }
+  // {
+  //   tagid: '6c993810-e35d-13e9-8215-3fd35126576e',
+  //   name: 'tag r',
+  //   comments: [],
+  //   __v: 0
+  // }
 ]
 
 const docsettings = [
@@ -220,6 +223,13 @@ const docsettings = [
         doc.pipe(fs.createWriteStream('../temp/' + fn + '.pdf'));
         //for each page, add new pdf page, convert svg into pdf page content data and put it into place.
         for (var h=0; h < pagesArray.length; h++) {
+          if(pagesArray[h].indexOf("Room 9") !== -1){
+            for(var g=0;g<10;g++){
+              pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + g, '')
+              pagesArray[cbuff] = pagesArray[cbuff].replace('Img ' + g, fillImg);
+            }
+            console.log();
+          }
           SVGtoPDF(doc, pagesArray[h], 0, 0);
           doc.addPage();
         }
