@@ -130,7 +130,8 @@ const dat = [
 
 const docsettings = [
   {
-    size: 'LETTER'
+    size: 'LETTER',
+   // autoFirstPage: false
   }
 ]
 //async function() {
@@ -194,23 +195,23 @@ const docsettings = [
       function (pos, i, callback) {
         //create data url, call insertion function
         QRCode.toDataURL('http://' + 'localhost:3000' + '/tag/' + pos.tagid, function (err, url) {
-            if (err) return callback(err);
-            try {
-              //every tenth page, increment page position
-              if (i != 0 && i % 10 == 0) {
-                cbuff++
-                console.log('up ' + cbuff)
-              }
-              console.log(pos.name)
-              //replace image and room name dummy values with values from async function and json file
-              pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + i, pos.name)
-              pagesArray[cbuff] = pagesArray[cbuff].replace('Img' + (i + 1), url)
-            } catch (e) {
-              return callback(e)
+          if (err) return callback(err);
+          try {
+            //every tenth page, increment page position
+            if (i != 0 && i % 10 == 0) {
+              cbuff++
+              console.log('up ' + cbuff)
             }
-            //call callback when finished
-            callback();
+            console.log(pos.name)
+            //replace image and room name dummy values with values from async function and json file
+            pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + (i % 10), pos.name)
+            pagesArray[cbuff] = pagesArray[cbuff].replace('Img' + ((i % 10) + 1), url)
+          } catch (e) {
+            return callback(e)
           }
+          //call callback when finished
+          callback();
+        }
         )
       },
       err => {
@@ -218,17 +219,17 @@ const docsettings = [
         //document write stream begins
         doc.pipe(fs.createWriteStream('../temp/' + fn + '.pdf'));
         //for each page, add new pdf page, convert svg into pdf page content data and put it into place.
-        for (var g = 0; g < pagesArray.length; g++) {
-          console.log(g);
-          doc.addPage().on('pageAdded', () => SVGtoPDF(doc, pagesArray[g], 0, 0))
+        for (var h=0; h < pagesArray.length; h++) {
+          SVGtoPDF(doc, pagesArray[h], 0, 0);
+          doc.addPage();
         }
         //finish writing to document
-        doc.end()
+        doc.end();
         //redirect user to pdf page
         //res.redirect("https://" + "localhost:3000" + "/pdf/" + fn + ".pdf");
         console.log(
           'https://' + 'localhost:3000' + '/pdf/' + fn + '.pdf'
-        )
+        );
       }
     )
   }

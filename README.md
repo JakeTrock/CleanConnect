@@ -77,3 +77,10 @@ and use these credentials:
 * https://resources.github.com/whitepapers/practical-guide-to-CI-with-Jenkins-and-GitHub/
 * https://developer.github.com/webhooks/
 * https://github.com/hokuco/CleanConnect/settings/hooks
+* Docker
+    * Mail
+        * https://mailu.io/1.7/setup.html
+        * https://github.com/tomav/docker-mailserver
+    * Docker image setup
+        * https://learndocker.online/
+        * https://www.katacoda.com/courses/docker/
