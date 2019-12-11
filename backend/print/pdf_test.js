@@ -8,129 +8,7 @@ const Post = require('../models/Tag')
 const fillImg=' data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKQAAACkAQMAAAAjexcCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAA1BMVEX///+nxBvIAAAAGUlEQVQYGe3BAQEAAACCoP6vdkjAAAAAuBYOGAABPIptXAAAAABJRU5ErkJggg==';
 
 
-const dat = [
-  {
-    tagid: '6c995810-e95d-11e9-8715-8fd31126566e',
-    name: 'tag a',
-    comments: [],
-    __v: 0
-  },
-  {
-    tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag b',
-    comments: [],
-    __v: 0
-  },
-  {
-    tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag c',
-    comments: [],
-    __v: 0
-  },
-  {
-    tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag d',
-    comments: [],
-    __v: 0
-  },
-  {
-    tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag e',
-    comments: [],
-    __v: 0
-  },
-  {
-    tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag f',
-    comments: [],
-    __v: 0
-  },
-  {
-    tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag g',
-    comments: [],
-    __v: 0
-  },
-  {
-    tagid: '9e90che0-e517-11e9-ad2d-55g5h577jl1e',
-    name: 'tag z',
-    comments: [],
-    __v: 0
-  },
-  {
-    tagid: '6c993810-e35d-13e9-8215-3fd35126576e',
-    name: 'tag a',
-    comments: [],
-    __v: 0
-  },
-  {
-    tagid: '9e87cfe0-e517-11e9-ad2d-59b6f467ed1e',
-    name: 'tag z',
-    comments: [],
-    __v: 0
-  },
 
-  {
-    tagid: '6c995810-e95d-11e9-8715-8fd31126566e',
-    name: 'tag r',
-    comments: [],
-    __v: 0
-  },
-  {
-    tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag r',
-    comments: [],
-    __v: 0
-  },
-  {
-    tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag r',
-    comments: [],
-    __v: 0
-  },
-  {
-    tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag r',
-    comments: [],
-    __v: 0
-  },
-  {
-    tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag r',
-    comments: [],
-    __v: 0
-  },
-  {
-    tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag r',
-    comments: [],
-    __v: 0
-  },
-  {
-    tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag r',
-    comments: [],
-    __v: 0
-  },
-  {
-    tagid: '9e90che0-e517-11e9-ad2d-55g5h577jl1e',
-    name: 'tag r',
-    comments: [],
-    __v: 0
-  },
-  {
-    tagid: '6c993810-e35d-13e9-8215-3fd35126576e',
-    name: 'tag r',
-    comments: [],
-    __v: 0
-  },
-  // {
-  //   tagid: '6c993810-e35d-13e9-8215-3fd35126576e',
-  //   name: 'tag r',
-  //   comments: [],
-  //   __v: 0
-  // }
-]
 
 const docsettings = [
   {
@@ -138,9 +16,9 @@ const docsettings = [
   }
 ]
 //async function() {
-// const dat = await Post.find({
-//     user: req.user.internalId
-// });
+const dat = Post.find({
+    user: req.user.internalId
+});
 /*await*/ fs.readFile(__dirname + '/template.svg', async function (err, data) {
   if (err) {
     console.error(err)
