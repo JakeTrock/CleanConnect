@@ -66,63 +66,64 @@ const dat = [
     comments: [],
     __v: 0
   },
+
   {
     tagid: '6c995810-e95d-11e9-8715-8fd31126566e',
-    name: 'tag a',
+    name: 'tag r',
     comments: [],
     __v: 0
   },
   {
     tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag b',
+    name: 'tag r',
     comments: [],
     __v: 0
   },
   {
     tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag c',
+    name: 'tag r',
     comments: [],
     __v: 0
   },
   {
     tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag d',
+    name: 'tag r',
     comments: [],
     __v: 0
   },
   {
     tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag e',
+    name: 'tag r',
     comments: [],
     __v: 0
   },
   {
     tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag f',
+    name: 'tag r',
     comments: [],
     __v: 0
   },
   {
     tagid: '78952c80-f41a-11e9-989f-11796a1aca21',
-    name: 'tag g',
+    name: 'tag r',
     comments: [],
     __v: 0
   },
   {
     tagid: '9e90che0-e517-11e9-ad2d-55g5h577jl1e',
-    name: 'tag z',
+    name: 'tag r',
     comments: [],
     __v: 0
   },
   {
     tagid: '6c993810-e35d-13e9-8215-3fd35126576e',
-    name: 'tag a',
+    name: 'tag r',
     comments: [],
     __v: 0
   },
   {
     tagid: '6c993810-e35d-13e9-8215-3fd35126576e',
-    name: 'tag a',
+    name: 'tag r',
     comments: [],
     __v: 0
   }
@@ -130,8 +131,7 @@ const dat = [
 
 const docsettings = [
   {
-    size: 'LETTER',
-   // autoFirstPage: false
+    size: 'LETTER'
   }
 ]
 //async function() {
@@ -204,8 +204,8 @@ const docsettings = [
             }
             console.log(pos.name)
             //replace image and room name dummy values with values from async function and json file
-            pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + (i % 10), pos.name)
-            pagesArray[cbuff] = pagesArray[cbuff].replace('Img' + ((i % 10) + 1), url)
+            pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + (i -(cbuff-10)), pos.name)
+            pagesArray[cbuff] = pagesArray[cbuff].replace('Img' + ((i -(cbuff*10)) + 1), url)
           } catch (e) {
             return callback(e)
           }
