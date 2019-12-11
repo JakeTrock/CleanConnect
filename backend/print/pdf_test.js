@@ -205,7 +205,7 @@ const docsettings = [
             console.log(pos.name)
             //replace image and room name dummy values with values from async function and json file
             pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + (i -(cbuff*10)), pos.name)
-            pagesArray[cbuff] = pagesArray[cbuff].replace('Img' + ((i -(cbuff*10)) + 1), url)
+            pagesArray[cbuff] = pagesArray[cbuff].replace('Img ' + (i -(cbuff*10)), url)
           } catch (e) {
             return callback(e)
           }

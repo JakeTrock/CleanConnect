@@ -183,55 +183,55 @@
       <g class="Graphic">
        <g>
         <rect class="BoundingBox" stroke="none" fill="none" x="11437" y="21957" width="4339" height="4339"/>
-        <image x="11437" y="21957" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img1"/>
+        <image x="11437" y="21957" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img 0"/>
        </g>
       </g>
       <g class="Graphic">
        <g>
         <rect class="BoundingBox" stroke="none" fill="none" x="11436" y="1598" width="4339" height="4339"/>
-        <image x="11436" y="1598" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img2"/>
+        <image x="11436" y="1598" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img 1"/>
        </g>
       </g>
       <g class="Graphic">
        <g>
         <rect class="BoundingBox" stroke="none" fill="none" x="677" y="11825" width="4339" height="4339"/>
-        <image x="677" y="11825" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img3"/>
+        <image x="677" y="11825" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img 2"/>
        </g>
       </g>
       <g class="Graphic">
        <g>
         <rect class="BoundingBox" stroke="none" fill="none" x="677" y="6720" width="4339" height="4339"/>
-        <image x="677" y="6720" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img4"/>
+        <image x="677" y="6720" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img 3"/>
        </g>
       </g>
       <g class="Graphic">
        <g>
         <rect class="BoundingBox" stroke="none" fill="none" x="677" y="21960" width="4339" height="4339"/>
-        <image x="677" y="21960" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img5"/>
+        <image x="677" y="21960" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img 4"/>
        </g>
       </g>
       <g class="Graphic">
        <g>
         <rect class="BoundingBox" stroke="none" fill="none" x="11436" y="6720" width="4339" height="4339"/>
-        <image x="11436" y="6720" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img6"/>
+        <image x="11436" y="6720" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img 5"/>
        </g>
       </g>
       <g class="Graphic">
        <g>
         <rect class="BoundingBox" stroke="none" fill="none" x="677" y="16694" width="4339" height="4339"/>
-        <image x="677" y="16694" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img7"/>
+        <image x="677" y="16694" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img 6"/>
        </g>
       </g>
       <g class="Graphic">
        <g>
         <rect class="BoundingBox" stroke="none" fill="none" x="677" y="1598" width="4339" height="4339"/>
-        <image x="677" y="1598" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img8"/>
+        <image x="677" y="1598" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img 7"/>
        </g>
       </g>
       <g class="Graphic">
        <g>
         <rect class="BoundingBox" stroke="none" fill="none" x="11436" y="16880" width="4339" height="4339"/>
-        <image x="11436" y="16880" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img9"/>
+        <image x="11436" y="16880" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img 8"/>
        </g>
       </g>
       <g class="com.sun.star.drawing.PolyPolygonShape">
@@ -249,7 +249,7 @@
       <g class="Graphic">
        <g>
         <rect class="BoundingBox" stroke="none" fill="none" x="11436" y="11800" width="4339" height="4339"/>
-        <image x="11436" y="11800" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img10"/>
+        <image x="11436" y="11800" width="4339" height="4339" preserveAspectRatio="none" xlink:href="Img 9"/>
        </g>
       </g>
       <g class="com.sun.star.drawing.PolyPolygonShape">
@@ -861,13 +861,13 @@
       <g class="com.sun.star.drawing.TextShape">
        <g id="id116">
         <rect class="BoundingBox" stroke="none" fill="none" x="1148" y="1370" width="1561" height="578"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="1148" y="1823"><tspan fill="rgb(51,163,255)" stroke="none">Room A</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="1148" y="1823"><tspan fill="rgb(51,163,255)" stroke="none">Room 0</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.TextShape">
        <g id="id117">
         <rect class="BoundingBox" stroke="none" fill="none" x="11886" y="1398" width="1565" height="578"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="11886" y="1851"><tspan fill="rgb(51,163,255)" stroke="none">Room B</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="11886" y="1851"><tspan fill="rgb(51,163,255)" stroke="none">Room 1</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.TextShape">
@@ -879,7 +879,7 @@
       <g class="com.sun.star.drawing.TextShape">
        <g id="id119">
         <rect class="BoundingBox" stroke="none" fill="none" x="1184" y="6492" width="1557" height="578"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="1184" y="6945"><tspan fill="rgb(51,163,255)" stroke="none">Room C</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="1184" y="6945"><tspan fill="rgb(51,163,255)" stroke="none">Room 2</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.TextShape">
@@ -891,7 +891,7 @@
       <g class="com.sun.star.drawing.TextShape">
        <g id="id121">
         <rect class="BoundingBox" stroke="none" fill="none" x="11963" y="6479" width="1599" height="578"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="11963" y="6932"><tspan fill="rgb(51,163,255)" stroke="none">Room D</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="11963" y="6932"><tspan fill="rgb(51,163,255)" stroke="none">Room 3</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.TextShape">
@@ -903,7 +903,7 @@
       <g class="com.sun.star.drawing.TextShape">
        <g id="id123">
         <rect class="BoundingBox" stroke="none" fill="none" x="1184" y="11548" width="1527" height="578"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="1184" y="12001"><tspan fill="rgb(51,163,255)" stroke="none">Room E</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="1184" y="12001"><tspan fill="rgb(51,163,255)" stroke="none">Room 4</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.TextShape">
@@ -915,7 +915,7 @@
       <g class="com.sun.star.drawing.TextShape">
        <g id="id125">
         <rect class="BoundingBox" stroke="none" fill="none" x="11937" y="11574" width="1510" height="578"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="11937" y="12027"><tspan fill="rgb(51,163,255)" stroke="none">Room F</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="11937" y="12027"><tspan fill="rgb(51,163,255)" stroke="none">Room 5</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.TextShape">
@@ -927,13 +927,13 @@
       <g class="com.sun.star.drawing.TextShape">
        <g id="id127">
         <rect class="BoundingBox" stroke="none" fill="none" x="1191" y="16462" width="1599" height="578"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="1191" y="16915"><tspan fill="rgb(51,163,255)" stroke="none">Room G</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="1191" y="16915"><tspan fill="rgb(51,163,255)" stroke="none">Room 6</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.TextShape">
        <g id="id128">
         <rect class="BoundingBox" stroke="none" fill="none" x="11886" y="16681" width="1603" height="578"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="11886" y="17134"><tspan fill="rgb(51,163,255)" stroke="none">Room H</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="11886" y="17134"><tspan fill="rgb(51,163,255)" stroke="none">Room 7</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.TextShape">
@@ -945,7 +945,7 @@
       <g class="com.sun.star.drawing.TextShape">
        <g id="id130">
         <rect class="BoundingBox" stroke="none" fill="none" x="1184" y="21737" width="1434" height="578"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="1184" y="22190"><tspan fill="rgb(51,163,255)" stroke="none">Room I</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="1184" y="22190"><tspan fill="rgb(51,163,255)" stroke="none">Room 8</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.TextShape">
@@ -957,7 +957,7 @@
       <g class="com.sun.star.drawing.TextShape">
        <g id="id132">
         <rect class="BoundingBox" stroke="none" fill="none" x="11937" y="21737" width="1404" height="578"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="11937" y="22190"><tspan fill="rgb(51,163,255)" stroke="none">Room J</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="FuturaMedium" font-size="423px" font-weight="400"><tspan class="TextPosition" x="11937" y="22190"><tspan fill="rgb(51,163,255)" stroke="none">Room 9</tspan></tspan></tspan></text>
        </g>
       </g>
      </g>
