@@ -117,7 +117,7 @@ router.post('/new', passport.authenticate('jwt', {
     //add tag node
     const newPost = new Post({
         name: req.body.name,
-        user: req.user.internalId
+        user: req.user._id
     });
     console.log(newPost);
     newPost.save().then(post => res.json(post)).catch((e) => console.error(e));
@@ -338,7 +338,6 @@ router.get('/print/', passport.authenticate('jwt', {
                                 pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + g, '')
                                 pagesArray[cbuff] = pagesArray[cbuff].replace('Img ' + g, fillImg);
                             }
-                            console.log();
                         }
                         SVGtoPDF(doc, pagesArray[h], 0, 0);
                         doc.addPage();
@@ -346,10 +345,7 @@ router.get('/print/', passport.authenticate('jwt', {
                     //finish writing to document
                     doc.end();
                     //redirect user to pdf page
-                    //res.redirect("https://" + "localhost:3000" + "/pdf/" + fn + ".pdf");
-                    console.log(
-                        'https://' + 'localhost:3000' + '/pdf/' + fn + '.pdf'
-                    );
+                    res.redirect("https://" + "localhost:3000" + "/pdf/" + fn + ".pdf");
                 }
             )
         }
