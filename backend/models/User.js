@@ -12,9 +12,6 @@ const UserSchema = new Schema({
         type: String,
         default: uuidv1().toString()
     },
-    tags: [{
-        type: String
-    }],
     name: {
         type: String,
         required: true

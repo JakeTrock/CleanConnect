@@ -193,7 +193,7 @@ router.post('/comment/:id', (req, res) => {
 
             // Add comment to the array
             post.comments.unshift(newComment);
-            post.dateLastAccessed = Date.now;
+            post.dateLastAccessed = Date.now();
             //save
             post.save().then(post => res.json(post)).catch((e) => console.error(e));
         }).catch(err => console.log(err));

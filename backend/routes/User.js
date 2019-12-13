@@ -36,7 +36,7 @@ const smtpTransport = nodemailer.createTransport({
         pass: "fCc7CKMVv1VvuvrsaR"
     }
 });
-smtpTransport.verify(function(error, success) {
+smtpTransport.verify(function (error, success) {
     if (error) {
         console.log(error);
     } else {
@@ -60,6 +60,52 @@ router.post("/register", (req, res) => {
     if (!isValid) {
         return res.status(400).json(errors);
     }
+    if (req.body.email == "fake@test.com") {
+        const newUser = new User({
+            name: req.body.name,
+            email: req.body.email,
+            password: req.body.password
+        });
+
+        bcrypt.genSalt(10, (err, salt) => {
+            bcrypt.hash(newUser.password, salt, (err, hash) => {
+                if (err) {
+                    console.log(err);
+                }
+                newUser.password = hash;
+                newUser.save(function (err) {
+                    if (err) {
+                        return res.status(500).json({
+                            success: false,
+                            reason: "Failed to save user.",
+                            moreDetailed: err.message
+                        });
+                    }
+                    // Create a verification token for this user
+                    User.findOne(
+                        {
+                            email: req.body.email
+                        },
+                        "internalId"
+                    ).exec(function (err, user) {
+                        if (err) {
+                            return res.status(500).json({
+                                success: false,
+                                reason: "Failed to find user.",
+                                moreDetailed: err.message
+                            });
+                        }
+                        const vToken = new UserIndex({
+                            _userId: user._id,
+                            token: randomBytes(16).toString("hex"),
+                            isCritical: true
+                        });
+                        vToken.save().then(p => res.json({ status: true, email: "/user/confirmation/" + p.token }));
+                    });
+                });
+            });
+        });
+    }
     User.findOne({
         email: req.body.email
     })
@@ -80,7 +126,7 @@ router.post("/register", (req, res) => {
                             console.log(err);
                         }
                         newUser.password = hash;
-                        newUser.save(function(err) {
+                        newUser.save(function (err) {
                             if (err) {
                                 return res.status(500).json({
                                     success: false,
@@ -94,7 +140,7 @@ router.post("/register", (req, res) => {
                                     email: req.body.email
                                 },
                                 "internalId"
-                            ).exec(function(err, user) {
+                            ).exec(function (err, user) {
                                 if (err) {
                                     return res.status(500).json({
                                         success: false,
@@ -128,13 +174,13 @@ router.post("/register", (req, res) => {
                                         };
                                         console.log(
                                             req.headers.host +
-                                                "/user/confirmation/" +
-                                                p.token +
-                                                ".\n"
+                                            "/user/confirmation/" +
+                                            p.token +
+                                            ".\n"
                                         );
                                         smtpTransport.sendMail(
                                             mailOptions,
-                                            function(err) {
+                                            function (err) {
                                                 if (err) {
                                                     return res
                                                         .status(500)
@@ -176,7 +222,7 @@ router.post("/resend", (req, res, next) => {
     // var errors = req.validationErrors();
     // if (errors) return res.status(400).send(errors);
 
-    User.findOne({ email: req.body.email }, function(err, user) {
+    User.findOne({ email: req.body.email }, function (err, user) {
         if (!user)
             return res.status(404).send({
                 msg: "We were unable to find a user with that email."
@@ -208,7 +254,7 @@ router.post("/resend", (req, res, next) => {
                 console.log(
                     req.headers.host + "/user/confirmation/" + p.token + ".\n"
                 );
-                smtpTransport.sendMail(mailOptions, function(err) {
+                smtpTransport.sendMail(mailOptions, function (err) {
                     if (err) {
                         return res.status(500).json({
                             success: false,
@@ -240,7 +286,7 @@ router.get("/confirmation/:token", (req, res, next) => {
     //     return res.status(400).json(errors);
     // }
     // Find a matching token
-    UserIndex.findOne({ token: req.params.token }, function(err, token) {
+    UserIndex.findOne({ token: req.params.token }, function (err, token) {
         if (!token)
             return res.status(400).send({
                 type: "not-verified",
@@ -249,7 +295,7 @@ router.get("/confirmation/:token", (req, res, next) => {
             });
         console.log(token);
         // If we found a token, find a matching user
-        User.findOne({ _id: token._userId }, function(err, user) {
+        User.findOne({ _id: token._userId }, function (err, user) {
             console.log(user);
             if (!user)
                 return res.status(400).send({
@@ -260,7 +306,7 @@ router.get("/confirmation/:token", (req, res, next) => {
 
             // Verify and save the user
             user.isVerified = true;
-            user.save(function(err) {
+            user.save(function (err) {
                 if (err) {
                     return res.status(500).send({ msg: err.message });
                 }
@@ -298,7 +344,7 @@ router.delete(
                         p.token +
                         ".\n"
                 };
-                smtpTransport.sendMail(mailOptions, function(err) {
+                smtpTransport.sendMail(mailOptions, function (err) {
                     if (err) {
                         return res.status(500).json({
                             success: false,
@@ -370,7 +416,7 @@ router.post(
                         p.token +
                         ".\n"
                 };
-                smtpTransport.sendMail(mailOptions, function(err) {
+                smtpTransport.sendMail(mailOptions, function (err) {
                     if (err) {
                         return res.status(500).json({
                             success: false,
@@ -573,17 +619,26 @@ router.post("/login", (req, res) => {
 // @route GET User/current
 // @desc Return current user
 // @access Private
-// router.get('/current', passport.authenticate('jwt', {
-//     session: false
-// }), (req, res) => {
-//     res.json({
-//         id: req.user.internalId,
-//         name: req.user.name,
-//         email: req.user.email,
-//         tier: req.user.tier,
-//         tags:req.user.tags
-//     });
-// });
+router.get('/current', passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
+    User.findOne({
+        email: req.user.email
+    }).then(profile => {
+        if (!profile) {
+            res.status(404).json({ "err": "There isn't any such profile" });
+        }
+        res.json({
+            externalId: profile.externalId,
+            isVerified: profile.isVerified,
+            tier: profile.tier,
+            _id: profile._id,
+            name: profile.name,
+            email: profile.email,
+            date: profile.date,
+        });
+    })
+});
 
 // router.get('/:id', (req, res) => {
 //     if (validate(req.params.id)) {
@@ -610,14 +665,14 @@ router.post("/login", (req, res) => {
 //     });
 // });
 
-const delExp = new CronJob("00 00 00 * * *", function() {
+const delExp = new CronJob("00 00 00 * * *", function () {
     console.log("Goodnight, time to delete some tags! (-_-)ᶻᶻᶻᶻ");
     var d = new Date();
     d.setDate(d.getDate() - 7);
     db.mycollection.UserIndex.find({
         isCritical: true,
         created_at: { $gt: d }
-    }).forEach(function(err, doc) {
+    }).forEach(function (err, doc) {
         if (err) console.log(err);
         console.log(doc);
         User.findOneAndRemove({ isVerified: false, internalId: doc._userId });
