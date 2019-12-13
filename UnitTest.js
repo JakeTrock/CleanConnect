@@ -43,7 +43,7 @@ describe("Verifying account...", function () {
   it("should return tag status code 200", function (done) {
     backend.get(verif).end(function (err, res) {
       // res.status.should.equal(200);
-      res.header['location'].should.include('/login')
+      res.header['location'].should.include('/login');
       done();
     });
   });
@@ -92,7 +92,6 @@ describe("Creating 20 tags...", function () {
 });
 describe("Getting all tag info...", function () {
   it("should return tag status code 200", function (done) {
-    var tn = "room" + Math.random().toString(36).substring(11);
     backend.post("/tag/" + info._id).set({
       "Authorization": token
     }).send({}).expect("Content-type", /json/).expect(200).end(function (err, res) {
@@ -105,13 +104,49 @@ describe("Getting all tag info...", function () {
 describe("Commenting on 20 tags...", function () {
   it("should return tag status code 200", function (done) {
     for (var v = 0; v < 20; v++) {
-      var tn = "room" + Math.random().toString(36).substring(11);
-      backend.post("/tag/new").send({
-        "name": tn
-      }).expect("Content-type", /json/).expect(200).end(function (err, res) {
+      backend.post("/tag/new") .set('Accept', 'application.json')
+      .field('text', 'testing text')
+      .field('sev', 1)
+      .attach('img', __dirname + '/testing.jpg')
+      .expect("Content-type", /json/).expect(200).end(function (err, res) {
         res.status.should.equal(200);
-        res.body.name.should.equal(tn);
-        res.body.hasOwnProperty('tagid').should.equal(true);
+        res.body.comments[0].sev.should.equal(1);
+        res.body.comments[0].text.should.equal('testing text');
+      });
+    }
+    done();
+  });
+});
+describe("Printing on 20 tags...", function () {
+  it("should return tag status code 200", function (done) {
+      backend.post("/tag/print") .set('Accept', 'application.json')
+      .expect("Content-type", /json/).expect(200).end(function (err, res) {
+        res.status.should.equal(200);
+        res.header['location'].should.include('/pdf')
+      });
+    }
+    done();
+  });
+});
+describe("Deleting 5 tags...", function () {
+  it("should return tag status code 200", function (done) {
+    for (var v = 0; v < 5; v++) {
+      backend.delete("/tag/"+tagArray[v].tagid) .set('Accept', 'application.json')
+      .expect("Content-type", /json/).expect(200).end(function (err, res) {
+        res.status.should.equal(200);
+        res.body.success.should.equal(true);
+        res.header['location'].should.include('/pdf')
+      });
+    }
+    done();
+  });
+});
+describe("Printing on 15 tags...", function () {
+  it("should return tag status code 200", function (done) {
+      backend.post("/tag/print") .set('Accept', 'application.json')
+      .expect("Content-type", /json/).expect(200).end(function (err, res) {
+        res.status.should.equal(200);
+        res.header['location'].should.include('/pdf')
       });
     }
     done();

@@ -251,7 +251,7 @@ router.get('/print/', passport.authenticate('jwt', {
     const dat = Post.find({
         user: req.user.internalId
     });
-    /*await*/ fs.readFile(__dirname + '/template.svg', async function (err, data) {
+    fs.readFile(__dirname + '/template.svg', async function (err, data) {
         if (err) {
             console.error(err)
         }
@@ -283,10 +283,7 @@ router.get('/print/', passport.authenticate('jwt', {
                     if (err) console.error(err.message)
                     SVGtoPDF(doc, svgbuff, 0, 0)
                     doc.end()
-                    //res.redirect("https://" + "localhost:3000" + "/pdf/" + fn + ".pdf");
-                    console.log(
-                        'https://' + 'localhost:3000' + '/pdf/' + fn + '.pdf'
-                    )
+                    res.redirect("https://" + "localhost:3000" + "/pdf/" + fn + ".pdf");    
                 }
             )
         } else {
