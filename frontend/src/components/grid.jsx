@@ -3,23 +3,13 @@ import React, { Component } from "react";
 import _ from "lodash";
 
 class Grid extends Component {
-  state = {
-    items: []
-  };
   componentDidMount() {
-    let { items } = this.props.items;
-    items = [
-      { name: "A", id: 1 },
-      { name: "", id: 2 },
-      { name: "C", id: 3 },
-      { name: "D", id: 4 }
-    ];
-    this.setState({ items: _.chunk(items, 2) });
     this.customBehavior = this.props.customBehavior.bind(this);
     this.emptyBehavior = this.props.emptyBehavior.bind(this);
   }
   render() {
-    const { items } = this.state;
+    let { items, idLocation } = this.props;
+    items = _.chunk(items, 2);
     const { customBehavior, emptyBehavior } = this;
     return (
       <React.Fragment>
@@ -29,14 +19,14 @@ class Grid extends Component {
               {list.map(function(item) {
                 if (item.name)
                   return (
-                    <React.Fragment key={item.id}>
+                    <React.Fragment key={item[idLocation]}>
                       {customBehavior(item)}
                     </React.Fragment>
                   );
                 else
                   return (
-                    <React.Fragment key={item.id}>
-                      {emptyBehavior(item)}
+                    <React.Fragment key="empty">
+                      {emptyBehavior()}
                     </React.Fragment>
                   );
               })}

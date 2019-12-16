@@ -2,23 +2,85 @@ import React, { Component } from "react";
 import Layout from "../components/layout";
 import Grid from "../components/grid";
 import Unit from "../components/unit";
+
+import * as auth from "../services/tagsAuthentication";
+
 import "../css/unit.css";
+
 class Tags extends Component {
+  state = {
+    tags: [],
+    limit: ""
+  };
+  async stateSetter() {
+    let { user } = this.props;
+    let tags = "";
+    if (user) {
+      tags = await auth.getTags();
+      tags = tags.data;
+      let limit = null;
+      if (user.tier === 0) limit = 5;
+      if (user.tier === 1) limit = 25;
+      if (limit !== this.state.limit) this.setState({ tags, limit });
+    }
+  }
+  componentDidMount() {
+    this.stateSetter();
+  }
+  componentDidUpdate(prevProps) {
+    if (prevProps === this.props) return;
+    this.stateSetter();
+  }
   render() {
-    let { tags } = this.props;
+    let { tags, limit } = this.state;
     if (!tags) tags = "";
+    if (tags[0] !== "" && tags.length < limit) tags.splice(0, 0, "");
+
+    async function deleteTag(id) {
+      //eventually turn this into a popup or an email notification
+      try {
+        const result = await auth.deleteTag(id);
+        console.log(result);
+        const { state } = this.props.location;
+        if (result) window.location = state ? state.from.pathname : "/tags";
+      } catch (e) {}
+    }
     function customBehavior(item) {
       //css for customBehavior and emptyBehavior are in unit.css
       return (
-        <Unit key={item.id} name={item.name}>
+        <Unit key={item._id} name={item.name}>
           <div className="unitText">item</div>
+          <div className="unitFooter"></div>
+          <a href="#" onClick={() => deleteTag(item._id)}>
+            Delete Tag
+          </a>
         </Unit>
       );
     }
-    function emptyBehavior(item) {
+    function emptyBehavior() {
       return (
-        <Unit key={item.id}>
-          <span className="text-muted">+</span>
+        <Unit>
+          <div className="label label-complete">
+            <input id="input" placeholder="Insert title..." />
+          </div>
+          <span
+            className="text-muted unitText addItem"
+            style={{ cursor: "pointer" }}
+            onClick={async () => {
+              try {
+                const result = await auth.newTag(
+                  document.getElementById("input").value
+                );
+                const { state } = this.props.location;
+                if (result)
+                  window.location = state ? state.from.pathname : "/tags";
+              } catch (e) {
+                console.log(e);
+              }
+            }}
+          >
+            +
+          </span>
         </Unit>
       );
     }
@@ -28,6 +90,7 @@ class Tags extends Component {
           <Grid
             {...this.props}
             items={tags}
+            idLocation={"_id"}
             customBehavior={customBehavior}
             emptyBehavior={emptyBehavior}
           ></Grid>
