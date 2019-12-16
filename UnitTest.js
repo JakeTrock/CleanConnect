@@ -94,7 +94,7 @@ describe("Getting all tag info...", function () {
   it("should return tag status code 200", function (done) {
     backend.post("/tag/" + info._id).set({
       "Authorization": token
-    }).send({}).expect("Content-type", /json/).expect(200).end(function (err, res) {
+    }).expect("Content-type", /json/).expect(200).end(function (err, res) {
       res.status.should.equal(200);
       tagArray = res.body;
     });
@@ -104,7 +104,7 @@ describe("Getting all tag info...", function () {
 describe("Commenting on 20 tags...", function () {
   it("should return tag status code 200", function (done) {
     for (var v = 0; v < 20; v++) {
-      backend.post("/tag/new") .set('Accept', 'application.json')
+      backend.post("/tag/new").set('Accept', 'application.json')
       .field('text', 'testing text')
       .field('sev', 1)
       .attach('img', __dirname + '/testing.jpg')
@@ -119,19 +119,18 @@ describe("Commenting on 20 tags...", function () {
 });
 describe("Printing on 20 tags...", function () {
   it("should return tag status code 200", function (done) {
-      backend.post("/tag/print") .set('Accept', 'application.json')
+      backend.post("/tag/print").set('Accept', 'application.json')
       .expect("Content-type", /json/).expect(200).end(function (err, res) {
         res.status.should.equal(200);
         res.header['location'].should.include('/pdf')
       });
-    }
     done();
   });
 });
 describe("Deleting 5 tags...", function () {
   it("should return tag status code 200", function (done) {
     for (var v = 0; v < 5; v++) {
-      backend.delete("/tag/"+tagArray[v].tagid) .set('Accept', 'application.json')
+      backend.delete("/tag/"+tagArray[v].tagid).set('Accept', 'application.json')
       .expect("Content-type", /json/).expect(200).end(function (err, res) {
         res.status.should.equal(200);
         res.body.success.should.equal(true);
@@ -148,10 +147,19 @@ describe("Printing on 15 tags...", function () {
         res.status.should.equal(200);
         res.header['location'].should.include('/pdf')
       });
-    }
     done();
   });
 });
+// describe("Printing on 15 tags...", function () {
+//   it("should return tag status code 200", function (done) {
+//       backend.post("/tag/print") .set('Accept', 'application.json')
+//       .expect("Content-type", /json/).expect(200).end(function (err, res) {
+//         res.status.should.equal(200);
+//         res.header['location'].should.include('/pdf')
+//       });
+//     done();
+//   });
+// });
 ////frontend
 describe("Now conducting unit test of frontend...", function () {
   it("should return home page", function (done) {

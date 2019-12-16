@@ -7,9 +7,9 @@ const passport = require('passport');
 const validate = require('uuid-validate');
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
-const SVGtoPDF = require('svg-to-pdfkit')
-const fs = require('fs')
-var async = require('async')
+const SVGtoPDF = require('svg-to-pdfkit');
+const fs = require('fs');
+var async = require('async');
 //Post model
 const Post = require('../models/Tag');
 const uuidv1 = require('uuid/v1');
@@ -39,18 +39,22 @@ router.get('/test', (req, res) => res.send("Tag Works"));
 // @route GET api/posts
 // @desc Get all the post
 // @access Public
-router.get('/:user', (req, res) => {
-    Post.find({
-        user: req.params.user
-    })
-        .sort({
-            dateLastAccessed: -1
+router.get('/getall', passport.authenticate('jwt', {
+    session: false
+}),
+    (req, res) => {
+        console.log(req.user);
+        Post.find({
+            user: req.user._id
         })
-        .then(posts => res.json(posts))
-        .catch(err => res.status(404).json({
-            nopostsfound: "No posts found!!"
-        }));
-});
+            .sort({
+                dateLastAccessed: -1
+            })
+            .then(posts => res.json(posts))
+            .catch(err => res.status(404).json({
+                nopostsfound: "No posts found!!"
+            }));
+    });
 // @route GET api/posts/:id
 // @desc Get all the post
 // @access Public
@@ -243,50 +247,49 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
     });
 });
 
-
-
 router.get('/print/', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
-    const dat = Post.find({
-        user: req.user.internalId
-    });
-    fs.readFile(__dirname + '/template.svg', async function (err, data) {
-        if (err) {
-            console.error(err)
-        }
-        if (dat.length < 10) {
-            var svgbuff = data.toString()
-            const doc = new PDFDocument(docsettings)
-            const fn = uuidv1()
-            doc.pipe(fs.createWriteStream('../temp/' + fn + '.pdf'))
-            async.forEachOf(
-                dat,
-                function (pos, i, callback) {
-                    console.log(i)
-                    console.log(pos)
-                    QRCode.toDataURL(
-                        'http://' + 'localhost:3000' + '/tag/' + pos.tagid,
-                        function (err, url) {
-                            if (err) return callback(err)
-                            try {
-                                svgbuff = svgbuff.replace('Room ' + i, pos.name)
-                                svgbuff = svgbuff.replace('Img' + (i + 1), url)
-                            } catch (e) {
-                                return callback(e)
-                            }
-                            callback()
-                        }
-                    )
-                },
-                err => {
-                    if (err) console.error(err.message)
-                    SVGtoPDF(doc, svgbuff, 0, 0)
-                    doc.end()
-                    res.redirect("https://" + "localhost:3000" + "/pdf/" + fn + ".pdf");    
-                }
-            )
-        } else {
+    Post.find({
+        user: req.user._id
+    }).then(dat => function (dat) {
+        console.log("dat:"+dat);
+        fs.readFile(__dirname + '/template.svg', async function (err, data) {
+            if (err) {
+                console.error(err)
+            }
+            // if (dat.length < 10) {
+            //     var svgbuff = data.toString()
+            //     const doc = new PDFDocument(docsettings)
+            //     const fn = uuidv1()
+            //     doc.pipe(fs.createWriteStream('../temp/' + fn + '.pdf'))
+            //     async.forEachOf(
+            //         dat,
+            //         function (pos, i, callback) {
+            //             console.log(i)
+            //             console.log(pos)
+            //             QRCode.toDataURL(
+            //                 'http://' + 'localhost:3000' + '/tag/' + pos.tagid,
+            //                 function (err, url) {
+            //                     if (err) return callback(err)
+            //                     try {
+            //                         svgbuff = svgbuff.replace('Room ' + i, pos.name)
+            //                         svgbuff = svgbuff.replace('Img' + (i + 1), url)
+            //                     } catch (e) {
+            //                         return callback(e)
+            //                     }
+            //                     callback()
+            //                 }
+            //             )
+            //         },
+            //         err => {
+            //             if (err) console.error(err.message)
+            //             SVGtoPDF(doc, svgbuff, 0, 0)
+            //             doc.end()
+            //             res.redirect("https://" + "localhost:3000" + "/pdf/" + fn + ".pdf");    
+            //         }
+            //     )
+            // } else {
             //svg template file
             var svgbuff = data.toString()
             //array of pages defined
@@ -327,7 +330,7 @@ router.get('/print/', passport.authenticate('jwt', {
                 err => {
                     if (err) return console.error(err.message);
                     //document write stream begins
-                    doc.pipe(fs.createWriteStream('../temp/' + fn + '.pdf'));
+                    doc.pipe(fs.createWriteStream(__dirname + '/../temp/' + fn + '.pdf'));
                     //for each page, add new pdf page, convert svg into pdf page content data and put it into place.
                     for (var h = 0; h < pagesArray.length; h++) {
                         if (pagesArray[h].indexOf("Room 9") !== -1) {
@@ -345,8 +348,12 @@ router.get('/print/', passport.authenticate('jwt', {
                     res.redirect("https://" + "localhost:3000" + "/pdf/" + fn + ".pdf");
                 }
             )
-        }
-    })
+            //       }
+        })
+    }).catch(err => res.status(404).json({
+        nopostsfound: "No posts found!!"
+    }));
+
 });
 
 module.exports = router;
