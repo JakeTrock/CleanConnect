@@ -135,13 +135,12 @@ router.delete('/:id', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     //current user
-    if (validate(req.user.id)) {
         Post.findOne({
             user: req.user.id
         })
             .then(profile => {
                 Post.findOne({
-                    tagid: req.params.id
+                    _id: req.params.id
                 })
                     .then(post => {
                         //Check the post owner
@@ -162,11 +161,6 @@ router.delete('/:id', passport.authenticate('jwt', {
                         moreDetailed: err
                     }));
             });
-    } else res.status(400).json({
-        success: false,
-        reason: "Bad url",
-        moreDetailed: "please retype url, or check if the link you used was broken"
-    });
 });
 
 
