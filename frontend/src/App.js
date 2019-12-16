@@ -15,7 +15,7 @@ import NotFound from "./pages/notFound";
 import Navbar from "./components/navbar";
 import ProtectedRoute from "./components/protectedRoute";
 import NoTokenRoute from "./components/noTokenRoute";
-import auth from "./services/authentication";
+import * as auth from "./services/userAuthentication";
 import "./App.css";
 
 class App extends Component {

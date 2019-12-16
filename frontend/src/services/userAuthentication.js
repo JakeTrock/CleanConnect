@@ -1,26 +1,12 @@
 import jwtDecode from "jwt-decode";
 import axios from "axios"; //Will be used for http requests
-import { toast } from "react-toastify";
 
 import { apiUrl } from "../config.json"; // Url of the server
+import "./interceptor";
 
 const apiEndpoint = apiUrl + "/user";
 const tokenKey = "token";
 
-axios.interceptors.response.use(
-  function(response) {
-    console.clear();
-    console.log(response);
-    if (response.data.status && response.data)
-      toast.success(response.data.status);
-    return response;
-  },
-  function(error) {
-    console.clear();
-    toast.error(error.response.statusText, { autoClose: 2500 });
-    return Promise.reject(error);
-  }
-);
 export async function login(email, password) {
   const { data: jwt } = await axios.post(apiEndpoint + "/login", {
     email,

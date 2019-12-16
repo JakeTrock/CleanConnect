@@ -5,7 +5,7 @@ import Joi from "joi-browser";
 
 import Form from "../components/form"; //allows you to render Input, initalizing login form as a form
 import Layout from "../components/layout";
-import * as auth from "../services/authentication";
+import * as auth from "../services/userAuthentication";
 
 class Register extends Form {
   state = {

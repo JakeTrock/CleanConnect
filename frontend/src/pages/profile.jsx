@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import Layout from "../components/layout";
-import * as auth from "../services/authentication";
+import * as auth from "../services/userAuthentication";
 
 class Profile extends Component {
   editAccount() {

@@ -5,7 +5,7 @@ import Joi from "joi-browser";
 
 import Form from "../components/form"; //allows you to render Input, initalizing login form as a form
 import Layout from "../components/layout";
-import * as auth from "../services/authentication";
+import * as auth from "../services/userAuthentication";
 
 class Change extends Form {
   state = {
@@ -51,7 +51,7 @@ class Change extends Form {
         data.password2
       );
       const { state } = this.props.location;
-      //window.location = state ? state.from.pathname : "/";
+      window.location = state ? state.from.pathname : "/";
     } catch (ex) {
       if (ex.response) {
         const errors = { ...this.state.errors };
