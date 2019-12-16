@@ -28,6 +28,7 @@
   border-bottom: solid #000000;
 }
 .label {
+  padding: -5%;
   margin-bottom: calc(var(--main-boarder) * -1);
 }
 @media screen and (min-width: 1001px) {

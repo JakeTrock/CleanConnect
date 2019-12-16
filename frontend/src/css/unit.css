@@ -1,7 +1,7 @@
 .unitBorder {
   position: relative;
   border: solid #000000;
-  border-radius: 10%;
+  border-radius: 8%;
   width: 46%;
   height: 33vh;
   margin: 2%;
@@ -19,5 +19,13 @@
   justify-content: center;
   text-align: center;
   align-items: center;
-  font-size: 800%;
+  height: 10vh;
+  font-size: 15vh;
+}
+
+.unitFooter {
+  border-top: solid #919191;
+}
+input {
+  width: 90%;
 }
