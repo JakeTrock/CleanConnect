@@ -1,18 +1,23 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const uuidv1 = require('uuid/v1');
+const QRCode = require('qrcode');
 
 const PostSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
-    tagid: {
-        type: String,
-        default: uuidv1().toString(),
-        required: true,
-        index: true
-    },
+    // tagid: {
+    //     type: String,
+    //     default: uuidv1().toString(),
+    //     required: true,
+    //     index: true
+    // },
+    // qrcode: {
+    //     type: String,
+    //     default:QRCode.toDataURL('http://' + 'localhost:3000' + '/tag/' + this._id)
+    // },
     name: {
         type: String,
         required: true
