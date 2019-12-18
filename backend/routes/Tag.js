@@ -56,7 +56,6 @@ router.post('/new', passport.authenticate('jwt', {
     }).then(posts => {
         for (var n in posts) {
             var p = posts[n].name;
-            //console.log(p, p == req.body.name, p === req.body.name);
             if (p == req.body.name) {
                 sc = false;
             }
@@ -85,7 +84,6 @@ router.post('/edit/:id', passport.authenticate('jwt', {
     }).then(posts => {
         for (var n in posts) {
             var p = posts[n].name;
-            console.log(p, p == req.body.name, p === req.body.name);
             if (p == req.body.name) {
                 sc = false;
             }
