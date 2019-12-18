@@ -5,7 +5,6 @@ class Unit extends Component {
   render() {
     const props = this.props;
     let containerClass = "unitBorder";
-    if (!props.name) containerClass += " addItem";
     return (
       <div className={containerClass}>
         <div className="unitBody">
