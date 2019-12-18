@@ -50,12 +50,63 @@ router.post('/new', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     //add tag node
-    const newPost = new Post({
-        name: req.body.name,
+    var sc = true;
+    Post.find({
         user: req.user._id
+    }).then(posts => {
+        for (var n in posts) {
+            var p = posts[n].name;
+            //console.log(p, p == req.body.name, p === req.body.name);
+            if (p == req.body.name) {
+                sc = false;
+            }
+        }
+        if (sc)
+            new Post({
+                name: req.body.name,
+                user: req.user._id
+            }).save().then(post => res.json(post)).catch((e) => console.error(e));
+        else
+            res.status(400).json({
+                success: false,
+                reason: "Name not unique.",
+            });
     });
-    console.log(newPost);
-    newPost.save().then(post => res.json(post)).catch((e) => console.error(e));
+
+});
+
+router.post('/edit/:id', passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
+    //edit tag node
+    var sc = true;
+    Post.find({
+        user: req.user._id
+    }).then(posts => {
+        for (var n in posts) {
+            var p = posts[n].name;
+            console.log(p, p == req.body.name, p === req.body.name);
+            if (p == req.body.name) {
+                sc = false;
+            }
+        }
+        if (sc)
+            Post.findOneAndUpdate({
+                _id: req.params.id,
+                internalId: req.user.id
+            }, {
+                $set: { name: req.body.name }
+            }, {
+                new: true
+            }).then(res.json({ status: "success" }))
+                .catch(e => console.error(e));
+        else
+            res.status(400).json({
+                success: false,
+                reason: "Name not unique.",
+            });
+    });
+
 });
 
 // @route DELETE api/post/:id
@@ -66,32 +117,32 @@ router.delete('/:id', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     //current user
+    // Post.findOne({
+    //     user: req.user.id
+    // }).then(profile => {
     Post.findOne({
+        _id: req.params.id,
         user: req.user.id
     })
-        .then(profile => {
-            Post.findOne({
-                _id: req.params.id
-            })
-                .then(post => {
-                    //Check the post owner
-                    if (post.user.toString() !== req.user.id) {
-                        return res.status(401).json({
-                            success: false,
-                            reason: "User not authorized"
-                        });
-                    }
-                    // Delete
-                    post.deleteOne().then(() => res.json({
-                        success: true
-                    }));
-                })
-                .catch(err => res.status(404).json({
-                    success: false,
-                    reason: "Post not found",
-                    moreDetailed: err
-                }));
-        });
+        .then(post => {
+            //Check the post owner
+            // if (post.user.toString() !== req.user.id) {
+            //     return res.status(401).json({
+            //         success: false,
+            //         reason: "User not authorized"
+            //     });
+            // }
+            // Delete
+            post.deleteOne().then(() => res.json({
+                success: true
+            }));
+        })
+        .catch(err => res.status(404).json({
+            success: false,
+            reason: "Post not found",
+            moreDetailed: err
+        }));
+    // });
 });
 
 
@@ -135,7 +186,8 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     Post.findOne({
-        _id: req.params.id
+        _id: req.params.id,
+        user: req.user.id
     }).then(post => {
         // Check if the comment exists
         if (post.comments.filter(comment => comment._id.toString() === req.params.comment_id).length === 0) {

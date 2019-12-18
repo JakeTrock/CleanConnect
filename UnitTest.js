@@ -117,10 +117,12 @@ describe("Commenting on 20 tags...", function () {
     done();
   });
 });
-describe("Printing on 20 tags...", function () {
+describe("Printing 20 tags...", function () {
   it("should return tag status code 200", function (done) {
-      backend.post("/tag/print").set('Accept', 'application.json')
-      .expect("Content-type", /json/).expect(200).end(function (err, res) {
+      backend.post("/tag/print").set('Accept', 'application.json').send({
+        "printIteration":[3,5,5,8,3,4,2,1,4,7,6,7,4,6,9,6,8,6,3,4],
+	      "tagSet":tagArray
+      }.expect("Content-type", /json/).expect(200).end(function (err, res) {
         res.status.should.equal(200);
         res.header['location'].should.include('/pdf')
       });
@@ -140,10 +142,23 @@ describe("Deleting 5 tags...", function () {
     done();
   });
 });
-describe("Printing on 15 tags...", function () {
+describe("Getting all tag info...", function () {
   it("should return tag status code 200", function (done) {
-      backend.post("/tag/print") .set('Accept', 'application.json')
-      .expect("Content-type", /json/).expect(200).end(function (err, res) {
+    backend.post("/tag/" + info._id).set({
+      "Authorization": token
+    }).expect("Content-type", /json/).expect(200).end(function (err, res) {
+      res.status.should.equal(200);
+      tagArray = res.body;
+    });
+    done();
+  });
+});
+describe("Printing 15 tags...", function () {
+  it("should return tag status code 200", function (done) {
+      backend.post("/tag/print").set('Accept', 'application.json').send({
+        "printIteration":[6,7,4,6,9,6,8,6,3,4],
+	      "tagSet":tagArray
+      }.expect("Content-type", /json/).expect(200).end(function (err, res) {
         res.status.should.equal(200);
         res.header['location'].should.include('/pdf')
       });
