@@ -177,6 +177,9 @@ router.post('/comment/:id', (req, res) => {
         _id: req.params.id
     }).then(post => {
         let image = req.files.img;
+        console.log(typeof image);
+        console.log(image);
+
         const name = uuidv1() + "." + image.name.split(".")[1];
         image.mv('./temp/' + name);
         const newComment = {
