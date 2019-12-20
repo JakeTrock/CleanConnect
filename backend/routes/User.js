@@ -106,111 +106,112 @@ router.post("/register", (req, res) => {
             });
         });
     }
-    User.findOne({
-        email: req.body.email
-    })
-        .then(user => {
-            if (user) {
-                errors.email = "Email already exists";
-                return res.status(400).json(errors);
-            } else {
-                const newUser = new User({
-                    name: req.body.name,
-                    email: req.body.email,
-                    password: req.body.password
-                });
-
-                bcrypt.genSalt(10, (err, salt) => {
-                    bcrypt.hash(newUser.password, salt, (err, hash) => {
-                        if (err) {
-                            console.log(err);
-                        }
-                        newUser.password = hash;
-                        newUser.save(function (err) {
+    else {
+        User.findOne({
+            email: req.body.email
+        })
+            .then(user => {
+                if (user) {
+                    errors.email = "Email already exists";
+                    return res.status(400).json(errors);
+                } else {
+                    const newUser = new User({
+                        name: req.body.name,
+                        email: req.body.email,
+                        password: req.body.password
+                    });
+                    bcrypt.genSalt(10, (err, salt) => {
+                        bcrypt.hash(newUser.password, salt, (err, hash) => {
                             if (err) {
-                                return res.status(500).json({
-                                    success: false,
-                                    reason: "Failed to save user.",
-                                    moreDetailed: err.message
-                                });
+                                console.log(err);
                             }
-                            // Create a verification token for this user
-                            User.findOne(
-                                {
-                                    email: req.body.email
-                                },
-                                "_id"
-                            ).exec(function (err, user) {
+                            newUser.password = hash;
+                            newUser.save(function (err) {
                                 if (err) {
                                     return res.status(500).json({
                                         success: false,
-                                        reason: "Failed to find user.",
+                                        reason: "Failed to save user.",
                                         moreDetailed: err.message
                                     });
                                 }
-                                const vToken = new UserIndex({
-                                    _userId: user,
-                                    token: randomBytes(16).toString("hex"),
-                                    isCritical: true
-                                });
-                                vToken
-                                    .save()
-                                    .then(p => {
-                                        // Send the email
-                                        var mailOptions = {
-                                            from:
-                                                "no-reply@" + req.headers.host,
-                                            to: req.body.email,
-                                            subject:
-                                                "Account Verification Token",
-                                            text:
-                                                "Hello,\n\n" +
-                                                "Please verify your account by clicking the link: \n" +
-                                                prefix +
+                                // Create a verification token for this user
+                                User.findOne(
+                                    {
+                                        email: req.body.email
+                                    },
+                                    "_id"
+                                ).exec(function (err, user) {
+                                    if (err) {
+                                        return res.status(500).json({
+                                            success: false,
+                                            reason: "Failed to find user.",
+                                            moreDetailed: err.message
+                                        });
+                                    }
+                                    const vToken = new UserIndex({
+                                        _userId: user,
+                                        token: randomBytes(16).toString("hex"),
+                                        isCritical: true
+                                    });
+                                    vToken
+                                        .save()
+                                        .then(p => {
+                                            // Send the email
+                                            var mailOptions = {
+                                                from:
+                                                    "no-reply@" + req.headers.host,
+                                                to: req.body.email,
+                                                subject:
+                                                    "Account Verification Token",
+                                                text:
+                                                    "Hello,\n\n" +
+                                                    "Please verify your account by clicking the link: \n" +
+                                                    prefix +
+                                                    req.headers.host +
+                                                    "/user/confirmation/" +
+                                                    p.token +
+                                                    ".\n"
+                                            };
+                                            console.log(
                                                 req.headers.host +
                                                 "/user/confirmation/" +
                                                 p.token +
                                                 ".\n"
-                                        };
-                                        console.log(
-                                            req.headers.host +
-                                            "/user/confirmation/" +
-                                            p.token +
-                                            ".\n"
-                                        );
-                                        smtpTransport.sendMail(
-                                            mailOptions,
-                                            function (err) {
-                                                if (err) {
-                                                    return res
-                                                        .status(500)
-                                                        .json({
-                                                            success: false,
-                                                            reason:
-                                                                "Failed to send mail.",
-                                                            moreDetailed:
-                                                                err.message
-                                                        });
+                                            );
+                                            smtpTransport.sendMail(
+                                                mailOptions,
+                                                function (err) {
+                                                    if (err) {
+                                                        return res
+                                                            .status(500)
+                                                            .json({
+                                                                success: false,
+                                                                reason:
+                                                                    "Failed to send mail.",
+                                                                moreDetailed:
+                                                                    err.message
+                                                            });
+                                                    }
                                                 }
-                                            }
-                                        );
-                                    })
-                                    .then(
-                                        res.json({
-                                            status:
-                                                "A verification email has been sent to " +
-                                                req.body.email +
-                                                "."
+                                            );
                                         })
-                                    )
-                                    .catch(err => console.log(err));
+                                        .then(
+                                            res.json({
+                                                status:
+                                                    "A verification email has been sent to " +
+                                                    req.body.email +
+                                                    "."
+                                            })
+                                        )
+                                        .catch(err => console.log(err));
+                                });
                             });
                         });
                     });
-                });
-            }
-        })
-        .catch(e => console.error(e));
+                }
+            })
+            .catch(e => console.error(e));
+    }
 });
 
 router.post("/resend", (req, res) => {
@@ -550,7 +551,6 @@ router.post(
 // @access Public
 
 router.post("/login", (req, res) => {
-    const email = req.body.email;
     const password = req.body.password;
 
     //Find User by email
@@ -561,16 +561,16 @@ router.post("/login", (req, res) => {
     }
 
     User.findOne({
-        email
+        email:req.body.email
     })
         .then(user => {
-            if (user.isVerified) {
-                errors.verified = "User not verified.";
-                return res.status(400).json(errors);
-            }
             errors.email = "User not found.";
             // Check for user
             if (!user) {
+                return res.status(400).json(errors);
+            }
+            if (!user.isVerified) {
+                errors.verified = "User not verified.";
                 return res.status(400).json(errors);
             }
             //Check password
@@ -583,12 +583,6 @@ router.post("/login", (req, res) => {
                         email: user.email,
                         tier: user.tier
                     }; // create jwt payload
-                    console.log(payload);
-                    if (!user.isVerified)
-                        return res.status(401).send({
-                            type: "not-verified",
-                            msg: "Your account has not been verified."
-                        });
                     //Sign token
                     jwt.sign(
                         payload,

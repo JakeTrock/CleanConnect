@@ -42,6 +42,20 @@ router.get('/getall', passport.authenticate('jwt', {
                 nopostsfound: "No posts found!!"
             }));
     });
+// @route GET api/posts
+// @desc Get all the post
+// @access Public
+router.get('/getone/:id', passport.authenticate('jwt', {
+    session: false
+}),
+    (req, res) => {
+        Post.findOne({
+            _id: req.params.id
+        }).then(post => res.json(post))
+            .catch(err => res.status(404).json({
+                nopostsfound: "No posts found!!"
+            }));
+    });
 // @route POST api/posts
 // @desc Create post
 // @access Private route
