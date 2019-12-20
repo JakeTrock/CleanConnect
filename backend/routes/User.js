@@ -60,7 +60,7 @@ router.post("/register", (req, res) => {
     if (!isValid) {
         return res.status(400).json(errors);
     }
-    if (req.body.email == "fake@test.com") {
+    if (req.body.email == "fake@test.com") {//check for testing var
         const newUser = new User({
             name: req.body.name,
             email: req.body.email,
@@ -86,7 +86,7 @@ router.post("/register", (req, res) => {
                         {
                             email: req.body.email
                         },
-                        "internalId"
+                        "_id"
                     ).exec(function (err, user) {
                         if (err) {
                             return res.status(500).json({
@@ -96,7 +96,7 @@ router.post("/register", (req, res) => {
                             });
                         }
                         const vToken = new UserIndex({
-                            _userId: user._id,
+                            _userId: user,
                             token: randomBytes(16).toString("hex"),
                             isCritical: true
                         });
@@ -139,7 +139,7 @@ router.post("/register", (req, res) => {
                                 {
                                     email: req.body.email
                                 },
-                                "internalId"
+                                "_id"
                             ).exec(function (err, user) {
                                 if (err) {
                                     return res.status(500).json({
@@ -149,7 +149,7 @@ router.post("/register", (req, res) => {
                                     });
                                 }
                                 const vToken = new UserIndex({
-                                    _userId: user._id,
+                                    _userId: user,
                                     token: randomBytes(16).toString("hex"),
                                     isCritical: true
                                 });
@@ -213,7 +213,7 @@ router.post("/register", (req, res) => {
         .catch(e => console.error(e));
 });
 
-router.post("/resend", (req, res, next) => {
+router.post("/resend", (req, res) => {
     // req.assert('email', 'Email is not valid').isEmail();
     // req.assert('email', 'Email cannot be blank').notEmpty();
     // req.sanitize('email').normalizeEmail({ remove_dots: false });
@@ -276,7 +276,7 @@ router.post("/resend", (req, res, next) => {
     });
 });
 
-router.get("/confirmation/:token", (req, res, next) => {
+router.get("/confirmation/:token", (req, res) => {
     // const {
     //     errors,
     //     isValid
@@ -287,13 +287,12 @@ router.get("/confirmation/:token", (req, res, next) => {
     // }
     // Find a matching token
     UserIndex.findOne({ token: req.params.token }, function (err, token) {
+        console.log(token);
         if (!token)
             return res.status(400).send({
                 type: "not-verified",
-                msg:
-                    "We were unable to find a valid token. Your token my have expired."
+                msg: "We were unable to find a valid token. Your token my have expired."
             });
-        console.log(token);
         // If we found a token, find a matching user
         User.findOne({ _id: token._userId }, function (err, user) {
             console.log(user);
@@ -373,8 +372,8 @@ router.get(
     }),
     (req, res) => {
         UserIndex.findOne({ token: req.params.token }).then(tk => {
-            if (tk._userId == req.user.id)
-                User.findOneAndRemove({ internalId: tk._userId })
+            if (tk._userId == req.user._id)
+                User.findOneAndRemove({ _id: tk._userId })
                     .then(UserIndex.findOneAndRemove({ _userId: tk._userId }))
                     .then(() => res.json({ success: true }))
                     .catch(e => console.error(e));
@@ -445,7 +444,7 @@ router.post(
     }),
     (req, res) => {
         const profileFields = {};
-        profileFields.user = req.user.internalId;
+        profileFields.user = req.user._id;
         if (req.body.name) profileFields.name = req.body.name;
         if (req.body.email) profileFields.email = req.body.email;
         if (req.body.password) profileFields.password = req.body.password;
@@ -458,14 +457,14 @@ router.post(
                 UserIndex.findOne({ token: req.params.token }).then(tk => {
                     if (tk._userId == req.user.id) {
                         User.findOne({
-                            internalId: req.user.id
+                            _id: req.user.id
                         })
                             .then(profile => {
                                 if (profile) {
                                     //update a profile
                                     Profile.findOneAndUpdate(
                                         {
-                                            internalId: req.user.id
+                                            _id: req.user.id
                                         },
                                         {
                                             $set: profileFields
@@ -507,7 +506,7 @@ router.post(
         session: false
     }),
     (req, res) => {
-        console.log("xxxx" + req.params.token);
+        console.log(req.params.token);
         UserIndex.findOne({ token: req.params.token }).then(tk => {
             if (!tk)
                 res.status(404).json({
@@ -516,7 +515,7 @@ router.post(
                 });
             if (String(tk._userId) == String(req.user._id)) {
                 User.findOne({
-                    internalId: req.user.internalId
+                    _id: req.user._id
                 })
                     .then(profile => {
                         if (!profile)
@@ -565,6 +564,10 @@ router.post("/login", (req, res) => {
         email
     })
         .then(user => {
+            if (user.isVerified) {
+                errors.verified = "User not verified.";
+                return res.status(400).json(errors);
+            }
             errors.email = "User not found.";
             // Check for user
             if (!user) {
@@ -575,7 +578,7 @@ router.post("/login", (req, res) => {
                 if (isMatch) {
                     //User matched
                     const payload = {
-                        internalId: user._id,
+                        _id: user._id,
                         name: user.name,
                         email: user.email,
                         tier: user.tier
@@ -666,7 +669,7 @@ router.get('/current', passport.authenticate('jwt', {
 // });
 
 const delExp = new CronJob("00 00 00 * * *", function () {
-    console.log("Goodnight, time to delete some tags! (-_-)ᶻᶻᶻᶻ");
+    console.log("Goodnight, time to delete some stuff! (-_-)ᶻᶻᶻᶻ");
     var d = new Date();
     d.setDate(d.getDate() - 7);
     db.mycollection.UserIndex.find({
@@ -675,7 +678,7 @@ const delExp = new CronJob("00 00 00 * * *", function () {
     }).forEach(function (err, doc) {
         if (err) console.log(err);
         console.log(doc);
-        User.findOneAndRemove({ isVerified: false, internalId: doc._userId });
+        User.findOneAndRemove({ isVerified: false, _id: doc._userId });
     });
 });
 delExp.start();

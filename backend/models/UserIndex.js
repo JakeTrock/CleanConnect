@@ -9,7 +9,8 @@ const UserIndexSchema = new Schema({
     },
     token: {
         type: String,
-        required: true
+        required: true,
+        index:true
     },
     isCritical: {
         type: Boolean,

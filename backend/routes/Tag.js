@@ -79,6 +79,9 @@ router.post('/edit/:id', passport.authenticate('jwt', {
 }), (req, res) => {
     //edit tag node
     var sc = true;
+    console.log(req.user);
+    console.log(req.user._id);
+
     Post.find({
         user: req.user._id
     }).then(posts => {
@@ -91,7 +94,7 @@ router.post('/edit/:id', passport.authenticate('jwt', {
         if (sc)
             Post.findOneAndUpdate({
                 _id: req.params.id,
-                internalId: req.user.id
+                user: req.user._id.toString()
             }, {
                 $set: { name: req.body.name }
             }, {

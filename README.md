@@ -30,18 +30,15 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 
 ## Issue board
 * template imgs are not in order(neither are names, fix later)
-* maybe put "use strict"; at the top of some files temporarily to find some goofs
 * re-do comments to make code more legible
-* I have a creeping suspicion that I may have created a glitch with the email being able to change
 * replace post with tag in routes/tag
 * encrypt token
-* make delete/alter account email-less, does req.user.email work?
-* streamline indexing/data sorting         index:true
 * replace post(like post.findOne) with word "stag"
 
 ### future
-* pdf is kinda jank, we will need to replace it
 * add email notifications of errors
+* pre-cache qrcode urls
+* inventory system
 * wireframe floorplans with color status
 * add payment with [this](https://developers.braintreepayments.com/guides/payment-methods/node)
 
@@ -80,7 +77,7 @@ and use these credentials:
 * Docker
     * Mail
         * https://mailu.io/1.7/setup.html
-        * https://github.com/tomav/docker-mailserver
+        * https://github.com/namshi/docker-smtp
     * Docker image setup
         * https://learndocker.online/
         * https://www.katacoda.com/courses/docker/

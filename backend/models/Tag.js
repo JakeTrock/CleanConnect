@@ -6,7 +6,8 @@ const QRCode = require('qrcode');
 const PostSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
+        index:true
     },
     // tagid: {
     //     type: String,
@@ -25,7 +26,8 @@ const PostSchema = new Schema({
     comments: [{
         _id: {
             type: Schema.Types.ObjectId,
-            ref: 'User'
+            ref: 'User',
+            index:true
         },
         img: {
             type: String,
