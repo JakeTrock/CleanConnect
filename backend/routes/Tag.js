@@ -179,7 +179,7 @@ router.post('/comment/:id', (req, res) => {
         let image = req.files.img;
         console.log(typeof image);
         console.log(image);
-
+        if(image.name.split(".")[1]=="gif"||image.name.split(".")[1]=="jpeg"||image.name.split(".")[1]=="png"||image.name.split(".")[1]=="jpg"||image.name.split(".")[1]=="tiff"){
         const name = uuidv1() + "." + image.name.split(".")[1];
         image.mv('./temp/' + name);
         const newComment = {
@@ -193,6 +193,9 @@ router.post('/comment/:id', (req, res) => {
         post.dateLastAccessed = Date.now();
         //save
         post.save().then(post => res.json(post)).catch((e) => console.error(e));
+    }else{
+        return res.status(400).json({"error":"invalid filetype"});
+    }
     }).catch(err => console.log(err));
 });
 

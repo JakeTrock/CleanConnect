@@ -19,6 +19,12 @@ coverage
 
 #temp dir
 backend/temp/**.pdf
+backend/temp/**.gif
+backend/temp/**.jpg
+backend/temp/**.jpeg
+backend/temp/**.png
+backend/temp/**.tiff
+
 # nyc test coverage
 .nyc_output
 
