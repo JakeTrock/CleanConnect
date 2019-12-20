@@ -81,3 +81,18 @@ and use these credentials:
     * Docker image setup
         * https://learndocker.online/
         * https://www.katacoda.com/courses/docker/
+
+
+
+
+
+        { name: 'testing.jpg',
+  data:
+   <Buffer ff d8 ff e0 00 10 4a 46 49 46 00 01 01 01 00 60 00 60 00 00 ff db 00 43 00 08 06 06 07 06 05 08 07 07 07 09 09 08 0a 0c 14 0d 0c 0b 0b 0c 19 12 13 0f ... >,
+  size: 4290,
+  encoding: '7bit',
+  tempFilePath: '',
+  truncated: false,
+  mimetype: 'image/jpeg',
+  md5: '3637439c680649ad5c8bcb8def2a4d64',
+  mv: [Function: mv] }
