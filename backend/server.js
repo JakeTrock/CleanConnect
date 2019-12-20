@@ -16,10 +16,9 @@ const app = express();
 
 app.use(cors());
 // Body Parser middleware
-
 app.use(bodyParser.urlencoded({
     extended: false
-}));
+}).json({ limit: '5mb' }));
 app.use(bodyParser.json());
 
 // Connect to MongoDB

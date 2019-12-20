@@ -17,6 +17,7 @@ const uuidv1 = require('uuid/v1');
 const validatePostInput = require('../validation/tag');
 const apr = require('../validation/apr');
 const app = express();
+app.use(bodyParser.json({ limit: '5mb' }))
 const fillImg = ' data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKQAAACkAQMAAAAjexcCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAA1BMVEX///+nxBvIAAAAGUlEQVQYGe3BAQEAAACCoP6vdkjAAAAAuBYOGAABPIptXAAAAABJRU5ErkJggg==';
 const docsettings = [{ size: 'LETTER' }];
 // @route GET api/posts/test
