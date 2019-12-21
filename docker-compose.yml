@@ -2,8 +2,6 @@ version: '2'
 services:
   mongo:
     image: mongo
-  ubuntu-upstart:
-    image: ubuntu-upstart
   node:
     image: node
     volumes: []
