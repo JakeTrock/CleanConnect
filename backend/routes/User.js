@@ -228,8 +228,11 @@ router.post("/resend", (req, res) => {
             return res.status(404).send({
                 msg: "We were unable to find a user with that email."
             });
-        if (user.isVerified)
-            return res.redirect(prefix + req.headers.host + "/login");
+        if (user.isVerified) {
+            return res.status(400).send({
+                msg: "User is already verified"
+            });
+        }
         const vToken = new UserIndex({
             _userId: user._id,
             token: randomBytes(16).toString("hex"),
@@ -301,8 +304,11 @@ router.get("/confirmation/:token", (req, res) => {
                 return res.status(400).send({
                     msg: "We were unable to find a user for this token."
                 });
-            if (user.isVerified)
-                return res.redirect(prefix + req.headers.host + "/login");
+            if (user.isVerified) {
+                return res.status(400).send({
+                    msg: "User is already verified"
+                });
+            }
 
             // Verify and save the user
             user.isVerified = true;
@@ -310,7 +316,7 @@ router.get("/confirmation/:token", (req, res) => {
                 if (err) {
                     return res.status(500).send({ msg: err.message });
                 }
-                res.redirect(prefix + req.headers.host + "/login");
+                res.json({"status":"success"});
             });
         });
     });
@@ -561,7 +567,7 @@ router.post("/login", (req, res) => {
     }
 
     User.findOne({
-        email:req.body.email
+        email: req.body.email
     })
         .then(user => {
             errors.email = "User not found.";

@@ -304,7 +304,8 @@ router.get('/print/', passport.authenticate('jwt', {
                 //finish writing to document
                 doc.end();
                 //redirect user to pdf page
-                res.redirect("https://" + "localhost:3000" + "/pdf/" + fn + ".pdf");
+                //"https://" + "localhost:3000" + "/pdf/" + fn + ".pdf"
+                res.json({"filename":fn});
             }
         )
     })
