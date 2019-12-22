@@ -17,7 +17,6 @@ const uuidv1 = require('uuid/v1');
 const validatePostInput = require('../validation/tag');
 const apr = require('../validation/apr');
 const app = express();
-app.use(bodyParser.json({ limit: '5mb' }))
 const fillImg = ' data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKQAAACkAQMAAAAjexcCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAA1BMVEX///+nxBvIAAAAGUlEQVQYGe3BAQEAAACCoP6vdkjAAAAAuBYOGAABPIptXAAAAABJRU5ErkJggg==';
 const docsettings = [{ size: 'LETTER' }];
 // @route GET api/posts/test
@@ -65,19 +64,27 @@ router.post('/new', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     //add tag node
+    var tagName = req.body.name;
+    const {
+        errors,
+        isValid
+    } = validatePostInput(req);
+    if (!isValid) {
+        return res.status(400).json(errors);
+    }
     var sc = true;
     Post.find({
         user: req.user._id
     }).then(posts => {
         for (var n in posts) {
             var p = posts[n].name;
-            if (p == req.body.name) {
+            if (p == tagName) {
                 sc = false;
             }
         }
         if (sc)
             new Post({
-                name: req.body.name,
+                name: tagName,
                 user: req.user._id
             }).save().then(post => res.json(post)).catch((e) => console.error(e));
         else
@@ -93,6 +100,14 @@ router.post('/edit/:id', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     //edit tag node
+    var tagName = req.body.name;
+    const {
+        errors,
+        isValid
+    } = validatePostInput(req);
+    if (!isValid) {
+        return res.status(400).json(errors);
+    }
     var sc = true;
     console.log(req.user);
     console.log(req.user._id);
@@ -102,7 +117,7 @@ router.post('/edit/:id', passport.authenticate('jwt', {
     }).then(posts => {
         for (var n in posts) {
             var p = posts[n].name;
-            if (p == req.body.name) {
+            if (p == tagName) {
                 sc = false;
             }
         }
@@ -111,7 +126,7 @@ router.post('/edit/:id', passport.authenticate('jwt', {
                 _id: req.params.id,
                 user: req.user._id.toString()
             }, {
-                $set: { name: req.body.name }
+                $set: { name: tagName }
             }, {
                 new: true
             }).then(res.json({ status: "success" }))
@@ -180,7 +195,8 @@ router.post('/comment/:id', (req, res) => {
         let image = req.files.img;
         console.log(typeof image);
         console.log(image);
-        if(image.name.split(".")[1]=="gif"||image.name.split(".")[1]=="jpeg"||image.name.split(".")[1]=="png"||image.name.split(".")[1]=="jpg"||image.name.split(".")[1]=="tiff"){
+
+        if(image.size<5100000&&(image.mimetype=="image/gif"||image.mimetype=="image/jpeg"||image.mimetype=="image/png"||image.mimetype=="image/jpg"||image.mimetype=="image/tiff")){
         const name = uuidv1() + "." + image.name.split(".")[1];
         image.mv('./temp/' + name);
         const newComment = {
