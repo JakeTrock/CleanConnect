@@ -182,39 +182,45 @@ router.delete('/:id', passport.authenticate('jwt', {
 // @access Privte Route
 
 router.post('/comment/:id', (req, res) => {
-    // const {
-    //     errors,
-    //     isValid
-    // } = apr(req.body);
-    // if (!req.body.sev || !isValid || !req.files) {
-    //     return res.status(400).json(errors);
-    // }
+    const {
+        errors,
+        isValid
+    } = apr(req.body);
+    if (!req.body.sev || !isValid) {
+        return res.status(400).json(errors);
+    }
     console.log(req);
     Post.findOne({
         _id: req.params.id
     }).then(post => {
-        let image = req.files.img;
-        console.log(typeof image);
-        console.log(image);
-
-        if(image.size<5100000&&(image.mimetype=="image/gif"||image.mimetype=="image/jpeg"||image.mimetype=="image/png"||image.mimetype=="image/jpg"||image.mimetype=="image/tiff")){
-        const name = uuidv1() + "." + image.name.split(".")[1];
-        image.mv('./temp/' + name);
-        const newComment = {
-            img: name,
-            text: req.body.text,
-            sev: req.body.sev //severity 0 to 2, 0 being green, 2 being red
-        };
-
+        var comment;
+        if (req.files) {
+            let image = req.files.img;
+            // console.log(typeof image);
+            // console.log(image);
+            if (image.size < 5100000 && (image.mimetype == "image/gif" || image.mimetype == "image/jpeg" || image.mimetype == "image/png" || image.mimetype == "image/jpg" || image.mimetype == "image/tiff")) {
+                const name = uuidv1() + "." + image.name.split(".")[1];
+                image.mv('./temp/' + name);
+                comment = {
+                    img: name,
+                    text: req.body.text,
+                    sev: req.body.sev //severity 0 to 2, 0 being green, 2 being red
+                };
+            } else {
+                return res.status(400).json({ "error": "invalid filetype" });
+            }
+        } else {
+            comment = {
+                text: req.body.text,
+                sev: req.body.sev //severity 0 to 2, 0 being green, 2 being red
+            };
+        }
         // Add comment to the array
-        post.comments.unshift(newComment);
+        post.comments.unshift(comment);
         post.dateLastAccessed = Date.now();
         //save
         post.save().then(post => res.json(post)).catch((e) => console.error(e));
-    }else{
-        return res.status(400).json({"error":"invalid filetype"});
-    }
-    }).catch(err => console.log(err));
+    });
 });
 
 // @route DELETE api/posts/comment/:id/:comment_id
@@ -322,7 +328,7 @@ router.get('/print/', passport.authenticate('jwt', {
                 doc.end();
                 //redirect user to pdf page
                 //"https://" + "localhost:3000" + "/pdf/" + fn + ".pdf"
-                res.json({"filename":fn});
+                res.json({ "filename": fn });
             }
         )
     })
