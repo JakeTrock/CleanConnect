@@ -12,6 +12,8 @@ import Change from "./pages/change";
 import Profile from "./pages/profile";
 import Tags from "./pages/tags";
 import NotFound from "./pages/notFound";
+import Comment from "./pages/comment";
+
 import Navbar from "./components/navbar";
 import ProtectedRoute from "./components/protectedRoute";
 import NoTokenRoute from "./components/noTokenRoute";
@@ -54,6 +56,7 @@ class App extends Component {
               path="/tags"
               render={props => <Tags {...props} user={user} />}
             />
+            <Route path="/comment/:token" component={Comment} />
             <Route path="/notFound" component={NotFound} />
             <Redirect to="/notFound" />
           </Switch>

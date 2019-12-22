@@ -1,5 +1,5 @@
 import axios from "axios"; //Will be used for http requests
-
+import FormData from "form-data";
 import { apiUrl } from "../config.json"; // Url of the server
 import * as user from "./userAuthentication";
 const apiEndpoint = apiUrl + "/tag";
@@ -43,6 +43,24 @@ export function deleteTag(id) {
       Authorization: user.getCurrentUser(true)
     };
     return axios.delete(apiEndpoint + "/" + id, {
+      headers: headers
+    });
+  } catch (ex) {
+    return null;
+  }
+}
+
+export function commentOnTag(id, text, sev, img) {
+  var payload = new FormData();
+  payload.append("text", text);
+  payload.append("sev", sev);
+  //payload.append("img", img);
+  //payload.append(data.image.name, data.image);
+  try {
+    const headers = {
+      "Content-Type": "multipart/form-data"
+    };
+    return axios.post(apiEndpoint + "/comment/" + id, payload, {
       headers: headers
     });
   } catch (ex) {
