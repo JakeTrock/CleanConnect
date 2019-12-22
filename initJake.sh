@@ -1,5 +1,5 @@
 
-sudo systemctl start mongod &  PIDIOS=$!
+sudo systemctl start mongodb &  PIDIOS=$!
 #mongod &  PIDIOS=$!
 npm run dev &  PIDMIX=$!
 wait $PIDIOS
