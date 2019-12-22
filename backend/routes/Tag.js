@@ -182,13 +182,14 @@ router.delete('/:id', passport.authenticate('jwt', {
 // @access Privte Route
 
 router.post('/comment/:id', (req, res) => {
-    const {
-        errors,
-        isValid
-    } = apr(req.body);
-    if (!req.body.sev || !isValid || !req.files) {
-        return res.status(400).json(errors);
-    }
+    // const {
+    //     errors,
+    //     isValid
+    // } = apr(req.body);
+    // if (!req.body.sev || !isValid || !req.files) {
+    //     return res.status(400).json(errors);
+    // }
+    console.log(req);
     Post.findOne({
         _id: req.params.id
     }).then(post => {
