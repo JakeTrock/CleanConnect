@@ -2,9 +2,8 @@ import React, { Component } from "react";
 import Layout from "../components/layout";
 import Grid from "../components/grid";
 import Unit from "../components/unit";
-
 import * as auth from "../services/tagsAuthentication";
-
+import Popup from "reactjs-popup";
 import "../css/unit.css";
 
 class Tags extends Component {
@@ -36,14 +35,57 @@ class Tags extends Component {
     if (!tags) tags = "";
     if (tags[0] !== "" && tags.length < limit) tags.splice(0, 0, "");
 
-    async function deleteTag(id) {
+    function DeletePopup(data) {
+      const item = data.item;
+      return (
+        <Popup
+          trigger={<a href="#">Delete Tag</a>}
+          position="right center"
+          modal
+        >
+          {close => (
+            <div style={{ border: "5px solid black", margin: "-6px" }}>
+              <div style={{ margin: "10px" }}>
+                <a className="close" onClick={close}>
+                  &times;
+                </a>
+                <h1>
+                  This will permanently delete the tag titled {item.name}.
+                  Proceed?
+                </h1>
+                <button
+                  className="btn btn-danger"
+                  style={{
+                    borderRadius: "10px",
+                    display: "block",
+                    width: "30%",
+                    marginLeft: "auto",
+                    marginRight: "auto"
+                  }}
+                  onClick={() => {
+                    close();
+                    deleteTag(data.props, item._id);
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          )}
+        </Popup>
+      );
+    }
+
+    async function deleteTag(props, id) {
       //eventually turn this into a popup or an email notification
       try {
         const result = await auth.deleteTag(id);
         console.log(result);
-        const { state } = this.props.location;
+        const { state } = props.location;
         if (result) window.location = state ? state.from.pathname : "/tags";
-      } catch (e) {}
+      } catch (e) {
+        console.log(e);
+      }
     }
     function customBehavior(item) {
       //css for customBehavior and emptyBehavior are in unit.css
@@ -51,9 +93,7 @@ class Tags extends Component {
         <Unit key={item._id} name={item.name}>
           <div className="unitText">item</div>
           <div className="unitFooter"></div>
-          <a href="#" onClick={() => deleteTag(item._id)}>
-            Delete Tag
-          </a>
+          <DeletePopup props={this.props} item={item} />
         </Unit>
       );
     }
