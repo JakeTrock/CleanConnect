@@ -3,7 +3,7 @@ import { Redirect } from "react-router-dom";
 
 import Joi from "joi-browser";
 
-import Form from "../components/form"; //allows you to render Input, initalizing login form as a form
+import Form from "../components/form";
 import Layout from "../components/layout";
 import * as auth from "../services/userAuthentication";
 
@@ -40,7 +40,6 @@ class Change extends Form {
   }
   doSubmit = async () => {
     try {
-      console.log("Here");
       const token = this.props.match.params.token;
       const { data } = this.state;
       await auth.completeChange(
