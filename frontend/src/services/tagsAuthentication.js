@@ -55,7 +55,6 @@ export function commentOnTag(id, text, sev, img) {
   payload.append("text", text);
   payload.append("sev", sev);
   if (img) payload.append("img", img);
-  //payload.append(data.image.name, data.image);
   try {
     const headers = {
       "Content-Type": "multipart/form-data"

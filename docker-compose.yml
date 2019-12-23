@@ -7,7 +7,5 @@ services:
     volumes: []
   smtp:
     image: namshi/smtp
-  jenkins:
-    image: jenkins
   nginx:
     image: nginx
