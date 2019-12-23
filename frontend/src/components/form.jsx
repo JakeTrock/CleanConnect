@@ -98,9 +98,10 @@ class Form extends Component {
       </div>
     );
   }
-  renderImage(name, error) {
+  renderImage(name, label, error) {
     return (
       <div className="form-group">
+        <label className="pageText">{label}</label>
         <input
           type="file"
           name={name}

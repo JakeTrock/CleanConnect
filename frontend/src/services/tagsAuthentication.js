@@ -54,7 +54,7 @@ export function commentOnTag(id, text, sev, img) {
   var payload = new FormData();
   payload.append("text", text);
   payload.append("sev", sev);
-  //payload.append("img", img);
+  if (img) payload.append("img", img);
   //payload.append(data.image.name, data.image);
   try {
     const headers = {
