@@ -1,37 +1,38 @@
+//import all libs
 const express = require('express');
 const fileUpload = require('express-fileupload');
-const router = express.Router();
-router.use(fileUpload());
 const mongoose = require('mongoose');
 const passport = require('passport');
 const validate = require('uuid-validate');
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
 const SVGtoPDF = require('svg-to-pdfkit');
+const uuidv1 = require('uuid/v1');
 const fs = require('fs');
 var async = require('async');
-//Post model
-const Post = require('../models/Tag');
-const uuidv1 = require('uuid/v1');
+//Tag model import
+const Tag = require('../models/Tag.js');
 // Validation Part for input
-const validatePostInput = require('../validation/tag');
-const apr = require('../validation/apr');
+const validatePostInput = require('../validation/tag.js');
+const apr = require('../validation/apr.js');
+//configure express addons
 const app = express();
+const router = express.Router();
+router.use(fileUpload());
+//document settings and blank template image for pdf creator
 const fillImg = ' data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKQAAACkAQMAAAAjexcCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAA1BMVEX///+nxBvIAAAAGUlEQVQYGe3BAQEAAACCoP6vdkjAAAAAuBYOGAABPIptXAAAAABJRU5ErkJggg==';
 const docsettings = [{ size: 'LETTER' }];
-// @route GET api/posts/test
-// @desc Tests post route
-// @access Public route
+// ROUTE: GET tag/test
+// DESCRIPTION: Tests post route
 router.get('/test', (req, res) => res.send("Tag Works"));
-// @route GET api/posts
-// @desc Get all the post
-// @access Public
+
+// ROUTE: GET tag/getall
+// DESCRIPTION: gets all tags of user based on their session token id
 router.get('/getall', passport.authenticate('jwt', {
     session: false
 }),
     (req, res) => {
-        console.log(req.user);
-        Post.find({
+        Tag.find({
             user: req.user._id
         })
             .sort({
@@ -42,24 +43,22 @@ router.get('/getall', passport.authenticate('jwt', {
                 nopostsfound: "No posts found!!"
             }));
     });
-// @route GET api/posts
-// @desc Get all the post
-// @access Public
+// ROUTE: GET tag/getone/id
+// DESCRIPTION: gets the metadata of a single tag based on its id, can also be used to confirm if a tag exists
 router.get('/getone/:id', passport.authenticate('jwt', {
     session: false
 }),
     (req, res) => {
-        Post.findOne({
+        Tag.findOne({
             _id: req.params.id
         }).then(post => res.json(post))
             .catch(err => res.status(404).json({
                 nopostsfound: "No posts found!!"
             }));
     });
-// @route POST api/posts
-// @desc Create post
-// @access Private route
-
+// ROUTE: POST tag/new
+// DESCRIPTION: creates a new tag
+// INPUT: requires a user name to link back to, and a unique room name
 router.post('/new', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
@@ -73,7 +72,7 @@ router.post('/new', passport.authenticate('jwt', {
         return res.status(400).json(errors);
     }
     var sc = true;
-    Post.find({
+    Tag.find({
         user: req.user._id
     }).then(posts => {
         for (var n in posts) {
@@ -83,7 +82,7 @@ router.post('/new', passport.authenticate('jwt', {
             }
         }
         if (sc)
-            new Post({
+            new Tag({
                 name: tagName,
                 user: req.user._id
             }).save().then(post => res.json(post)).catch((e) => console.error(e));
@@ -96,6 +95,9 @@ router.post('/new', passport.authenticate('jwt', {
 
 });
 
+// ROUTE: POST tag/edit/:id
+// DESCRIPTION: allows user to change current tag name to unique name
+// INPUT: new tag name via json body
 router.post('/edit/:id', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
@@ -109,10 +111,7 @@ router.post('/edit/:id', passport.authenticate('jwt', {
         return res.status(400).json(errors);
     }
     var sc = true;
-    console.log(req.user);
-    console.log(req.user._id);
-
-    Post.find({
+    Tag.find({
         user: req.user._id
     }).then(posts => {
         for (var n in posts) {
@@ -122,7 +121,7 @@ router.post('/edit/:id', passport.authenticate('jwt', {
             }
         }
         if (sc)
-            Post.findOneAndUpdate({
+            Tag.findOneAndUpdate({
                 _id: req.params.id,
                 user: req.user._id.toString()
             }, {
@@ -140,46 +139,33 @@ router.post('/edit/:id', passport.authenticate('jwt', {
 
 });
 
-// @route DELETE api/post/:id
-// @desc DELETE a post by its id
-// @access Private route
+// ROUTE: DELETE tag/:id
+// DESCRIPTION: allows user to delete given tag information
+// INPUT: tag id via url bar
 
 router.delete('/:id', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
-    //current user
-    // Post.findOne({
-    //     user: req.user.id
-    // }).then(profile => {
-    Post.findOne({
+    Tag.findOne({
         _id: req.params.id,
         user: req.user.id
     })
         .then(post => {
-            //Check the post owner
-            // if (post.user.toString() !== req.user.id) {
-            //     return res.status(401).json({
-            //         success: false,
-            //         reason: "User not authorized"
-            //     });
-            // }
-            // Delete
             post.deleteOne().then(() => res.json({
                 success: true
             }));
         })
         .catch(err => res.status(404).json({
             success: false,
-            reason: "Post not found",
+            reason: "Tag not found",
             moreDetailed: err
         }));
-    // });
 });
 
 
-// @route POST api/posts/comment/:id
-// @desc Add comment to post
-// @access Privte Route
+// ROUTE: POST tag/comment/:id
+// DESCRIPTION: allows unauthorized user to add a comment to a post
+// INPUT: severity of issue(0 to 2, being worst), description of issue, and an optional image of the issue
 
 router.post('/comment/:id', (req, res) => {
     const {
@@ -190,7 +176,7 @@ router.post('/comment/:id', (req, res) => {
         return res.status(400).json(errors);
     }
     console.log(req);
-    Post.findOne({
+    Tag.findOne({
         _id: req.params.id
     }).then(post => {
         var comment;
@@ -198,7 +184,7 @@ router.post('/comment/:id', (req, res) => {
             let image = req.files.img;
             // console.log(typeof image);
             // console.log(image);
-            if (image.size < 5100000 && (image.mimetype == "image/gif" || image.mimetype == "image/jpeg" || image.mimetype == "image/png" || image.mimetype == "image/jpg" || image.mimetype == "image/tiff")) {
+            if (image.size < 5100000 && (image.mimetype == "video/mp4" || image.mimetype == "video/webm" || image.mimetype == "image/webp"||image.mimetype == "image/gif" || image.mimetype == "image/jpeg" || image.mimetype == "image/png" || image.mimetype == "image/jpg" || image.mimetype == "image/tiff")) {
                 const name = uuidv1() + "." + image.name.split(".")[1];
                 image.mv('./temp/' + name);
                 comment = {
@@ -223,14 +209,14 @@ router.post('/comment/:id', (req, res) => {
     });
 });
 
-// @route DELETE api/posts/comment/:id/:comment_id
-// @desc DELETE a comment
-// @access Private route
+// ROUTE: DELETE api/posts/comment/:id/:comment
+// DESCRIPTION: allows deletion of comment, most likely after it has been resolved
+// INPUT: in the url bar, this first takes the id of the post, then the id of the child comment
 
 router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
-    Post.findOne({
+    Tag.findOne({
         _id: req.params.id,
         user: req.user.id
     }).then(post => {
@@ -252,10 +238,13 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
         post.save().then(res.json(post)).catch((e) => console.error(e));
     }).catch(err => res.status(404).json({
         success: false,
-        reason: "Post not found.",
+        reason: "Tag not found.",
         moreDetailed: err
     }));
 });
+// ROUTE: GET tag/print/
+// DESCRIPTION: prints tags as qr codes, allowing people to access them in real life
+// INPUT: an array as long as the number of tags you have, containing numbers which tell the program the number of times to print each tag, and an array of tags(in the same format as they are in getall)
 
 router.get('/print/', passport.authenticate('jwt', {
     session: false
@@ -334,78 +323,5 @@ router.get('/print/', passport.authenticate('jwt', {
     })
 });
 
+//export module for importing into central server file
 module.exports = router;
-
-
-
-// Post.find({
-//     user: req.user._id
-// }).then(dat => function (dat) {
-//     console.log("dat:" + dat);
-//     fs.readFile(__dirname + '/template.svg', async function (err, data) {
-//         if (err) {
-//             console.error(err)
-//         }
-//         //svg template file
-//         var svgbuff = data.toString()
-//         //array of pages defined
-//         var pagesArray = [];
-//         //populate pages array with templates one for each ten< of data
-//         for (var h = 0; h < Math.ceil(dat.length / 10); h++) {
-//             pagesArray.push(svgbuff);
-//         }
-//         //cbuff stores page position
-//         var cbuff = 0;
-//         const doc = new PDFDocument(docsettings);
-//         const fn = uuidv1();
-//         //async qr generation
-//         async.forEachOf(
-//             dat,
-//             function (pos, i, callback) {
-//                 //create data url, call insertion function
-//                 QRCode.toDataURL('http://' + 'localhost:3000' + '/tag/' + pos._id, function (err, url) {
-//                     if (err) return callback(err);
-//                     try {
-//                         //every tenth page, increment page position
-//                         if (i != 0 && i % 10 == 0) {
-//                             cbuff++
-//                             console.log('up ' + cbuff)
-//                         }
-//                         console.log(pos.name)
-//                         //replace image and room name dummy values with values from async function and json file
-//                         pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + (i - (cbuff * 10)), pos.name)
-//                         pagesArray[cbuff] = pagesArray[cbuff].replace('Img ' + (i - (cbuff * 10)), url)
-//                     } catch (e) {
-//                         return callback(e)
-//                     }
-//                     //call callback when finished
-//                     callback();
-//                 }
-//                 )
-//             },
-//             err => {
-//                 if (err) return console.error(err.message);
-//                 //document write stream begins
-//                 doc.pipe(fs.createWriteStream(__dirname + '/../temp/' + fn + '.pdf'));
-//                 //for each page, add new pdf page, convert svg into pdf page content data and put it into place.
-//                 for (var h = 0; h < pagesArray.length; h++) {
-//                     if (pagesArray[h].indexOf("Room 9") !== -1) {
-//                         for (var g = 0; g < 10; g++) {
-//                             pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + g, '')
-//                             pagesArray[cbuff] = pagesArray[cbuff].replace('Img ' + g, fillImg);
-//                         }
-//                     }
-//                     SVGtoPDF(doc, pagesArray[h], 0, 0);
-//                     doc.addPage();
-//                 }
-//                 //finish writing to document
-//                 doc.end();
-//                 //redirect user to pdf page
-//                 res.redirect("https://" + "localhost:3000" + "/pdf/" + fn + ".pdf");
-//             }
-//         )
-//     })
-// }).catch(err => res.status(404).json({
-//     nopostsfound: "No posts found!!",
-//     moreDetailed: err
-// }));

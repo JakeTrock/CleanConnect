@@ -1,33 +1,29 @@
+//import modules
+const fs = require('fs')
 const express = require("express");
-const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const nodemailer = require("nodemailer");
 const randomBytes = require("randombytes");
 const CronJob = require("cron").CronJob;
-
-// stuff for pdf handling
-const uuidv1 = require("uuid/v1");
-const validate = require("uuid-validate");
+//create express derivative access
+const router = express.Router();
 // Load input validation
 const validateRegisterInput = require("../validation/register");
 const validateLoginInput = require("../validation/login");
-
+//load keys
 const keys = require("../config/keys");
-
-//Load user model
+//Load user models
 const User = require("../models/User");
 const UserIndex = require("../models/UserIndex");
-const prefix = "http://";
 
-// @route GET User/test
-// @desc Tests User route
-// @access Public route
+// ROUTE: GET user/test
+// DESCRIPTION: tests user route
+// INPUT: none
 router.get("/test", (req, res) => res.send("Routes Works"));
 
 //testing
-
 const smtpTransport = nodemailer.createTransport({
     host: "smtp.ethereal.email",
     port: 587,
@@ -51,9 +47,9 @@ smtpTransport.verify(function (error, success) {
 //          name: 'localhost'
 // })
 
-// @route GET User/register
-// @desc Register a user
-// @access Public route
+// ROUTE: POST user/register
+// DESCRIPTION: sends registration email to user
+// INPUT: user name, email and password(all as strings), via json body
 router.post("/register", (req, res) => {
     const { errors, isValid } = validateRegisterInput(req.body);
     //check validation
@@ -214,6 +210,9 @@ router.post("/register", (req, res) => {
     }
 });
 
+// ROUTE: GET user/resend
+// DESCRIPTION: resends verification email to user
+// INPUT: email as string via json body
 router.post("/resend", (req, res) => {
     // req.assert('email', 'Email is not valid').isEmail();
     // req.assert('email', 'Email cannot be blank').notEmpty();
@@ -256,7 +255,7 @@ router.post("/resend", (req, res) => {
                         ".\n"
                 };
                 console.log(
-                    req.headers.host + "/user/confirmation/" + p.token + ".\n"
+                    req.headers.host + "/user/confirmation/" + p.token + "\n"
                 );
                 smtpTransport.sendMail(mailOptions, function (err) {
                     if (err) {
@@ -280,15 +279,10 @@ router.post("/resend", (req, res) => {
     });
 });
 
+// ROUTE: GET user/confirmation/:token
+// DESCRIPTION: confirms that user exists, deletes verif token after it isn't necessary
+// INPUT: token value via the url
 router.get("/confirmation/:token", (req, res) => {
-    // const {
-    //     errors,
-    //     isValid
-    // } = validateLoginInput(req.body);
-    // //check validation
-    // if (!isValid) {
-    //     return res.status(400).json(errors);
-    // }
     // Find a matching token
     UserIndex.findOne({ token: req.params.token }, function (err, token) {
         console.log(token);
@@ -322,9 +316,10 @@ router.get("/confirmation/:token", (req, res) => {
     });
 });
 
-router.delete(
-    "/deleteinfo",
-    passport.authenticate("jwt", {
+// ROUTE: DELETE user/deleteinfo
+// DESCRIPTION: sends verification email to delete account
+// INPUT: user details via json user token
+router.delete("/deleteinfo",passport.authenticate("jwt", {
         session: false
     }),
     (req, res) => {
@@ -372,6 +367,9 @@ router.delete(
     }
 );
 
+// ROUTE: GET user/delete/:token
+// DESCRIPTION: recieves deletion email link request
+// INPUT: token value via url bar
 router.get(
     "/delete/:token",
     passport.authenticate("jwt", {
@@ -394,6 +392,9 @@ router.get(
     }
 );
 
+// ROUTE: POST user/changeinfo
+// DESCRIPTION: sends verification email to change account details
+// INPUT: user id from jwt header
 router.post(
     "/changeinfo",
     passport.authenticate("jwt", {
@@ -444,6 +445,9 @@ router.post(
     }
 );
 
+// ROUTE: POST user/change/:token
+// DESCRIPTION: recieves verification email to change account details
+// INPUT: new user details via json body
 router.post(
     "/change/:token",
     passport.authenticate("jwt", {
@@ -507,6 +511,9 @@ router.post(
     }
 );
 
+// ROUTE: POST user/isValid/:token
+// DESCRIPTION: checks if token is still valid
+// INPUT: token value via url bar
 router.post(
     "/isValid/:token",
     passport.authenticate("jwt", {
@@ -552,9 +559,9 @@ router.post(
     }
 );
 
-// @route GET User/login
-// @desc Login User / Returning JWT Token
-// @access Public
+// ROUTE: POST user/login
+// DESCRIPTION: generates token based on user properties submitted
+// INPUT: user details via json user token
 
 router.post("/login", (req, res) => {
     const password = req.body.password;
@@ -619,9 +626,9 @@ router.post("/login", (req, res) => {
         .catch(e => console.error(e));
 });
 
-// @route GET User/current
-// @desc Return current user
-// @access Private
+// ROUTE: GET user/current
+// DESCRIPTION: returns current user
+// INPUT: jwt token details
 router.get('/current', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
@@ -643,31 +650,11 @@ router.get('/current', passport.authenticate('jwt', {
     })
 });
 
-// router.get('/:id', (req, res) => {
-//     if (validate(req.params.id)) {
-//         const errors = {};
-//         User.findOne({
-//                 externalId: req.params.id
-//             })
-//             .populate('user','externalId', ['name'])
-//             .then(profile => {
-//                 if (!profile) {
-//                     errors.noprofile = "There isn't any such profile";
-//                     res.status(404).json(errors)
-//                 }
-//                 res.json(profile);
-//             }).catch(err => res.status(404).json({
-//                 success: false,
-//                 reason: "There is no profile for this user.",
-//                 moreDetailed: err
-//             }));
-//     } else res.status(400).json({
-//         success: false,
-//         reason: "Bad url",
-//         moreDetailed: "please retype url, or check if the link you used was broken"
-//     });
-// });
-
+// ROUTE: NONE
+// DESCRIPTION: deletes unused tokens and pdfs over a week old from the server
+// INPUT: NONE
+// MAYBE YOU SHOULD MOVE THIS TO THE INDEX FILE? OR MAYBE THE FILE FILE?
+var tempDir = "/temp/";
 const delExp = new CronJob("00 00 00 * * *", function () {
     console.log("Goodnight, time to delete some stuff! (-_-)ᶻᶻᶻᶻ");
     var d = new Date();
@@ -680,7 +667,16 @@ const delExp = new CronJob("00 00 00 * * *", function () {
         console.log(doc);
         User.findOneAndRemove({ isVerified: false, _id: doc._userId });
     });
+    //--experimental--
+    fs.readdir(tempDir, function (err, files) {
+      files.forEach(function (file, index) {
+  			if(fs.statSync(file)<d){
+            	 fs.unlinkSync(file);
+        	}
+        });
+    });
+    //--experimental--
 });
 delExp.start();
-
+//exports current script as module
 module.exports = router;

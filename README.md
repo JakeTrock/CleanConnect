@@ -29,9 +29,10 @@ For every server api path, in insomnia, you will have to create an account, usin
 In production, most likely, we would store the bearer key in a cookie. The bearer key is only valid to the server for 24 hours, so the cookie should be set accordingly.
 
 ## Issue board
-* re-do comments to make code more legible
-* replace post with tag in routes/tag
 * encrypt token
+* add captcha to anonymous posting to prevent spam--justin
+* add html/styling to email verification
+* add webm/mp4/webp upload to image uploader--justin
 
 ### future
 * add email notifications of errors
@@ -41,6 +42,7 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * add payment with [this](https://developers.braintreepayments.com/guides/payment-methods/node)
 
 ### Resolved (keep in mind when new code is written)
+* re-do comments to make code more legible
 * if account is unverified for more than x days, delete it, use findoneanddelete, find if boolean is false, and if date>certain thingymabobber. maybe you could have a central boolean array that is shortened whenever a person verifies their account, maybe it could be their internalids rather than a bool....
 * add more swears to [comment validation](/validation/apr.js)
 * make all errors this style:
