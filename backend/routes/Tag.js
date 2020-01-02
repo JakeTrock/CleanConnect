@@ -40,7 +40,8 @@ router.get('/getall', passport.authenticate('jwt', {
             })
             .then(posts => res.json(posts))
             .catch(err => res.status(404).json({
-                nopostsfound: "No posts found!!"
+                nopostsfound: "No posts found!!",
+                moreDetailed:err
             }));
     });
 // ROUTE: GET tag/getone/id

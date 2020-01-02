@@ -1,12 +1,11 @@
 //import modules
-const fs = require('fs')
+const fs = require('fs');
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const nodemailer = require("nodemailer");
 const randomBytes = require("randombytes");
-const CronJob = require("cron").CronJob;
 //create express derivative access
 const router = express.Router();
 // Load input validation
@@ -310,7 +309,7 @@ router.get("/confirmation/:token", (req, res) => {
                 if (err) {
                     return res.status(500).send({ msg: err.message });
                 }
-                res.json({"status":"success"});
+                res.json({ "status": "success" });
             });
         });
     });
@@ -319,9 +318,9 @@ router.get("/confirmation/:token", (req, res) => {
 // ROUTE: DELETE user/deleteinfo
 // DESCRIPTION: sends verification email to delete account
 // INPUT: user details via json user token
-router.delete("/deleteinfo",passport.authenticate("jwt", {
-        session: false
-    }),
+router.delete("/deleteinfo", passport.authenticate("jwt", {
+    session: false
+}),
     (req, res) => {
         const vToken = new UserIndex({
             _userId: req.user.id,
@@ -649,34 +648,5 @@ router.get('/current', passport.authenticate('jwt', {
         });
     })
 });
-
-// ROUTE: NONE
-// DESCRIPTION: deletes unused tokens and pdfs over a week old from the server
-// INPUT: NONE
-// MAYBE YOU SHOULD MOVE THIS TO THE INDEX FILE? OR MAYBE THE FILE FILE?
-var tempDir = "/temp/";
-const delExp = new CronJob("00 00 00 * * *", function () {
-    console.log("Goodnight, time to delete some stuff! (-_-)ᶻᶻᶻᶻ");
-    var d = new Date();
-    d.setDate(d.getDate() - 7);
-    db.mycollection.UserIndex.find({
-        isCritical: true,
-        created_at: { $gt: d }
-    }).forEach(function (err, doc) {
-        if (err) console.log(err);
-        console.log(doc);
-        User.findOneAndRemove({ isVerified: false, _id: doc._userId });
-    });
-    //--experimental--
-    fs.readdir(tempDir, function (err, files) {
-      files.forEach(function (file, index) {
-  			if(fs.statSync(file)<d){
-            	 fs.unlinkSync(file);
-        	}
-        });
-    });
-    //--experimental--
-});
-delExp.start();
 //exports current script as module
 module.exports = router;
