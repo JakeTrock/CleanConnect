@@ -29,7 +29,6 @@ For every server api path, in insomnia, you will have to create an account, usin
 In production, most likely, we would store the bearer key in a cookie. The bearer key is only valid to the server for 24 hours, so the cookie should be set accordingly.
 
 ## Issue board
-* encrypt token
 * add captcha to anonymous posting to prevent spam--justin
 * add html/styling to email verification
 * add webm/mp4/webp upload to image uploader--justin
@@ -43,19 +42,13 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 
 ### Resolved (keep in mind when new code is written)
 * re-do comments to make code more legible
-* if account is unverified for more than x days, delete it, use findoneanddelete, find if boolean is false, and if date>certain thingymabobber. maybe you could have a central boolean array that is shortened whenever a person verifies their account, maybe it could be their internalids rather than a bool....
 * add more swears to [comment validation](/validation/apr.js)
 * make all errors this style:
 	success: false,
 	reason: "Post not found",
 	moreDetailed: err
 * add .catch with error logging to all promise functions with .catch((e)=>console.error(e));
-* use uuid validate to check url based uuids for validity
 
-
-### Resolved permanently
-* possible migrate /print and /pdf to tags
-* possible change to status codes
 
 ### Jake-specific:
 /home/bluushift/Desktop/CleanConnect/backend/config,/home/bluushift/Desktop/CleanConnect/backend/models,/home/bluushift/Desktop/CleanConnect/backend/routes,/home/bluushift/Desktop/CleanConnect/backend/temp,/home/bluushift/Desktop/CleanConnect/backend/TESTING,/home/bluushift/Desktop/CleanConnect/backend/validation
