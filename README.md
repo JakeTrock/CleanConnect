@@ -29,9 +29,7 @@ For every server api path, in insomnia, you will have to create an account, usin
 In production, most likely, we would store the bearer key in a cookie. The bearer key is only valid to the server for 24 hours, so the cookie should be set accordingly.
 
 ## Issue board
-* add captcha to anonymous posting to prevent spam--justin
 * add html/styling to email verification
-* add webm/mp4/webp upload to image uploader--justin
 
 ### future
 * add email notifications of errors
