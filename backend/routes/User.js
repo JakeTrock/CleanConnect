@@ -320,128 +320,121 @@ router.get("/confirmation/:token", (req, res) => {
 // INPUT: user details via json user token
 router.delete("/deleteinfo", passport.authenticate("jwt", {
     session: false
-}),
-    (req, res) => {
-        const vToken = new UserIndex({
-            _userId: req.user.id,
-            token: randomBytes(16).toString("hex"),
-            isCritical: false
-        });
-        vToken
-            .save()
-            .then(p => {
-                // Send the email
-                var mailOptions = {
-                    from: "no-reply@" + req.headers.host,
-                    to: req.user.email,
-                    subject: "Account Deletion",
-                    text:
-                        "Hello,\n\n" +
-                        "Please delete your account by clicking the link: \n" +
-                        prefix +
-                        req.headers.host +
-                        "/delete/" +
-                        p.token +
-                        ".\n"
-                };
-                smtpTransport.sendMail(mailOptions, function (err) {
-                    if (err) {
-                        return res.status(500).json({
-                            success: false,
-                            reason: "Failed to send mail.",
-                            moreDetailed: err.message
-                        });
-                    }
-                });
+}), (req, res) => {
+    const vToken = new UserIndex({
+        _userId: req.user.id,
+        token: randomBytes(16).toString("hex"),
+        isCritical: false
+    });
+    vToken
+        .save()
+        .then(p => {
+            // Send the email
+            var mailOptions = {
+                from: "no-reply@" + req.headers.host,
+                to: req.user.email,
+                subject: "Account Deletion",
+                text:
+                    "Hello,\n\n" +
+                    "Please delete your account by clicking the link: \n" +
+                    prefix +
+                    req.headers.host +
+                    "/delete/" +
+                    p.token +
+                    ".\n"
+            };
+            smtpTransport.sendMail(mailOptions, function (err) {
+                if (err) {
+                    return res.status(500).json({
+                        success: false,
+                        reason: "Failed to send mail.",
+                        moreDetailed: err.message
+                    });
+                }
+            });
+        })
+        .then(
+            res.json({
+                status:
+                    "A deletion email has been sent to " +
+                    req.user.email +
+                    "."
             })
-            .then(
-                res.json({
-                    status:
-                        "A deletion email has been sent to " +
-                        req.user.email +
-                        "."
-                })
-            )
-            .catch(err => console.log(err));
-    }
+        )
+        .catch(err => console.log(err));
+}
 );
 
 // ROUTE: GET user/delete/:token
 // DESCRIPTION: recieves deletion email link request
 // INPUT: token value via url bar
-router.get(
-    "/delete/:token",
-    passport.authenticate("jwt", {
-        session: false
-    }),
-    (req, res) => {
-        UserIndex.findOne({ token: req.params.token }).then(tk => {
-            if (tk._userId == req.user._id)
-                User.findOneAndRemove({ _id: tk._userId })
-                    .then(UserIndex.findOneAndRemove({ _userId: tk._userId }))
-                    .then(() => res.json({ success: true }))
-                    .catch(e => console.error(e));
-            else
-                res.status(403).json({
-                    success: false,
-                    reason:
-                        "email token does not match current user cookie, please log into this computer to load the cookie into your memory"
-                });
-        });
-    }
+router.get("/delete/:token", passport.authenticate("jwt", {
+    session: false
+}), (req, res) => {
+    UserIndex.findOne({ token: req.params.token }).then(tk => {
+        if (tk._userId == req.user._id)
+            User.findOneAndRemove({ _id: tk._userId })
+                .then(UserIndex.findOneAndRemove({ _userId: tk._userId }))
+                .then(() => res.json({ success: true }))
+                .catch(e => console.error(e));
+        else
+            res.status(403).json({
+                success: false,
+                reason:
+                    "email token does not match current user cookie, please log into this computer to load the cookie into your memory"
+            });
+    });
+}
 );
 
 // ROUTE: POST user/changeinfo
 // DESCRIPTION: sends verification email to change account details
 // INPUT: user id from jwt header
-router.post(
-    "/changeinfo",
-    passport.authenticate("jwt", {
-        session: false
-    }),
-    (req, res) => {
-        const vToken = new UserIndex({
-            _userId: req.user.id,
-            token: randomBytes(16).toString("hex"),
-            isCritical: false
-        });
-        vToken
-            .save()
-            .then(p => {
-                // Send the email
-                var mailOptions = {
-                    from: "no-reply@" + req.headers.host,
-                    to: req.user.email,
-                    subject: "Account Changes",
-                    text:
-                        "Hello,\n\n" +
-                        "Please alter your account by clicking the link: \n" +
-                        prefix +
-                        req.headers.host +
-                        "/change/" +
-                        p.token +
-                        ".\n"
-                };
-                smtpTransport.sendMail(mailOptions, function (err) {
-                    if (err) {
-                        return res.status(500).json({
-                            success: false,
-                            reason: "Failed to send mail.",
-                            moreDetailed: err.message
-                        });
-                    }
-                });
+router.post("/changeinfo", passport.authenticate("jwt", {
+    session: false
+}), (req, res) => {
+    const vToken = new UserIndex({
+        _userId: req.user.id,
+        token: randomBytes(16).toString("hex"),
+        isCritical: false
+    });
+    vToken
+        .save()
+        .then(p => {
+            // Send the email
+            var mailOptions = {
+                from: "no-reply@" + req.headers.host,
+                to: req.user.email,
+                subject: "Account Changes",
+                text:
+                    "Hello,\n\n" +
+                    "Please alter your account by clicking the link: \n" +
+                    prefix +
+                    req.headers.host +
+                    "/change/" +
+                    p.token +
+                    ".\n"
+            };
+            smtpTransport.sendMail(mailOptions, function (err) {
+                if (err) {
+                    return res.status(500).json({
+                        success: false,
+                        reason: "Failed to send mail.",
+                        moreDetailed: err.message
+                    });
+                }
+            });
+        })
+        .then(
+            res.json({
+                status:
+                    "A settings email has been sent to " +
+                    req.user.email +
+                    "."
             })
-            .then(
-                res.json({
-                    status:
-                        "A settings email has been sent to " +
-                        req.user.email +
-                        "."
-                })
-            )
-            .catch(err => console.log(err));
-    }
+        )
+        .catch(err => console.log(err));
+}
 );
 
 // ROUTE: POST user/change/:token
