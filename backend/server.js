@@ -8,7 +8,7 @@ const cors = require('cors');
 //imports different router/handler files
 const user = require('./routes/User.js');
 const tag = require('./routes/Tag.js');
-const file = require('./File.js');
+const file = require('./routes/File.js');
 const keys = require('./config/keys');
 
 //setup bodyparser and express

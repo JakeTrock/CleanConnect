@@ -6,8 +6,9 @@ const CronJob = require("cron").CronJob;
 //load in express modules
 const router = express.Router();
 //load in mongoose templates
-const User = require("./models/User");
-const UserIndex = require("./models/UserIndex");
+const User = require("../models/User");
+const UserIndex = require("../models/UserIndex.js");
+const tempDir = __dirname + '/../temp/';
 
 // ROUTE: GET /pdf/:uuid
 // DESCRIPTION: retrieves and returns pdf from temp dir
@@ -15,9 +16,9 @@ const UserIndex = require("./models/UserIndex");
 router.get('/pdf/:uuid', (req, res) => {
     var uu = req.params.uuid;
     //checks if url is valid
-    if (validate(uu.split(".")[0])) res.sendFile(__dirname + '/temp/' + uu);
+    if (validate(uu.split(".")[0])) res.sendFile(tempDir + uu);
     else res.status(404).json({
-        error: "invalid url. please retype url correctly."
+        error: "invalid url. url may be incorrectly typed, or file may no longer exist."
         // error: "This pdf has been deleted to preserve the privacy of its user, or never existed in the first place. Pdf files are erased from the server one week after their creation, if you'd like to re-generate this pdf, please go to https://CleanConnect.com/user/print"
     });
 });
@@ -27,9 +28,9 @@ router.get('/pdf/:uuid', (req, res) => {
 router.get('/img/:uuid', (req, res) => {
     var uu = req.params.uuid;
     //checks if url is valid
-    if (validate(uu.split(".")[0])) res.sendFile(__dirname + '/temp/' + uu);
+    if (validate(uu.split(".")[0])) res.sendFile(tempDir + uu);
     else res.status(404).json({
-        error: "invalid url. please retype url correctly."
+        error: "invalid url. url may be incorrectly typed, or file may no longer exist."
         //error: "This image has been deleted to preserve the privacy of its user, or never existed in the first place. Image files are erased from the server when no longer needed."
     });
 });
@@ -37,7 +38,6 @@ router.get('/img/:uuid', (req, res) => {
 // ROUTE: NONE
 // DESCRIPTION: deletes unused tokens and pdfs over a week old from the server
 // INPUT: NONE
-const tempDir = __dirname + '/temp/';
 const delExp = new CronJob("00 00 00 * * *", function () {
     console.log("Goodnight, time to delete some stuff! (-_-)ᶻᶻᶻᶻ");
     var d = new Date();
@@ -60,7 +60,6 @@ const delExp = new CronJob("00 00 00 * * *", function () {
             });
         }
     });
-    //--experimental--
     fs.readdir(tempDir, function (err, files) {
         files.forEach(function (file) {
             if (fs.statSync(tempDir + file).birthtime < d&&file.split(".")[1]!="pathpreserve") {
@@ -68,7 +67,6 @@ const delExp = new CronJob("00 00 00 * * *", function () {
             }
         });
     });
-    //--experimental--
 });
 //start cronjob
 
