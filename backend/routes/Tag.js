@@ -36,8 +36,9 @@ router.get('/getall', passport.authenticate('jwt', {
     }).sort({
         dateLastAccessed: -1
     }).then(posts => res.json(posts)).catch(err => res.status(404).json({
-        nopostsfound: "No posts found!!",
-        moreDetailed: err
+        success: false,
+        simple: "No posts found.",
+        details: err
     }));
 });
 // ROUTE: GET tag/genimgs
@@ -60,7 +61,7 @@ router.get('/genimgs', passport.authenticate('jwt', {
                             _id: pos._id
                         }, {
                             qrcode: url
-                        },{
+                        }, {
                             new: true
                         });
                     });
@@ -72,7 +73,7 @@ router.get('/genimgs', passport.authenticate('jwt', {
             callback();
         }, err => {
             if (err) return console.error(err.message);
-            res.json({ done: true });
+            res.json({ success: true });
         })
     });
 });
@@ -84,10 +85,12 @@ router.get('/getone/:id', passport.authenticate('jwt', {
     (req, res) => {
         Tag.findOne({
             _id: req.params.id
-        }).then(post => res.json(post))
-            .catch(err => res.status(404).json({
-                nopostsfound: "No posts found!!"
-            }));
+        }).then(post => res.json({
+            success: true
+        })).catch(err => res.status(404).json({
+            success: false,
+            simple: "No posts found.",
+        }));
     });
 // ROUTE: GET tag/exists/:id
 // DESCRIPTION: sees if tag exists
@@ -112,7 +115,11 @@ router.post('/new', passport.authenticate('jwt', {
         isValid
     } = validatePostInput(req);
     if (!isValid) {
-        return res.status(400).json(errors);
+        return res.status(400).json({
+            success: false,
+            simple: "Invalid post body.",
+            details: errors
+        });
     }
     var sc = true;
     Tag.find({
@@ -128,11 +135,13 @@ router.post('/new', passport.authenticate('jwt', {
             new Tag({
                 name: tagName,
                 user: req.user._id
-            }).save().then(post => res.json(post)).catch((e) => console.error(e));
+            }).save().then(post => res.json({
+                success: true
+            })).catch((e) => console.error(e));
         else
             res.status(400).json({
                 success: false,
-                reason: "Name not unique.",
+                simple: "Name not unique."
             });
     });
 
@@ -151,7 +160,11 @@ router.post('/edit/:id', passport.authenticate('jwt', {
         isValid
     } = validatePostInput(req);
     if (!isValid) {
-        return res.status(400).json(errors);
+        return res.status(400).json({
+            success: false,
+            simple: "Invalid post body.",
+            details: errors
+        });
     }
     var sc = true;
     Tag.find({
@@ -171,12 +184,16 @@ router.post('/edit/:id', passport.authenticate('jwt', {
                 $set: { name: tagName }
             }, {
                 new: true
-            }).then(res.json({ status: "success" }))
-                .catch(e => console.error(e));
+            }).then(res.json({ success: true }))
+                .catch(e => res.json({
+                    success: false,
+                    simple: "Error updating tag",
+                    details: e
+                }));
         else
             res.status(400).json({
                 success: false,
-                reason: "Name not unique.",
+                simple: "Name not unique."
             });
     });
 
@@ -200,8 +217,8 @@ router.delete('/:id', passport.authenticate('jwt', {
         })
         .catch(err => res.status(404).json({
             success: false,
-            reason: "Tag not found",
-            moreDetailed: err
+            simple: "Tag not found",
+            details: err
         }));
 });
 
@@ -216,7 +233,11 @@ router.post('/comment/:id', (req, res) => {
         isValid
     } = apr(req.body);
     if (!req.body.sev || !isValid) {
-        return res.status(400).json(errors);
+        return res.status(400).json({
+            success: false,
+            simple: "Invalid post body.",
+            details: errors
+        });
     }
     Tag.findOne({
         _id: req.params.id
@@ -224,8 +245,6 @@ router.post('/comment/:id', (req, res) => {
         var comment;
         if (req.files) {
             let image = req.files.img;
-            // console.log(typeof image);
-            // console.log(image);
             if (image.size < 5100000 && (image.mimetype == "video/mp4" || image.mimetype == "video/webm" || image.mimetype == "image/webp" || image.mimetype == "image/gif" || image.mimetype == "image/jpeg" || image.mimetype == "image/png" || image.mimetype == "image/jpg" || image.mimetype == "image/tiff")) {
                 const name = uuidv1() + "." + image.name.split(".")[1];
                 image.mv('./temp/' + name);
@@ -235,7 +254,11 @@ router.post('/comment/:id', (req, res) => {
                     sev: req.body.sev //severity 0 to 2, 0 being green, 2 being red
                 };
             } else {
-                return res.status(400).json({ "error": "invalid filetype" });
+                return res.status(400).json({
+                    success: false,
+                    simple: "invalid filetype",
+                    details: e
+                });
             }
         } else {
             comment = {
@@ -247,7 +270,12 @@ router.post('/comment/:id', (req, res) => {
         post.comments.unshift(comment);
         post.dateLastAccessed = Date.now();
         //save
-        post.save().then(post => res.json(post)).catch((e) => console.error(e));
+        post.save().then(post => res.json({
+            success: true
+        })).catch((e) => res.json({
+            success: false,
+            details: e
+        }));
     });
 });
 
@@ -265,7 +293,8 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
         // Check if the comment exists
         if (post.comments.filter(comment => comment.cid.toString() === req.params.comment_id).length === 0) {
             return res.status(404).json({
-                commentnotfound: "Your comment doesn't exist"
+                success: false,
+                simple: "Your comment doesn't exist"
             });
         }
         // Get remove index
@@ -277,11 +306,17 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
         // Splice comment out of the array
         post.comments.splice(removeIndex, 1);
 
-        post.save().then(res.json(post)).catch((e) => console.error(e));
+        post.save().then(res.json({
+            success: true
+        })).catch((e) => res.json({
+            success: false,
+            simple: "Error saving tag.",
+            details: e
+        }));
     }).catch(err => res.status(404).json({
         success: false,
-        reason: "Tag not found.",
-        moreDetailed: err
+        simple: "Tag not found.",
+        details: err
     }));
 });
 // ROUTE: GET tag/print/
@@ -341,7 +376,10 @@ router.get('/print/', passport.authenticate('jwt', {
         //finish writing to document
         doc.end();
         //redirect user to pdf page
-        res.json({ "filename": fn });
+        res.json({
+            success: true,
+            filename: fn
+        });
     })
 });
 

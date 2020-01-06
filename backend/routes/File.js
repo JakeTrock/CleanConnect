@@ -18,8 +18,8 @@ router.get('/pdf/:uuid', (req, res) => {
     //checks if url is valid
     if (validate(uu.split(".")[0])) res.sendFile(tempDir + uu);
     else res.status(404).json({
-        error: "invalid url. url may be incorrectly typed, or file may no longer exist."
-        // error: "This pdf has been deleted to preserve the privacy of its user, or never existed in the first place. Pdf files are erased from the server one week after their creation, if you'd like to re-generate this pdf, please go to https://CleanConnect.com/user/print"
+        success: false,
+        simple: "invalid url. url may be incorrectly typed, or file may no longer exist."
     });
 });
 // ROUTE: GET /img/:uuid
@@ -30,8 +30,8 @@ router.get('/img/:uuid', (req, res) => {
     //checks if url is valid
     if (validate(uu.split(".")[0])) res.sendFile(tempDir + uu);
     else res.status(404).json({
-        error: "invalid url. url may be incorrectly typed, or file may no longer exist."
-        //error: "This image has been deleted to preserve the privacy of its user, or never existed in the first place. Image files are erased from the server when no longer needed."
+        success: false,
+        simple: "invalid url. url may be incorrectly typed, or file may no longer exist."
     });
 });
 
@@ -49,7 +49,7 @@ const delExp = new CronJob("00 00 00 * * *", function () {
         for (var i = 0; i < list.length; i++) {
             if (err) console.log(err);
             console.log(list[i]);
-            User.findOneAndRemove({ 
+            User.findOneAndRemove({
                 isVerified: false,
                 _id: list[i]._userId
             });
@@ -62,7 +62,7 @@ const delExp = new CronJob("00 00 00 * * *", function () {
     });
     fs.readdir(tempDir, function (err, files) {
         files.forEach(function (file) {
-            if (fs.statSync(tempDir + file).birthtime < d&&file.split(".")[1]!="pathpreserve") {
+            if (fs.statSync(tempDir + file).birthtime < d && file.split(".")[1] != "pathpreserve") {
                 fs.unlinkSync(tempDir + file);
             }
         });

@@ -33,7 +33,7 @@ const smtpTransport = nodemailer.createTransport({
 });
 smtpTransport.verify(function (error, success) {
     if (error) {
-        console.log(error);
+        console.error(error);
     } else {
         console.log("mailserver online.");
     }
@@ -53,7 +53,11 @@ router.post("/register", (req, res) => {
     const { errors, isValid } = validateRegisterInput(req.body);
     //check validation
     if (!isValid) {
-        return res.status(400).json(errors);
+        return res.status(400).json({
+            success: false,
+            simple: "Invalid post body.",
+            details: errors
+        });
     }
     if (req.body.email == "fake@test.com") {//check for testing var
         const newUser = new User({
@@ -65,15 +69,19 @@ router.post("/register", (req, res) => {
         bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(newUser.password, salt, (err, hash) => {
                 if (err) {
-                    console.log(err);
+                    return res.json({
+                        success: false,
+                        simple: "Failed to generate password.",
+                        details: err
+                    });
                 }
                 newUser.password = hash;
                 newUser.save(function (err) {
                     if (err) {
                         return res.status(500).json({
                             success: false,
-                            reason: "Failed to save user.",
-                            moreDetailed: err.message
+                            simple: "Failed to save user.",
+                            details: err.message
                         });
                     }
                     // Create a verification token for this user
@@ -86,8 +94,8 @@ router.post("/register", (req, res) => {
                         if (err) {
                             return res.status(500).json({
                                 success: false,
-                                reason: "Failed to find user.",
-                                moreDetailed: err.message
+                                simple: "Failed to find user.",
+                                details: err.message
                             });
                         }
                         const vToken = new UserIndex({
@@ -95,7 +103,10 @@ router.post("/register", (req, res) => {
                             token: randomBytes(16).toString("hex"),
                             isCritical: true
                         });
-                        vToken.save().then(p => res.json({ status: true, email: "/user/confirmation/" + p.token }));
+                        vToken.save().then(p => res.json({
+                            success: true,
+                            email: "/user/confirmation/" + p.token
+                        }));
                     });
                 });
             });
@@ -108,7 +119,11 @@ router.post("/register", (req, res) => {
             .then(user => {
                 if (user) {
                     errors.email = "Email already exists";
-                    return res.status(400).json(errors);
+                    return res.status(400).json({
+                        success: false,
+                        simple: "Invalid post body",
+                        details: errors
+                    });
                 } else {
                     const newUser = new User({
                         name: req.body.name,
@@ -118,15 +133,19 @@ router.post("/register", (req, res) => {
                     bcrypt.genSalt(10, (err, salt) => {
                         bcrypt.hash(newUser.password, salt, (err, hash) => {
                             if (err) {
-                                console.log(err);
+                                return res.json({
+                                    success: false,
+                                    simple: "Failed to generate password.",
+                                    details: err
+                                });
                             }
                             newUser.password = hash;
                             newUser.save(function (err) {
                                 if (err) {
                                     return res.status(500).json({
                                         success: false,
-                                        reason: "Failed to save user.",
-                                        moreDetailed: err.message
+                                        simple: "Failed to save user.",
+                                        details: err.message
                                     });
                                 }
                                 // Create a verification token for this user
@@ -139,8 +158,8 @@ router.post("/register", (req, res) => {
                                     if (err) {
                                         return res.status(500).json({
                                             success: false,
-                                            reason: "Failed to find user.",
-                                            moreDetailed: err.message
+                                            simple: "Failed to find user.",
+                                            details: err.message
                                         });
                                     }
                                     const vToken = new UserIndex({
@@ -173,39 +192,31 @@ router.post("/register", (req, res) => {
                                                 p.token +
                                                 ".\n"
                                             );
-                                            smtpTransport.sendMail(
-                                                mailOptions,
-                                                function (err) {
-                                                    if (err) {
-                                                        return res
-                                                            .status(500)
-                                                            .json({
-                                                                success: false,
-                                                                reason:
-                                                                    "Failed to send mail.",
-                                                                moreDetailed:
-                                                                    err.message
-                                                            });
-                                                    }
+                                            smtpTransport.sendMail(mailOptions, function (err) {
+                                                if (err) {
+                                                    return res.status(500).json({
+                                                        success: false,
+                                                        simple: "Failed to send mail.",
+                                                        details: err.message
+                                                    });
                                                 }
+                                            }
                                             );
-                                        })
-                                        .then(
-                                            res.json({
-                                                status:
-                                                    "A verification email has been sent to " +
-                                                    req.body.email +
-                                                    "."
-                                            })
-                                        )
-                                        .catch(err => console.log(err));
-                                });
+                                        }).then(res.json({
+                                            success: true,
+                                            status: "A verification email has been sent to " + req.body.email + "."
+                                        })).catch(err => res.json({
+                                            success: false,
+                                            simple: "Failed to send mail.",
+                                            details: err
+                                        }));
                             });
                         });
                     });
-                }
-            })
-            .catch(e => console.error(e));
+                });
+    }
+})
+    .catch(e => console.error(e));
     }
 });
 
@@ -223,12 +234,16 @@ router.post("/resend", (req, res) => {
 
     User.findOne({ email: req.body.email }, function (err, user) {
         if (!user)
-            return res.status(404).send({
-                msg: "We were unable to find a user with that email."
+            return res.status(404).json({
+                success: false,
+                simple: "Unable to find user with this email.",
+                details: err
             });
         if (user.isVerified) {
-            return res.status(400).send({
-                msg: "User is already verified"
+            return res.status(400).json({
+                success: false,
+                simple: "This user is already verified.",
+                details: err
             });
         }
         const vToken = new UserIndex({
@@ -260,21 +275,19 @@ router.post("/resend", (req, res) => {
                     if (err) {
                         return res.status(500).json({
                             success: false,
-                            reason: "Failed to send mail.",
-                            moreDetailed: err.message
+                            simple: "Failed to send mail.",
+                            details: err.message
                         });
                     }
                 });
-            })
-            .then(
-                res.json({
-                    status:
-                        "A verification email has been sent to " +
-                        req.body.email +
-                        "."
-                })
-            )
-            .catch(err => console.log(err));
+            }).then(res.json({
+                success: true,
+                status: "A verification email has been sent to " + req.body.email + "."
+            })).catch(err => res.json({
+                success: false,
+                simple: "Failed to send mail.",
+                details: err
+            }));
     });
 });
 
@@ -286,20 +299,24 @@ router.get("/confirmation/:token", (req, res) => {
     UserIndex.findOne({ token: req.params.token }, function (err, token) {
         console.log(token);
         if (!token)
-            return res.status(400).send({
-                type: "not-verified",
-                msg: "We were unable to find a valid token. Your token my have expired."
+            return res.status(400).json({
+                success: false,
+                simple: "We were unable to find a valid token. Your token my have expired.",
+                details: err
             });
         // If we found a token, find a matching user
         User.findOne({ _id: token._userId }, function (err, user) {
-            console.log(user);
             if (!user)
-                return res.status(400).send({
-                    msg: "We were unable to find a user for this token."
+                return res.status(400).json({
+                    success: false,
+                    simple: "We were unable to find a user with this token.",
+                    details: err
                 });
             if (user.isVerified) {
-                return res.status(400).send({
-                    msg: "User is already verified"
+                return res.status(400).json({
+                    success: false,
+                    simple: "This user was already verified.",
+                    details: err
                 });
             }
 
@@ -307,9 +324,15 @@ router.get("/confirmation/:token", (req, res) => {
             user.isVerified = true;
             user.save(function (err) {
                 if (err) {
-                    return res.status(500).send({ msg: err.message });
+                    return res.status(500).json({
+                        success: false,
+                        simple: "Unable to save user.",
+                        details: err
+                    });
                 }
-                res.json({ "status": "success" });
+                res.json({
+                    success: true
+                });
             });
         });
     });
@@ -347,21 +370,21 @@ router.delete("/deleteinfo", passport.authenticate("jwt", {
                 if (err) {
                     return res.status(500).json({
                         success: false,
-                        reason: "Failed to send mail.",
-                        moreDetailed: err.message
+                        simple: "Failed to send mail.",
+                        details: err.message
                     });
                 }
             });
+        }).then(res.json({
+            success: false,
+            status: "A deletion email has been sent to " + req.user.email + "."
         })
-        .then(
-            res.json({
-                status:
-                    "A deletion email has been sent to " +
-                    req.user.email +
-                    "."
-            })
         )
-        .catch(err => console.log(err));
+        .catch(err => res.json({
+            success: false,
+            simple: "Failed to send mail.",
+            details: err
+        }));
 }
 );
 
@@ -375,13 +398,15 @@ router.get("/delete/:token", passport.authenticate("jwt", {
         if (tk._userId == req.user._id)
             User.findOneAndRemove({ _id: tk._userId })
                 .then(UserIndex.findOneAndRemove({ _userId: tk._userId }))
-                .then(() => res.json({ success: true }))
+                .then(() => res.json({
+                    success: true
+                }))
                 .catch(e => console.error(e));
         else
             res.status(403).json({
                 success: false,
-                reason:
-                    "email token does not match current user cookie, please log into this computer to load the cookie into your memory"
+                simple: "email token does not match current user cookie, please log into this computer to load the cookie into your memory",
+                details: ""
             });
     });
 }
@@ -419,21 +444,23 @@ router.post("/changeinfo", passport.authenticate("jwt", {
                 if (err) {
                     return res.status(500).json({
                         success: false,
-                        reason: "Failed to send mail.",
-                        moreDetailed: err.message
+                        simple: "Failed to send mail.",
+                        details: err.message
                     });
                 }
             });
         })
         .then(
             res.json({
-                status:
-                    "A settings email has been sent to " +
-                    req.user.email +
-                    "."
+                success: true,
+                status: "A settings email has been sent to " + req.user.email + "."
             })
         )
-        .catch(err => console.log(err));
+        .catch(err => res.json({
+            success: false,
+            simple: "Failed to send mail.",
+            details: err
+        }));
 }
 );
 
@@ -454,7 +481,11 @@ router.post(
         bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(profileFields.password, salt, (err, hash) => {
                 if (err) {
-                    console.log(err);
+                    return res.json({
+                        success: false,
+                        simple: "Failed to generate password.",
+                        details: err
+                    })
                 }
                 profileFields.password = hash;
                 UserIndex.findOne({ token: req.params.token }).then(tk => {
@@ -465,23 +496,23 @@ router.post(
                             .then(profile => {
                                 if (profile) {
                                     //update a profile
-                                    Profile.findOneAndUpdate(
-                                        {
-                                            _id: req.user.id
-                                        },
-                                        {
-                                            $set: profileFields
-                                        },
-                                        {
-                                            new: true
-                                        }
-                                    )
-                                        .then(res.json({ status: "success" }))
-                                        .catch(e => console.error(e));
+                                    Profile.findOneAndUpdate({
+                                        _id: req.user.id
+                                    }, {
+                                        $set: profileFields
+                                    }, {
+                                        new: true
+                                    }).then(res.json({
+                                        success: true
+                                    })).catch(e => res.json({
+                                        success: false,
+                                        simple: "Error updating profile.",
+                                        details: e
+                                    }));
                                 } else {
                                     res.status(404).json({
                                         success: false,
-                                        reason: "Profile does not exist."
+                                        simple: "Profile does not exist."
                                     });
                                 }
                             })
@@ -494,8 +525,7 @@ router.post(
                     } else
                         res.status(403).json({
                             success: false,
-                            reason:
-                                "email token does not match current user cookie, please log into this computer to load the cookie into your memory"
+                            simple: "email token does not match current user cookie, please log into this computer to load the cookie into your memory"
                         });
                 });
             });
@@ -512,12 +542,11 @@ router.post(
         session: false
     }),
     (req, res) => {
-        console.log(req.params.token);
         UserIndex.findOne({ token: req.params.token }).then(tk => {
             if (!tk)
                 res.status(404).json({
                     success: false,
-                    reason: "Token does not exist."
+                    simple: "Token does not exist."
                 });
             if (String(tk._userId) == String(req.user._id)) {
                 User.findOne({
@@ -527,24 +556,22 @@ router.post(
                         if (!profile)
                             res.status(404).json({
                                 success: false,
-                                reason: "Profile does not exist."
+                                simple: "Profile does not exist."
                             });
                         if (!profile.isVerified)
                             return res.status(401).json({
-                                type: "not-verified",
-                                reason: "Your account has not been verified."
+                                success: false,
+                                simple: "Your account has not been verified."
                             });
                         res.status(200).json({
-                            success: true,
-                            msg: "acct is valid"
+                            success: true
                         });
                     })
                     .catch(e => console.error(e));
             } else {
                 res.status(403).json({
                     success: false,
-                    reason:
-                        "email token does not match current user cookie, please log into this computer to load the cookie into your memory"
+                    status: "email token does not match current user cookie, please log into this computer to load the cookie into your memory"
                 });
             }
         });
@@ -562,7 +589,11 @@ router.post("/login", (req, res) => {
     const { errors, isValid } = validateLoginInput(req.body);
     //check validation
     if (!isValid) {
-        return res.status(400).json(errors);
+        return res.status(400).json({
+            success: false,
+            simple: "Invalid login information.",
+            details: errors
+        });
     }
 
     User.findOne({
@@ -572,11 +603,19 @@ router.post("/login", (req, res) => {
             errors.email = "User not found.";
             // Check for user
             if (!user) {
-                return res.status(400).json(errors);
+                return res.status(400).json({
+                    success: false,
+                    simple: "Invalid user information",
+                    details: errors
+                });
             }
             if (!user.isVerified) {
                 errors.verified = "User not verified.";
-                return res.status(400).json(errors);
+                return res.status(400).json({
+                    success: false,
+                    simple: "Verification error.",
+                    details: errors
+                });
             }
             //Check password
             bcrypt.compare(password, user.password).then(isMatch => {
@@ -599,8 +638,8 @@ router.post("/login", (req, res) => {
                             if (err)
                                 res.status(500).json({
                                     success: false,
-                                    reason: "unable to generate auth token.",
-                                    moreDetailed: err
+                                    simple: "unable to generate auth token.",
+                                    details: err
                                 });
                             else
                                 res.json({
@@ -611,7 +650,11 @@ router.post("/login", (req, res) => {
                     );
                 } else {
                     errors.password = "Password Incorrect.";
-                    return res.status(400).json(errors);
+                    return res.status(400).json({
+                        success: false,
+                        simple: "Invalid body.",
+                        details: errors
+                    });
                 }
             });
         })
@@ -628,7 +671,10 @@ router.get('/current', passport.authenticate('jwt', {
         email: req.user.email
     }).then(profile => {
         if (!profile) {
-            res.status(404).json({ "err": "There isn't any such profile" });
+            res.status(404).json({
+                success: false,
+                simple: "No profile found"
+            });
         }
         res.json({
             externalId: profile.externalId,
