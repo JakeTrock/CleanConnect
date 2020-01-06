@@ -218,7 +218,6 @@ router.post('/comment/:id', (req, res) => {
     if (!req.body.sev || !isValid) {
         return res.status(400).json(errors);
     }
-    console.log(req);
     Tag.findOne({
         _id: req.params.id
     }).then(post => {
@@ -264,7 +263,7 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
         user: req.user.id
     }).then(post => {
         // Check if the comment exists
-        if (post.comments.filter(comment => comment._id.toString() === req.params.comment_id).length === 0) {
+        if (post.comments.filter(comment => comment.cid.toString() === req.params.comment_id).length === 0) {
             return res.status(404).json({
                 commentnotfound: "Your comment doesn't exist"
             });
@@ -272,7 +271,7 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
         // Get remove index
 
         const removeIndex = post.comments
-            .map(item => item._id.toString())
+            .map(item => item.cid.toString())
             .indexOf(req.params.comment_id);
 
         // Splice comment out of the array
@@ -321,9 +320,7 @@ router.get('/print/', passport.authenticate('jwt', {
             //every tenth page, increment page position
             if (i != 0 && i % 10 == 0) {
                 cbuff++
-                console.log('up ' + cbuff)
             }
-            console.log(dat[i].name)
             //replace image and room name dummy values with values from async function and json file
             pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + (i - (cbuff * 10)), dat[i].name)
             pagesArray[cbuff] = pagesArray[cbuff].replace('Img ' + (i - (cbuff * 10)), dat[i].qrcode)
@@ -344,7 +341,6 @@ router.get('/print/', passport.authenticate('jwt', {
         //finish writing to document
         doc.end();
         //redirect user to pdf page
-        //"https://" + "localhost:3000" + "/pdf/" + fn + ".pdf"
         res.json({ "filename": fn });
     })
 });

@@ -15,8 +15,9 @@ const PostSchema = new Schema({
         required: true
     },
     comments: [{
-        _id: {
-            type: Schema.Types.ObjectId,
+        cid: {
+            type: String,
+            default:Math.random().toString(36).substring(7),
             index:true
         },
         img: {
