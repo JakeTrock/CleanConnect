@@ -4,14 +4,6 @@ const uuidv1 = require('uuid/v1');
 
 // Create Schema
 const UserSchema = new Schema({
-    // internalId: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'User'
-    // },
-    // externalId: {
-    //     type: String,
-    //     default: uuidv1().toString()
-    // },
     name: {
         type: String,
         required: true
