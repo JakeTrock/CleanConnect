@@ -150,12 +150,9 @@ router.post("/register", (req, res) => {
                                     });
                                 }
                                 // Create a verification token for this user
-                                User.findOne(
-                                    {
-                                        email: req.body.email
-                                    },
-                                    "_id"
-                                ).exec(function (err, user) {
+                                User.findOne({
+                                    email: req.body.email
+                                }, "_id").exec(function (err, user) {
                                     if (err) {
                                         return res.status(500).json({
                                             success: false,
@@ -168,49 +165,47 @@ router.post("/register", (req, res) => {
                                         token: randomBytes(16).toString("hex"),
                                         isCritical: true
                                     });
-                                    vToken
-                                        .save()
-                                        .then(p => {
-                                            // Send the email
-                                            var mailOptions = {
-                                                from:
-                                                    "no-reply@" + req.headers.host,
-                                                to: req.body.email,
-                                                subject:
-                                                    "Account Verification Token",
-                                                text:
-                                                    "Hello,\n\n" +
-                                                    "Please verify your account by clicking the link: \n" +
-                                                    prefix +
-                                                    req.headers.host +
-                                                    "/user/confirmation/" +
-                                                    p.token +
-                                                    ".\n"
-                                            };
-                                            console.log(
+                                    vToken.save().then(p => {
+                                        // Send the email
+                                        var mailOptions = {
+                                            from:
+                                                "no-reply@" + req.headers.host,
+                                            to: req.body.email,
+                                            subject:
+                                                "Account Verification Token",
+                                            text:
+                                                "Hello,\n\n" +
+                                                "Please verify your account by clicking the link: \n" +
+                                                prefix +
                                                 req.headers.host +
                                                 "/user/confirmation/" +
                                                 p.token +
                                                 ".\n"
-                                            );
-                                            smtpTransport.sendMail(mailOptions, function (err) {
-                                                if (err) {
-                                                    return res.status(500).json({
-                                                        success: false,
-                                                        simple: "Failed to send mail.",
-                                                        details: err.message
-                                                    });
-                                                }
+                                        };
+                                        console.log(
+                                            req.headers.host +
+                                            "/user/confirmation/" +
+                                            p.token +
+                                            ".\n"
+                                        );
+                                        smtpTransport.sendMail(mailOptions, function (err) {
+                                            if (err) {
+                                                return res.status(500).json({
+                                                    success: false,
+                                                    simple: "Failed to send mail.",
+                                                    details: err.message
+                                                });
                                             }
-                                            );
-                                        }).then(res.json({
-                                            success: true,
-                                            status: "A verification email has been sent to " + req.body.email + "."
-                                        })).catch(err => res.json({
-                                            success: false,
-                                            simple: "Failed to send mail.",
-                                            details: err
-                                        }));
+                                        }
+                                        );
+                                    }).then(res.json({
+                                        success: true,
+                                        status: "A verification email has been sent to " + req.body.email + "."
+                                    })).catch(err => res.json({
+                                        success: false,
+                                        simple: "Failed to send mail.",
+                                        details: err
+                                    }));
                                 });
                             });
                         });

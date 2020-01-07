@@ -257,7 +257,6 @@ router.post('/comment/:id', (req, res) => {
                 return res.status(400).json({
                     success: false,
                     simple: "invalid filetype",
-                    details: e
                 });
             }
         } else {

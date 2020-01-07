@@ -8,8 +8,8 @@ const router = express.Router();
 //load in mongoose templates
 const User = require("../models/User");
 const UserIndex = require("../models/UserIndex.js");
-const tempDir = __dirname + '/../temp/';
-
+const tempDir = process.env.rootDir+'/temp/';
+console.log(tempDir);
 // ROUTE: GET /pdf/:uuid
 // DESCRIPTION: retrieves and returns pdf from temp dir
 // INPUT: uuid of choice pdf

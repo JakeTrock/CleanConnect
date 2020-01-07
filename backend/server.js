@@ -4,8 +4,9 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 const cors = require('cors');
-//import keys and creds
+//import keys and creds, exp envvars
 const keys = require('./config/keys');
+process.env.rootDir=__dirname;
 process.env.mailCreds=[keys.mailServer,keys.mailPort,keys.mailUser,keys.mailPass];
 //imports different router/handler files
 const user = require('./routes/User.js');
