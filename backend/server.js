@@ -4,12 +4,13 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 const cors = require('cors');
-
+//import keys and creds
+const keys = require('./config/keys');
+process.env.mailCreds=[keys.mailServer,keys.mailPort,keys.mailUser,keys.mailPass];
 //imports different router/handler files
 const user = require('./routes/User.js');
 const tag = require('./routes/Tag.js');
 const file = require('./routes/File.js');
-const keys = require('./config/keys');
 
 //setup bodyparser and express
 const app = express();
@@ -27,7 +28,6 @@ mongoose.connect(keys.url, { useNewUrlParser: true })
 mongoose.set('useNewUrlParser', true)
     .set('useFindAndModify', false)
     .set('useCreateIndex', true);
-
 
 //Passport Config
 app.use(passport.initialize());

@@ -23,12 +23,13 @@ const UserIndex = require("../models/UserIndex");
 router.get("/test", (req, res) => res.send("Routes Works"));
 
 //testing
-const smtpTransport = nodemailer.createTransport({
-    host: "smtp.ethereal.email",
-    port: 587,
+const creds = process.env.mailCreds;
+var smtpTransport = nodemailer.createTransport({
+    host: creds[0],
+    port: creds[1],
     auth: {
-        user: "lilian.bernhard@ethereal.email",
-        pass: "fCc7CKMVv1VvuvrsaR"
+        user: creds[2],
+        pass: creds[3]
     }
 });
 smtpTransport.verify(function (error, success) {
@@ -210,13 +211,13 @@ router.post("/register", (req, res) => {
                                             simple: "Failed to send mail.",
                                             details: err
                                         }));
+                                });
                             });
                         });
                     });
-                });
-    }
-})
-    .catch(e => console.error(e));
+                }
+            })
+            .catch(e => console.error(e));
     }
 });
 
