@@ -9,7 +9,6 @@ class Form extends Component {
   validate = () => {
     const options = { abortEarly: false };
     const { error } = Joi.validate(this.state.data, this.schema, options);
-    console.log(this.state.data);
     if (!error) return null;
     const errors = {};
     //for (let item of error.details) errors[item.path[0]] = item.message;
@@ -106,7 +105,7 @@ class Form extends Component {
           type="file"
           name={name}
           id={name}
-          accept="image/*"
+          accept="image/*, .mp4, .gif, .webm, .webp"
           capture="environment"
           onChange={this.handleImage}
         />
