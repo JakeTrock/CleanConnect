@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import Layout from "../components/layout";
 import Grid from "../components/grid";
 import Unit from "../components/unit";
+import { DeletePopupContainer } from "../components/popupContainer";
 import * as auth from "../services/tagsAuthentication";
-import Popup from "reactjs-popup";
 import "../css/unit.css";
 
 class Tags extends Component {
@@ -20,7 +20,7 @@ class Tags extends Component {
       let limit = null;
       if (user.tier === 0) limit = 5;
       if (user.tier === 1) limit = 25;
-      if (limit !== this.state.limit) this.setState({ tags, limit });
+      if (limit !== this.state.limit) this.setState({ tags, limit }); //to prevent infinite loop, if statement is used
     }
   }
   componentDidMount() {
@@ -36,48 +36,23 @@ class Tags extends Component {
     if (tags[0] !== "" && tags.length < limit) tags.splice(0, 0, "");
 
     function DeletePopup(data) {
-      const item = data.item;
+      const customText =
+        "This will permanently delete the tag titled " +
+        data.item.name +
+        ". Proceed?";
       return (
-        <Popup
-          trigger={<a href="#">Delete Tag</a>}
-          position="right center"
-          modal
-        >
-          {close => (
-            <div style={{ border: "5px solid black", margin: "-6px" }}>
-              <div style={{ margin: "10px" }}>
-                <a className="close" onClick={close}>
-                  &times;
-                </a>
-                <h1>
-                  This will permanently delete the tag titled {item.name}.
-                  Proceed?
-                </h1>
-                <button
-                  className="btn btn-danger"
-                  style={{
-                    borderRadius: "10px",
-                    display: "block",
-                    width: "30%",
-                    marginLeft: "auto",
-                    marginRight: "auto"
-                  }}
-                  onClick={() => {
-                    close();
-                    deleteTag(data.props, item._id);
-                  }}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          )}
-        </Popup>
+        <DeletePopupContainer
+          triggerText="Delete Tag"
+          customText={customText}
+          deleteRoute={deleteTag}
+          deleteData={data}
+        />
       );
     }
 
-    async function deleteTag(props, id) {
-      //eventually turn this into a popup or an email notification
+    async function deleteTag(data) {
+      const props = data.props;
+      const id = data.item._id;
       try {
         const result = await auth.deleteTag(id);
         console.log(result);
@@ -92,8 +67,9 @@ class Tags extends Component {
       return (
         <Unit key={item._id} name={item.name}>
           <div className="unitText">item</div>
-          <div className="unitFooter"></div>
-          <DeletePopup props={this.props} item={item} />
+          <div className="unitFooter">
+            <DeletePopup props={this.props} item={item} />
+          </div>
         </Unit>
       );
     }
@@ -101,7 +77,7 @@ class Tags extends Component {
       return (
         <Unit>
           <div className="label label-complete">
-            <input id="input" placeholder="Insert title..." />
+            <input id="input" placeholder="Insert title..." maxLength="20" />
           </div>
           <span
             className="text-muted unitText addItem"
