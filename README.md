@@ -29,8 +29,10 @@ For every server api path, in insomnia, you will have to create an account, usin
 In production, most likely, we would store the bearer key in a cookie. The bearer key is only valid to the server for 24 hours, so the cookie should be set accordingly.
 
 ## Issue board
-* add html/styling to email verification
-* add payment with [this](https://developers.braintreepayments.com/guides/payment-methods/node)
+* Add html/styling to email verification
+* Add payment with [this](https://developers.braintreepayments.com/guides/payment-methods/node)
+* Replace try/catch blocks eventually (Justin)
+* Bring back errors for form parts (Jake)
 
 
 ### future
