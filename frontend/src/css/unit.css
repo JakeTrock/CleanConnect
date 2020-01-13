@@ -1,16 +1,37 @@
+.dot {
+  height: 2vw;
+  width: 2vw;
+  margin: 1%;
+  margin-top: auto;
+  margin-bottom: auto;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  border: solid 1px #000000;
+}
+.dot:before {
+  content: "";
+  display: inline-block;
+  padding-top: 100%;
+}
 .unitBorder {
   position: relative;
   border: solid #000000;
   border-radius: 8%;
-  width: 46%;
-  height: 33vh;
-  margin: 2%;
+  width: 42%;
+  margin: 4%;
 }
 
 .unitBody {
+  overflow-y: hidden;
+  overflow-x: hidden;
+
   text-align: left;
+  height: 40vh;
 }
 .unitText {
+  font-size: 5vh;
+  margin-bottom: auto;
   margin-left: 1%;
 }
 
@@ -28,4 +49,19 @@
 }
 input {
   width: 90%;
+}
+.unitCenter {
+  height: 25vh;
+  overflow-y: auto;
+}
+
+.rightObj {
+  margin-left: auto;
+  float: right;
+}
+.centerObj {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 25%;
 }

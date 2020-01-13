@@ -23,23 +23,23 @@ class Comment extends Form {
       //not used if image doesn't exist, but applies filter if it does
       is: Joi.not(""),
       then: Joi.string()
-        .regex(/\.(jpg|jpeg|tiff|gif|png)$/i)
+        .regex(/\.(jpg|jpeg|tiff|gif|png|webm|mp4|webp)$/i)
         .error(() => {
           return {
-            message: "Not a valid image type (jpg, jpeg, tiff, gif, or png)"
+            message:
+              "Not a valid image type (jpg, jpeg, tiff, gif, webm, webp, mp4, or png)"
           };
         })
     })
   };
   async componentDidMount() {
-    // not finished
-    /*const token = this.props.match.params.token;
+    const token = this.props.match.params.token;
     try {
-      await auth.commentOnTag(token);
+      await auth.tagExists(token);
     } catch (ex) {
-      //if (ex.response && ex.response.status === 404)
-      //this.setState({ verified: false });
-    }*/
+      if (ex.response && ex.response.status === 404)
+        this.setState({ verified: false });
+    }
   }
   doSubmit = async () => {
     try {

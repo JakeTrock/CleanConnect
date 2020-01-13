@@ -5,7 +5,8 @@ import _ from "lodash";
 class Grid extends Component {
   componentDidMount() {
     this.customBehavior = this.props.customBehavior.bind(this);
-    this.emptyBehavior = this.props.emptyBehavior.bind(this);
+    if (this.props.emptyBehavior)
+      this.emptyBehavior = this.props.emptyBehavior.bind(this);
   }
   render() {
     let { items, idLocation } = this.props;
@@ -23,12 +24,13 @@ class Grid extends Component {
                       {customBehavior(item)}
                     </React.Fragment>
                   );
-                else
+                else if (emptyBehavior) {
                   return (
                     <React.Fragment key="empty">
                       {emptyBehavior()}
                     </React.Fragment>
                   );
+                } else return "";
               })}
             </div>
           );

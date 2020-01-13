@@ -35,7 +35,25 @@ export function getTags() {
     return null;
   }
 }
-
+export function getTag(token) {
+  try {
+    const headers = {
+      "Content-Type": "application/json"
+    };
+    return axios.get(apiEndpoint + "/getone/" + token, {
+      headers: headers
+    });
+  } catch (ex) {
+    return null;
+  }
+}
+export function tagExists(token) {
+  try {
+    return axios.get(apiEndpoint + "/exists/" + token);
+  } catch (ex) {
+    return null;
+  }
+}
 export function deleteTag(id) {
   try {
     const headers = {
@@ -49,7 +67,20 @@ export function deleteTag(id) {
     return null;
   }
 }
-
+export function deleteComment(postId, commentId) {
+  console.log(commentId);
+  try {
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: user.getCurrentUser(true)
+    };
+    return axios.delete(apiEndpoint + "/comment/" + postId + "/" + commentId, {
+      headers: headers
+    });
+  } catch (ex) {
+    return null;
+  }
+}
 export function commentOnTag(id, text, sev, img) {
   var payload = new FormData();
   payload.append("text", text);

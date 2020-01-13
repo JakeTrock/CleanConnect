@@ -16,18 +16,27 @@ import Comment from "./pages/comment";
 
 import Navbar from "./components/navbar";
 import ProtectedRoute from "./components/protectedRoute";
+import CaptchaRoute from "./components/captchaRoute";
+
 import NoTokenRoute from "./components/noTokenRoute";
 import * as auth from "./services/userAuthentication";
 import "./App.css";
 
 class App extends Component {
-  state = {};
+  state = {
+    captchaValidated: false
+  };
   componentDidMount() {
     const user = auth.getCurrentUser();
     this.setState({ user });
+    this.captchaSubmit = this.captchaSubmit.bind(this);
+  }
+  captchaSubmit() {
+    //remove from app later
+    this.setState({ captchaValidated: true });
   }
   render() {
-    const { user } = this.state;
+    const { user, captchaValidated } = this.state;
     return (
       <React.Fragment>
         <ToastContainer />
@@ -56,7 +65,12 @@ class App extends Component {
               path="/tags"
               render={props => <Tags {...props} user={user} />}
             />
-            <Route path="/comment/:token" component={Comment} />
+            <CaptchaRoute
+              path="/comment/:token"
+              validated={captchaValidated}
+              captchaSubmit={() => this.captchaSubmit()}
+              component={Comment}
+            />
             <Route path="/notFound" component={NotFound} />
             <Redirect to="/notFound" />
           </Switch>

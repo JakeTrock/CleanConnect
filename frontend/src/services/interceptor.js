@@ -11,7 +11,10 @@ axios.interceptors.response.use(
   },
   function(error) {
     //console.clear();
-    toast.error(error.response.statusText, { autoClose: 2500 });
+    console.log(error.response);
+    if (error.response && error.response.data && error.response.data.simple)
+      toast.error(error.response.data.simple, { autoClose: 2500 });
+    else toast.error("An unexpected error has occurred.", { autoClose: 2500 });
     return Promise.reject(error);
   }
 );
