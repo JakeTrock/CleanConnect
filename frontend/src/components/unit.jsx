@@ -4,11 +4,30 @@ class Unit extends Component {
   //don't put anything in unit.jsx besides this, render in tags with grid rendering children eventually
   render() {
     const props = this.props;
-    let containerClass = "unitBorder";
+    let headerClass = "";
+    if (props.name) headerClass = "label-complete";
     return (
-      <div className={containerClass}>
+      <div className="unitBorder">
         <div className="unitBody">
-          {props.name && <h1 className="label label-complete">{props.name}</h1>}
+          <div className={headerClass} style={{ display: "flex" }}>
+            {props.name && (
+              <h1
+                className="label"
+                style={{ marginLeft: "auto", marginRight: "auto" }}
+              >
+                {props.name}
+              </h1>
+            )}
+            {props.dot && (
+              <span
+                style={{
+                  marginLeft: "-2vw",
+                  backgroundColor: props.dot
+                }}
+                className=" dot rightObj"
+              />
+            )}
+          </div>
           {props.children}
         </div>
       </div>

@@ -1,12 +1,18 @@
 .dot {
-  height: 4vh;
-  width: 4vh;
-  margin-top: 1.25vh;
-  margin-right: 1vh;
-
+  height: 2vw;
+  width: 2vw;
+  margin: 1%;
+  margin-top: auto;
+  margin-bottom: auto;
   background-color: #bbb;
   border-radius: 50%;
   display: inline-block;
+  border: solid 1px #000000;
+}
+.dot:before {
+  content: "";
+  display: inline-block;
+  padding-top: 100%;
 }
 .unitBorder {
   position: relative;
@@ -17,12 +23,15 @@
 }
 
 .unitBody {
+  overflow-y: hidden;
   overflow-x: hidden;
+
   text-align: left;
   height: 40vh;
 }
 .unitText {
   font-size: 5vh;
+  margin-bottom: auto;
   margin-left: 1%;
 }
 

@@ -52,7 +52,6 @@ class Dashboard extends Component {
     if (!tags) tags = "";
 
     function DeletePopup(data) {
-      console.log(data);
       const customText =
         "This will permanently delete the comment with info: " +
         data.item.text +
@@ -72,7 +71,6 @@ class Dashboard extends Component {
       const commentId = data.item.cid;
       try {
         const result = await auth.deleteComment(postId, commentId);
-        console.log(result);
         const { state } = props.location;
         if (result) window.location = state ? state.from.pathname : "/";
       } catch (e) {
@@ -86,8 +84,13 @@ class Dashboard extends Component {
     }
     function customBehavior(item) {
       //css for customBehavior are in unit.css
+      let severity = 0;
+      for (let i = 0; i < item.comments.length; i++) {
+        severity += item.comments[i].sev;
+      }
+      severity = severityColor(Math.round(severity / item.comments.length));
       return (
-        <Unit key={item._id} name={item.name}>
+        <Unit key={item._id} name={item.name} dot={severity}>
           <div className="unitCenter">
             {item.comments.map(function(comment) {
               comment.postId = item._id;
