@@ -18,13 +18,15 @@ lib-cov
 coverage
 
 #temp dir
-backend/temp/**.pdf
-backend/temp/**.gif
-backend/temp/**.jpg
-backend/temp/**.jpeg
-backend/temp/**.png
-backend/temp/**.tiff
-
+backend/temp/*.pdf
+backend/temp/*.gif
+backend/temp/*.jpg
+backend/temp/*.jpeg
+backend/temp/*.tiff
+backend/temp/*.png
+backend/temp/*.webp
+backend/temp/*.mp4
+backend/temp/*.webm
 # nyc test coverage
 .nyc_output
 
@@ -71,7 +73,4 @@ typings/
 #useless mac file
 .DS_Store
 
-*.pdf
-*.jpg
-backend/temp/c22a19d0-3099-11ea-80ba-71b968de3457.png
-backend/temp/85b824b0-3341-11ea-89a6-8772990c4066.mp4
+
