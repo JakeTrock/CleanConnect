@@ -55,15 +55,23 @@ router.get('/genimgs', passport.authenticate('jwt', {
             try {
                 if (list[i].qrcode == undefined) {
                     QRCode.toDataURL('http://localhost:3000/tag/' + pos._id, function (err, url) {
-                        if (err) console.log(err);
-                        console.log(pos);
+
+                        if (err) res.status(500).json({
+                            success: false,
+                            simple: "Error generating cache.",
+                            details: err
+                        });
                         Tag.findOneAndUpdate({
                             _id: pos._id
                         }, {
                             qrcode: url
                         }, {
                             new: true
-                        });
+                        }).catch(err => res.status(500).json({
+                            success: false,
+                            simple: "Error generating cache.",
+                            details: err
+                        }));
                     });
                 }
             } catch (e) {
@@ -72,7 +80,11 @@ router.get('/genimgs', passport.authenticate('jwt', {
             //call callback when finished
             callback();
         }, err => {
-            if (err) return console.error(err.message);
+            if (err) return res.status(500).json({
+                success: false,
+                simple: "Error generating cache.",
+                details: err.message
+            });
             res.json({ success: true });
         })
     });
@@ -90,6 +102,7 @@ router.get('/getone/:id', passport.authenticate('jwt', {
         })).catch(err => res.status(404).json({
             success: false,
             simple: "No posts found.",
+            details: err
         }));
     });
 // ROUTE: GET tag/exists/:id
@@ -137,7 +150,11 @@ router.post('/new', passport.authenticate('jwt', {
                 user: req.user._id
             }).save().then(post => res.json({
                 success: true
-            })).catch((e) => console.error(e));
+            })).catch((e) => res.status(500).json({
+                success: false,
+                simple: "Error creating tag.",
+                details: e
+            }));
         else
             res.status(400).json({
                 success: false,
@@ -321,7 +338,6 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
 // ROUTE: GET tag/print/
 // DESCRIPTION: prints tags as qr codes, allowing people to access them in real life
 // INPUT: an array as long as the number of tags you have, containing numbers which tell the program the number of times to print each tag, and an array of tags(in the same format as they are in getall)
-
 router.get('/print/', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
@@ -333,12 +349,17 @@ router.get('/print/', passport.authenticate('jwt', {
             dat.push(ts[i]);
         }
     }
-    fs.readFile(__dirname + '/template.svg', async function (err, data) {
+    //console.log(dat);
+    fs.readFile(__dirname + '/template.svg', function (err, data) {
         if (err) {
-            console.error(err)
+            res.status(500).json({
+                success: false,
+                simple: "Error generating pdf.",
+                details: err
+            })
         }
         //svg template file
-        var svgbuff = data.toString()
+        var svgbuff = data.toString();
         //array of pages defined
         var pagesArray = [];
         //populate pages array with templates one for each ten< of data
@@ -349,37 +370,40 @@ router.get('/print/', passport.authenticate('jwt', {
         var cbuff = 0;
         const doc = new PDFDocument(docsettings);
         const fn = uuidv1();
-        //async qr generation
+        //qr generation
         for (var i = 0; i < dat.length; dat++) {
+            console.log("1");
             //every tenth page, increment page position
             if (i != 0 && i % 10 == 0) {
-                cbuff++
+                cbuff++;
             }
             //replace image and room name dummy values with values from async function and json file
-            pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + (i - (cbuff * 10)), dat[i].name)
-            pagesArray[cbuff] = pagesArray[cbuff].replace('Img ' + (i - (cbuff * 10)), dat[i].qrcode)
+            pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + (i - (cbuff * 10)), dat[i].name);
+            pagesArray[cbuff] = pagesArray[cbuff].replace('Img ' + (i - (cbuff * 10)), dat[i].qrcode);
         }
         //document write stream begins
-        doc.pipe(fs.createWriteStream(__dirname + '/../temp/' + fn + '.pdf'));
+        doc.pipe(fs.createWriteStream(process.env.rootDir+'/temp/' + fn + '.pdf'));
         //for each page, add new pdf page, convert svg into pdf page content data and put it into place.
-        for (var h = 0; h < pagesArray.length; h++) {
-            if (pagesArray[h].indexOf("Room 9") !== -1) {
-                for (var g = 0; g < 10; g++) {
-                    pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + g, '')
-                    pagesArray[cbuff] = pagesArray[cbuff].replace('Img ' + g, fillImg);
+        for (var g = 0; g < pagesArray.length; g++) {
+            console.log("2");
+            if (pagesArray[g].indexOf("Room 9") !== -1) {
+                for (var b = 0; b < 10; b++) {
+                    pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + b, '');
+                    pagesArray[cbuff] = pagesArray[cbuff].replace('Img ' + b, fillImg);
                 }
             }
-            SVGtoPDF(doc, pagesArray[h], 0, 0);
+            SVGtoPDF(doc, pagesArray[g], 0, 0);
             doc.addPage();
         }
         //finish writing to document
+        console.log("3");
         doc.end();
         //redirect user to pdf page
         res.json({
             success: true,
             filename: fn
         });
-    })
+    });
 });
 
 //export module for importing into central server file

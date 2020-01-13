@@ -9,7 +9,6 @@ const router = express.Router();
 const User = require("../models/User");
 const UserIndex = require("../models/UserIndex.js");
 const tempDir = process.env.rootDir+'/temp/';
-console.log(tempDir);
 // ROUTE: GET /pdf/:uuid
 // DESCRIPTION: retrieves and returns pdf from temp dir
 // INPUT: uuid of choice pdf
