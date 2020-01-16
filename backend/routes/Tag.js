@@ -20,7 +20,7 @@ const app = express();
 const router = express.Router();
 router.use(fileUpload());
 //document settings and blank template image for pdf creator
-const fillImg = ' data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKQAAACkAQMAAAAjexcCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAA1BMVEX///+nxBvIAAAAGUlEQVQYGe3BAQEAAACCoP6vdkjAAAAAuBYOGAABPIptXAAAAABJRU5ErkJggg==';
+const fillImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKQAAACkAQMAAAAjexcCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAA1BMVEX///+nxBvIAAAAGUlEQVQYGe3BAQEAAACCoP6vdkjAAAAAuBYOGAABPIptXAAAAABJRU5ErkJggg==';
 const docsettings = [{ size: 'LETTER' }];
 // ROUTE: GET tag/test
 // DESCRIPTION: Tests post route
@@ -341,14 +341,10 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
 router.get('/print/', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
-    const ts = req.body.tagSet;
+    const dat = req.body.tagSet;
     const pi = req.body.printIteration;
-    var dat = [];
-    for (var i = 0; i < ts.length; i++) {
-        for (var b = 0; b < pi[i]; b++) {
-            dat.push(ts[i]);
-        }
-    }
+    var pit = 0;
+    pi.forEach(n => pit += n);
     //console.log(dat);
     fs.readFile(__dirname + '/template.svg', function (err, data) {
         if (err) {
@@ -363,40 +359,44 @@ router.get('/print/', passport.authenticate('jwt', {
         //array of pages defined
         var pagesArray = [];
         //populate pages array with templates one for each ten< of data
-        for (var h = 0; h < Math.ceil(dat.length / 10); h++) {
+        console.log(pit);
+        for (var h = 0; h < Math.ceil(pit / 10); h++) {
             pagesArray.push(svgbuff);
         }
         //cbuff stores page position
         var cbuff = 0;
         const doc = new PDFDocument(docsettings);
         const fn = uuidv1();
-        //qr generation
-        for (var i = 0; i < dat.length; dat++) {
-            console.log("1");
-            //every tenth page, increment page position
-            if (i != 0 && i % 10 == 0) {
-                cbuff++;
+        doc.pipe(fs.createWriteStream(process.env.rootDir + '/temp/' + fn + '.pdf'));
+        var b = 0;
+        for (var g = 0; g < pi.length; g++) {
+            for (var i = 0; i < pi[g]; i++) {
+                if (b != 0 && b % 10 == 0) {
+                    cbuff++;//every tenth page, increment page position
+                    // console.log("cbf" + cbuff);
+                }
+                // console.log("G: " + g + ", I: " + i + ", B: " + b);
+                // console.log("cbp " + ((b-(cbuff * 10))));
+                //replace image and room name dummy values with values from json req
+                pagesArray[cbuff] = pagesArray[cbuff].replace('room' + ((b-(cbuff * 10))), dat[g].name);
+                pagesArray[cbuff] = pagesArray[cbuff].replace('img' + ((b-(cbuff * 10))), dat[g].qrcode);
+                b++;
             }
-            //replace image and room name dummy values with values from async function and json file
-            pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + (i - (cbuff * 10)), dat[i].name);
-            pagesArray[cbuff] = pagesArray[cbuff].replace('Img ' + (i - (cbuff * 10)), dat[i].qrcode);
         }
         //document write stream begins
-        doc.pipe(fs.createWriteStream(process.env.rootDir+'/temp/' + fn + '.pdf'));
         //for each page, add new pdf page, convert svg into pdf page content data and put it into place.
         for (var g = 0; g < pagesArray.length; g++) {
-            console.log("2");
-            if (pagesArray[g].indexOf("Room 9") !== -1) {
+            if (pagesArray[g].indexOf("room9") !== -1) {
                 for (var b = 0; b < 10; b++) {
-                    pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + b, '');
-                    pagesArray[cbuff] = pagesArray[cbuff].replace('Img ' + b, fillImg);
+                    pagesArray[cbuff] = pagesArray[cbuff].replace('room' + b, '');
+                    pagesArray[cbuff] = pagesArray[cbuff].replace('img' + b, fillImg);
                 }
             }
+            // console.log(pagesArray[g]);
             SVGtoPDF(doc, pagesArray[g], 0, 0);
             doc.addPage();
         }
         //finish writing to document
-        console.log("3");
         doc.end();
         //redirect user to pdf page
         res.json({
@@ -408,80 +408,3 @@ router.get('/print/', passport.authenticate('jwt', {
 
 //export module for importing into central server file
 module.exports = router;
-
-// router.get('/print/', passport.authenticate('jwt', {
-//     session: false
-// }), (req, res) => {
-//     const ts = req.body.tagSet;
-//     const pi = req.body.printIteration;
-//     var dat = [];
-//     for (var i = 0; i < ts.length; i++) {
-//         for (var b = 0; b < pi[i]; b++) {
-//             dat.push(ts[i]);
-//         }
-//     }
-//     fs.readFile(__dirname + '/template.svg', async function (err, data) {
-//         if (err) {
-//             console.error(err)
-//         }
-//         //svg template file
-//         var svgbuff = data.toString()
-//         //array of pages defined
-//         var pagesArray = [];
-//         //populate pages array with templates one for each ten< of data
-//         for (var h = 0; h < Math.ceil(dat.length / 10); h++) {
-//             pagesArray.push(svgbuff);
-//         }
-//         //cbuff stores page position
-//         var cbuff = 0;
-//         const doc = new PDFDocument(docsettings);
-//         const fn = uuidv1();
-//         //async qr generation
-//         async.forEachOf(
-//             dat,
-//             function (pos, i, callback) {
-//                 //create data url, call insertion function
-//                 QRCode.toDataURL('http://' + 'localhost:3000' + '/tag/' + pos._id, function (err, url) {
-//                     if (err) return callback(err);
-//                     try {
-//                         //every tenth page, increment page position
-//                         if (i != 0 && i % 10 == 0) {
-//                             cbuff++
-//                             console.log('up ' + cbuff)
-//                         }
-//                         console.log(pos.name)
-//                         //replace image and room name dummy values with values from async function and json file
-//                         pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + (i - (cbuff * 10)), pos.name)
-//                         pagesArray[cbuff] = pagesArray[cbuff].replace('Img ' + (i - (cbuff * 10)), url)
-//                     } catch (e) {
-//                         return callback(e)
-//                     }
-//                     //call callback when finished
-//                     callback();
-//                 }
-//                 )
-//             },
-//             err => {
-//                 if (err) return console.error(err.message);
-//                 //document write stream begins
-//                 doc.pipe(fs.createWriteStream(__dirname + '/../temp/' + fn + '.pdf'));
-//                 //for each page, add new pdf page, convert svg into pdf page content data and put it into place.
-//                 for (var h = 0; h < pagesArray.length; h++) {
-//                     if (pagesArray[h].indexOf("Room 9") !== -1) {
-//                         for (var g = 0; g < 10; g++) {
-//                             pagesArray[cbuff] = pagesArray[cbuff].replace('Room ' + g, '')
-//                             pagesArray[cbuff] = pagesArray[cbuff].replace('Img ' + g, fillImg);
-//                         }
-//                     }
-//                     SVGtoPDF(doc, pagesArray[h], 0, 0);
-//                     doc.addPage();
-//                 }
-//                 //finish writing to document
-//                 doc.end();
-//                 //redirect user to pdf page
-//                 //"https://" + "localhost:3000" + "/pdf/" + fn + ".pdf"
-//                 res.json({ "filename": fn });
-//             }
-//         )
-//     })
-// });
