@@ -40,6 +40,7 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * pre-cache qrcode urls
 * inventory system
 * wireframe floorplans with color status
+* PDF could certainly use some optimization
 
 ### Resolved (keep in mind when new code is written)
 * re-do comments to make code more legible
