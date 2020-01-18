@@ -33,6 +33,7 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * Add payment with [this](https://developers.braintreepayments.com/guides/payment-methods/node)
 * Replace try/catch blocks eventually (Justin)
 * Bring back errors for form parts (Jake)
+* ask justin about react deployment
 
 
 ### future
