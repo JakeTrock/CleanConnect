@@ -24,15 +24,20 @@ router.get("/test", (req, res) => res.send("Routes Works"));
 
 //testing
 const creds = process.env.mailCreds;
-var smtpTransport = nodemailer.createTransport({
-    host: creds[0],
-    port: creds[1],
-    auth: {
-        user: creds[2],
-        pass: creds[3]
-    }
+// var smtpTransport = nodemailer.createTransport({
+//     host: creds[0],
+//     port: creds[1],
+//     auth: {
+//         user: creds[2],
+//         pass: creds[3]
+//     }
+// });
+let smtpTransport = nodemailer.createTransport({
+    sendmail: true,
+    newline: 'unix',
+    path: '/usr/sbin/sendmail'
 });
-smtpTransport.verify(function (error, success) {
+smtpTransport.verify(function(error, success) {
     if (error) {
         console.error(error);
     } else {
@@ -60,7 +65,7 @@ router.post("/register", (req, res) => {
             details: errors
         });
     }
-    if (req.body.email == "fake@test.com") {//check for testing var
+    if (req.body.email == "fake@test.com") { //check for testing var
         const newUser = new User({
             name: req.body.name,
             email: req.body.email,
@@ -77,7 +82,7 @@ router.post("/register", (req, res) => {
                     });
                 }
                 newUser.password = hash;
-                newUser.save(function (err) {
+                newUser.save(function(err) {
                     if (err) {
                         return res.status(500).json({
                             success: false,
@@ -86,12 +91,11 @@ router.post("/register", (req, res) => {
                         });
                     }
                     // Create a verification token for this user
-                    User.findOne(
-                        {
+                    User.findOne({
                             email: req.body.email
                         },
                         "_id"
-                    ).exec(function (err, user) {
+                    ).exec(function(err, user) {
                         if (err) {
                             return res.status(500).json({
                                 success: false,
@@ -112,11 +116,10 @@ router.post("/register", (req, res) => {
                 });
             });
         });
-    }
-    else {
+    } else {
         User.findOne({
-            email: req.body.email
-        })
+                email: req.body.email
+            })
             .then(user => {
                 if (user) {
                     errors.email = "Email already exists";
@@ -141,7 +144,7 @@ router.post("/register", (req, res) => {
                                 });
                             }
                             newUser.password = hash;
-                            newUser.save(function (err) {
+                            newUser.save(function(err) {
                                 if (err) {
                                     return res.status(500).json({
                                         success: false,
@@ -152,7 +155,7 @@ router.post("/register", (req, res) => {
                                 // Create a verification token for this user
                                 User.findOne({
                                     email: req.body.email
-                                }, "_id").exec(function (err, user) {
+                                }, "_id").exec(function(err, user) {
                                     if (err) {
                                         return res.status(500).json({
                                             success: false,
@@ -168,13 +171,10 @@ router.post("/register", (req, res) => {
                                     vToken.save().then(p => {
                                         // Send the email
                                         var mailOptions = {
-                                            from:
-                                                "no-reply@" + req.headers.host,
+                                            from: "no-reply@" + req.headers.host,
                                             to: req.body.email,
-                                            subject:
-                                                "Account Verification Token",
-                                            text:
-                                                "Hello,\n\n" +
+                                            subject: "Account Verification Token",
+                                            text: "Hello,\n\n" +
                                                 "Please verify your account by clicking the link: \n" +
                                                 prefix +
                                                 req.headers.host +
@@ -188,7 +188,7 @@ router.post("/register", (req, res) => {
                                             p.token +
                                             ".\n"
                                         );
-                                        smtpTransport.sendMail(mailOptions, function (err) {
+                                        smtpTransport.sendMail(mailOptions, function(err) {
                                             if (err) {
                                                 return res.status(500).json({
                                                     success: false,
@@ -196,8 +196,7 @@ router.post("/register", (req, res) => {
                                                     details: err.message
                                                 });
                                             }
-                                        }
-                                        );
+                                        });
                                     }).then(res.json({
                                         success: true,
                                         status: "A verification email has been sent to " + req.body.email + "."
@@ -228,7 +227,7 @@ router.post("/resend", (req, res) => {
     // var errors = req.validationErrors();
     // if (errors) return res.status(400).send(errors);
 
-    User.findOne({ email: req.body.email }, function (err, user) {
+    User.findOne({ email: req.body.email }, function(err, user) {
         if (!user)
             return res.status(404).json({
                 success: false,
@@ -255,8 +254,7 @@ router.post("/resend", (req, res) => {
                     from: "no-reply@" + req.headers.host,
                     to: req.body.email,
                     subject: "Account Verification Token",
-                    text:
-                        "Hello,\n\n" +
+                    text: "Hello,\n\n" +
                         "Please verify your account by clicking the link: \n" +
                         prefix +
                         req.headers.host +
@@ -267,7 +265,7 @@ router.post("/resend", (req, res) => {
                 console.log(
                     req.headers.host + "/user/confirmation/" + p.token + "\n"
                 );
-                smtpTransport.sendMail(mailOptions, function (err) {
+                smtpTransport.sendMail(mailOptions, function(err) {
                     if (err) {
                         return res.status(500).json({
                             success: false,
@@ -292,7 +290,7 @@ router.post("/resend", (req, res) => {
 // INPUT: token value via the url
 router.get("/confirmation/:token", (req, res) => {
     // Find a matching token
-    UserIndex.findOne({ token: req.params.token }, function (err, token) {
+    UserIndex.findOne({ token: req.params.token }, function(err, token) {
         console.log(token);
         if (!token)
             return res.status(400).json({
@@ -301,7 +299,7 @@ router.get("/confirmation/:token", (req, res) => {
                 details: err
             });
         // If we found a token, find a matching user
-        User.findOne({ _id: token._userId }, function (err, user) {
+        User.findOne({ _id: token._userId }, function(err, user) {
             if (!user)
                 return res.status(400).json({
                     success: false,
@@ -318,7 +316,7 @@ router.get("/confirmation/:token", (req, res) => {
 
             // Verify and save the user
             user.isVerified = true;
-            user.save(function (err) {
+            user.save(function(err) {
                 if (err) {
                     return res.status(500).json({
                         success: false,
@@ -353,8 +351,7 @@ router.delete("/deleteinfo", passport.authenticate("jwt", {
                 from: "no-reply@" + req.headers.host,
                 to: req.user.email,
                 subject: "Account Deletion",
-                text:
-                    "Hello,\n\n" +
+                text: "Hello,\n\n" +
                     "Please delete your account by clicking the link: \n" +
                     prefix +
                     req.headers.host +
@@ -362,7 +359,7 @@ router.delete("/deleteinfo", passport.authenticate("jwt", {
                     p.token +
                     ".\n"
             };
-            smtpTransport.sendMail(mailOptions, function (err) {
+            smtpTransport.sendMail(mailOptions, function(err) {
                 if (err) {
                     return res.status(500).json({
                         success: false,
@@ -374,15 +371,13 @@ router.delete("/deleteinfo", passport.authenticate("jwt", {
         }).then(res.json({
             success: false,
             status: "A deletion email has been sent to " + req.user.email + "."
-        })
-        )
+        }))
         .catch(err => res.json({
             success: false,
             simple: "Failed to send mail.",
             details: err
         }));
-}
-);
+});
 
 // ROUTE: GET user/delete/:token
 // DESCRIPTION: recieves deletion email link request
@@ -393,11 +388,11 @@ router.get("/delete/:token", passport.authenticate("jwt", {
     UserIndex.findOne({ token: req.params.token }).then(tk => {
         if (tk._userId == req.user._id)
             User.findOneAndRemove({ _id: tk._userId })
-                .then(UserIndex.findOneAndRemove({ _userId: tk._userId }))
-                .then(() => res.json({
-                    success: true
-                }))
-                .catch(e => console.error(e));
+            .then(UserIndex.findOneAndRemove({ _userId: tk._userId }))
+            .then(() => res.json({
+                success: true
+            }))
+            .catch(e => console.error(e));
         else
             res.status(403).json({
                 success: false,
@@ -405,8 +400,7 @@ router.get("/delete/:token", passport.authenticate("jwt", {
                 details: ""
             });
     });
-}
-);
+});
 
 // ROUTE: POST user/changeinfo
 // DESCRIPTION: sends verification email to change account details
@@ -427,8 +421,7 @@ router.post("/changeinfo", passport.authenticate("jwt", {
                 from: "no-reply@" + req.headers.host,
                 to: req.user.email,
                 subject: "Account Changes",
-                text:
-                    "Hello,\n\n" +
+                text: "Hello,\n\n" +
                     "Please alter your account by clicking the link: \n" +
                     prefix +
                     req.headers.host +
@@ -436,7 +429,7 @@ router.post("/changeinfo", passport.authenticate("jwt", {
                     p.token +
                     ".\n"
             };
-            smtpTransport.sendMail(mailOptions, function (err) {
+            smtpTransport.sendMail(mailOptions, function(err) {
                 if (err) {
                     return res.status(500).json({
                         success: false,
@@ -457,8 +450,7 @@ router.post("/changeinfo", passport.authenticate("jwt", {
             simple: "Failed to send mail.",
             details: err
         }));
-}
-);
+});
 
 // ROUTE: POST user/change/:token
 // DESCRIPTION: recieves verification email to change account details
@@ -487,8 +479,8 @@ router.post(
                 UserIndex.findOne({ token: req.params.token }).then(tk => {
                     if (tk._userId == req.user.id) {
                         User.findOne({
-                            _id: req.user.id
-                        })
+                                _id: req.user.id
+                            })
                             .then(profile => {
                                 if (profile) {
                                     //update a profile
@@ -546,8 +538,8 @@ router.post(
                 });
             if (String(tk._userId) == String(req.user._id)) {
                 User.findOne({
-                    _id: req.user._id
-                })
+                        _id: req.user._id
+                    })
                     .then(profile => {
                         if (!profile)
                             res.status(404).json({
@@ -593,8 +585,8 @@ router.post("/login", (req, res) => {
     }
 
     User.findOne({
-        email: req.body.email
-    })
+            email: req.body.email
+        })
         .then(user => {
             errors.email = "User not found.";
             // Check for user
@@ -626,8 +618,7 @@ router.post("/login", (req, res) => {
                     //Sign token
                     jwt.sign(
                         payload,
-                        keys.secretOrKey,
-                        {
+                        keys.secretOrKey, {
                             expiresIn: "1d"
                         },
                         (err, token) => {
