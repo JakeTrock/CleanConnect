@@ -15,6 +15,7 @@ const Tag = require('../models/Tag.js');
 // Validation Part for input
 const validatePostInput = require('../validation/tag.js');
 const apr = require('../validation/apr.js');
+const isprintable = require('../validation/is-printable.js');
 //configure express addons
 const app = express();
 const router = express.Router();
@@ -48,13 +49,13 @@ router.get('/genimgs', passport.authenticate('jwt', {
 }), (req, res) => {
     Tag.find({
         user: req.user._id
-    }, function (err, list) {
-        async.forEachOf(list, function (pos, i, callback) {
+    }, function(err, list) {
+        async.forEachOf(list, function(pos, i, callback) {
             //create data url, call insertion function
             if (err) return callback(err);
             try {
                 if (list[i].qrcode == undefined) {
-                    QRCode.toDataURL('http://localhost:3000/tag/' + pos._id, function (err, url) {
+                    QRCode.toDataURL('http://localhost:3000/tag/' + pos._id, function(err, url) {
 
                         if (err) res.status(500).json({
                             success: false,
@@ -92,8 +93,8 @@ router.get('/genimgs', passport.authenticate('jwt', {
 // ROUTE: GET tag/getone/id
 // DESCRIPTION: gets the metadata of a single tag based on its id, can also be used to confirm if a tag exists
 router.get('/getone/:id', passport.authenticate('jwt', {
-    session: false
-}),
+        session: false
+    }),
     (req, res) => {
         Tag.findOne({
             _id: req.params.id
@@ -202,11 +203,11 @@ router.post('/edit/:id', passport.authenticate('jwt', {
             }, {
                 new: true
             }).then(res.json({ success: true }))
-                .catch(e => res.json({
-                    success: false,
-                    simple: "Error updating tag",
-                    details: e
-                }));
+            .catch(e => res.json({
+                success: false,
+                simple: "Error updating tag",
+                details: e
+            }));
         else
             res.status(400).json({
                 success: false,
@@ -224,9 +225,9 @@ router.delete('/:id', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     Tag.findOne({
-        _id: req.params.id,
-        user: req.user.id
-    })
+            _id: req.params.id,
+            user: req.user.id
+        })
         .then(post => {
             post.deleteOne().then(() => res.json({
                 success: true
@@ -338,14 +339,25 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
 // ROUTE: GET tag/print/
 // DESCRIPTION: prints tags as qr codes, allowing people to access them in real life
 // INPUT: an array as long as the number of tags you have, containing numbers which tell the program the number of times to print each tag, and an array of tags(in the same format as they are in getall)
-router.get('/print/', passport.authenticate('jwt', {
+router.post('/print/', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     const dat = req.body.tagSet;
     const pi = req.body.printIteration;
+    const {
+        errors,
+        isValid
+    } = isprintable(req.body);
+    if (!req.body.sev || !isValid) {
+        return res.status(400).json({
+            success: false,
+            simple: "Invalid post body.",
+            details: errors
+        });
+    }
 
     //console.log(dat);
-    fs.readFile(__dirname + '/template.svg', function (err, data) {
+    fs.readFile(__dirname + '/template.svg', function(err, data) {
         if (err) {
             res.status(500).json({
                 success: false,
@@ -354,7 +366,7 @@ router.get('/print/', passport.authenticate('jwt', {
             })
         }
         //svg template file
-        var svgbuff=data.toString();
+        var svgbuff = data.toString();
         //array of pages defined
         //cbuff stores page position
         var cbuff = 0;
@@ -369,7 +381,7 @@ router.get('/print/', passport.authenticate('jwt', {
                 svgbuff = svgbuff.replace('img' + ((b - (cbuff * 10))), dat[g].qrcode);
                 b++;
                 if (b != 0 && b % 10 == 0) {
-                    cbuff++;//every tenth page, increment page position
+                    cbuff++; //every tenth page, increment page position
                     if (svgbuff.indexOf("room9") !== -1) {
                         for (var r = 0; r < 10; r++) {
                             svgbuff = svgbuff.replace('room' + b, '');
@@ -378,7 +390,7 @@ router.get('/print/', passport.authenticate('jwt', {
                     }
                     SVGtoPDF(doc, svgbuff, 0, 0);
                     doc.addPage();
-                    svgbuff=data.toString();
+                    svgbuff = data.toString();
                 }
             }
         }

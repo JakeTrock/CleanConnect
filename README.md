@@ -34,6 +34,7 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * Replace try/catch blocks eventually (Justin)
 * Bring back errors for form parts (Jake)
 * ask justin about react deployment
+* add git webhook to our webserver
 
 
 ### future
@@ -44,9 +45,14 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 
 ### Bizdev
 * Ask about payment system(how much each tag tier should cost)
+    * Couldn't answer
 * financial handling(cost splitting, taxes)
+    * Email him, mainly handled by finance lawyers, papers cost ~$60 to be filled by a pro 
 * User agreements(which one to use)
-* 
+    * Email him, boilerplate should work for now
+* Patent/Copyright
+    * Copyright papers are ~$90 to file
+    * Patents can be searched without cruddy mainframes at https://www.google.com/?tbm=pts
 
 ### Resolved (keep in mind when new code is written)
 * re-do comments to make code more legible
