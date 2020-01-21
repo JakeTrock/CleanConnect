@@ -14,7 +14,7 @@ module.exports = {
       NODE_ENV: 'development'
     },
     env_production: {
-      NODE_ENV: 'production'
+      NODE_ENV: 'production',
       mailServer: 'smtp.ethereal.email',
         mailPort: 587,
         mailUser: 'lilian.bernhard@ethereal.email',
