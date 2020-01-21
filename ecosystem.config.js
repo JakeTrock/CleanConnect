@@ -8,13 +8,19 @@ module.exports = {
     instances: 1,
     autorestart: true,
     watch: true,
-    ignore_watch: ["README.md",“node_modules”],
+    //ignore_watch: ["README.md",“node_modules”],
     max_memory_restart: '600M',
     env: {
       NODE_ENV: 'development'
     },
     env_production: {
       NODE_ENV: 'production'
+      mailServer: 'smtp.ethereal.email',
+        mailPort: 587,
+        mailUser: 'lilian.bernhard@ethereal.email',
+        mailPass: 'fCc7CKMVv1VvuvrsaR',
+      url: "mongodb://localhost/CleanConnectProd",
+        secretOrKey: 'c9:4b:ed:35:ed:9d'
     }
   }],
 
