@@ -6,7 +6,7 @@ import logo from "../images/logo.png";
 const Navbar = ({ user }) => {
   //Temporary navbar, subject to change
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light">
+    <nav className="navbar navbar-expand-lg fixed-top navbar-light bg-light">
       <Link style={{ width: "50%" }} to="/">
         <img style={{ width: "60%" }} src={logo} alt="" />
       </Link>
