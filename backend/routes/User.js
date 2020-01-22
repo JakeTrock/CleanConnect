@@ -24,7 +24,7 @@ const topLevelDomain = "cleanconnect.jakesandbox.com";
 // ROUTE: GET user/test
 // DESCRIPTION: tests user route
 // INPUT: none
-router.get("/test", (req, res) => res.send("Routes Works"));
+router.get("/test", (req, res) => res.send("User Works"));
 
 //testing
 var smtpTransport = nodemailer.createTransport({ sendmail: true });
