@@ -39,6 +39,8 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 
 ### future
 * add email notifications of errors
+* OR
+* add frontend issues panel that shows errors as they happen
 * pre-cache qrcode urls
 * inventory system
 * wireframe floorplans with color status

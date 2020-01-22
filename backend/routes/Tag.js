@@ -342,65 +342,111 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
 router.post('/print/', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
-    const dat = req.body.tagSet;
-    const pi = req.body.printIteration;
-    const {
-        errors,
-        isValid
-    } = isprintable(req.body);
-    if (!req.body.sev || !isValid) {
-        return res.status(400).json({
-            success: false,
-            simple: "Invalid post body.",
-            details: errors
-        });
-    }
-
-    //console.log(dat);
-    fs.readFile(__dirname + '/template.svg', function(err, data) {
-        if (err) {
-            res.status(500).json({
+    Tag.find({
+        user: req.user._id
+    }, function(err, list) {
+        const pi = req.body.printIteration;
+        const {
+            errors,
+            isValid
+        } = isprintable(req.body, list.length);
+        if (!isValid) {
+            return res.status(400).json({
                 success: false,
-                simple: "Error generating pdf.",
-                details: err
-            })
+                simple: "Invalid post body.",
+                details: errors
+            });
         }
-        //svg template file
-        var svgbuff = data.toString();
-        //array of pages defined
-        //cbuff stores page position
-        var cbuff = 0;
-        const doc = new PDFDocument(docsettings);
-        const fn = uuidv1();
-        doc.pipe(fs.createWriteStream(process.env.rootDir + '/temp/' + fn + '.pdf'));
-        var b = 0;
-        for (var g = 0; g < pi.length; g++) {
-            for (var i = 0; i < pi[g]; i++) {
-                //replace image and room name dummy values with values from json req
-                svgbuff = svgbuff.replace('room' + ((b - (cbuff * 10))), dat[g].name);
-                svgbuff = svgbuff.replace('img' + ((b - (cbuff * 10))), dat[g].qrcode);
-                b++;
-                if (b != 0 && b % 10 == 0) {
-                    cbuff++; //every tenth page, increment page position
-                    if (svgbuff.indexOf("room9") !== -1) {
-                        for (var r = 0; r < 10; r++) {
-                            svgbuff = svgbuff.replace('room' + b, '');
-                            svgbuff = svgbuff.replace('img' + b, fillImg);
-                        }
+        async.forEachOf(list, function(pos, i, callback) {
+            //create data url, call insertion function
+            if (err) return callback(err);
+            try {
+                if (list[i].qrcode == undefined) {
+                    QRCode.toDataURL('http://localhost:3000/tag/' + pos._id, function(err, url) {
+
+                        if (err) res.status(500).json({
+                            success: false,
+                            simple: "Error generating cache.",
+                            details: err
+                        });
+                        Tag.findOneAndUpdate({
+                            _id: pos._id
+                        }, {
+                            qrcode: url
+                        }, {
+                            new: true
+                        }).catch(err => res.status(500).json({
+                            success: false,
+                            simple: "Error generating cache.",
+                            details: err
+                        }));
+                    });
+                }
+            } catch (e) {
+                return callback(e)
+            }
+            //call callback when finished
+            callback();
+        }, err => {
+            if (err) return res.status(500).json({
+                success: false,
+                simple: "Error generating cache.",
+                details: err.message
+            });
+        })
+        fs.readFile(__dirname + '/template.svg', function(err, data) {
+            if (err) {
+                res.status(500).json({
+                    success: false,
+                    simple: "Error generating pdf.",
+                    details: err
+                })
+            }
+            //svg template file
+            var svgbuff = data.toString();
+            //array of pages defined
+            //cbuff stores page position
+            var cbuff = 0;
+            const doc = new PDFDocument(docsettings);
+            const fn = uuidv1();
+            doc.pipe(fs.createWriteStream(process.env.rootDir + '/temp/' + fn + '.pdf'));
+            var b = 0;
+            for (var g = 0; g < pi.length; g++) { //adds one less page than it should??!!!!!!
+                for (var i = 0; i < pi[g]; i++) {
+                    //replace image and room name dummy values with values from json req
+                    svgbuff = svgbuff.replace('room' + ((b - (cbuff * 10))), list[g].name);
+                    svgbuff = svgbuff.replace('img' + ((b - (cbuff * 10))), list[g].qrcode);
+                    b++;
+                    console.log(((b - (cbuff * 10))));
+                    if (b != 0 && b % 10 == 0) {
+                        console.log(g + "," + cbuff);
+                        if (cbuff != 0) doc.addPage();
+                        SVGtoPDF(doc, svgbuff, 0, 0);
+                        console.log("svgbuff");
+                        svgbuff = data.toString();
+                        cbuff++; //every tenth page, increment page position
                     }
-                    SVGtoPDF(doc, svgbuff, 0, 0);
-                    doc.addPage();
-                    svgbuff = data.toString();
                 }
             }
-        }
-
-        //finish writing to document
-        doc.end();
-        //redirect user to pdf page
-        res.json({
-            success: true,
-            filename: fn
+            if (svgbuff.indexOf("room9") !== -1) {
+                for (var r = 0; r < 10; r++) {
+                    svgbuff = svgbuff.replace('room' + r, '');
+                    svgbuff = svgbuff.replace('img' + r, fillImg);
+                    console.log("rep");
+                }
+                doc.addPage();
+                SVGtoPDF(doc, svgbuff, 0, 0);
+                console.log("svgbuff");
+                // svgbuff = data.toString();
+            }
+            //finish writing to document
+            console.log("end");
+            doc.end();
+            //redirect user to pdf page
+            res.json({
+                success: true,
+                filename: fn
+            });
         });
     });
 });

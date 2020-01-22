@@ -1,16 +1,13 @@
 const Validator = require('validator');
 const isEmpty = require('./is-empty');
 
-module.exports = function validatePostInput(data) {
+module.exports = function validatePostInput(data, pil) {
     let errors = {};
-    if (Validator.isEmpty(data.tagSet)) {
-        errors.text = 'Missing pre-computed QR codes';
-    }
-    if (Validator.isEmpty(data.printIteration)) {
+    if (data.printIteration.length < 1) {
         errors.text = 'Missing print iteration header';
     }
-    if (data.tagSet.length != data.printIteration.length) {
-        errors.text = "Print iteration header must be same length as QR code list";
+    if (data.printIteration.length != pil) {
+        errors.text = 'printIteration header not short/long enough, should be of length ' + pil;
     }
     return {
         errors,
