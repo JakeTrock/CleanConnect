@@ -35,10 +35,10 @@ class Register extends Form {
     } catch (ex) {
       if (ex.response && ex.response.status === 400) {
         const errors = { ...this.state.errors };
-        errors.name = ex.response.data.name;
-        errors.email = ex.response.data.email;
-        errors.password = ex.response.data.password;
-        errors.password2 = ex.response.data.password2;
+        errors.name = ex.response.data.details.name;
+        errors.email = ex.response.data.details.email;
+        errors.password = ex.response.data.details.password;
+        errors.password2 = ex.response.data.details.password2;
         this.setState({ errors });
       }
     }

@@ -32,11 +32,11 @@ class Login extends Form {
       if (ex.response) {
         const errors = { ...this.state.errors };
         if (ex.response.status === 400) {
-          errors.email = ex.response.data.email;
-          errors.password = ex.response.data.password;
+          errors.email = ex.response.data.details.email;
+          errors.password = ex.response.data.details.password;
         }
         if (ex.response.status === 401) {
-          errors.email = ex.response.data.msg;
+          errors.email = ex.response.data.details.msg;
         }
         this.setState({ errors });
       }

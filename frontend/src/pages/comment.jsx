@@ -54,9 +54,9 @@ class Comment extends Form {
         //gets errors then shows them to user
         const errors = { ...this.state.errors };
         if (ex.response.status === 400) {
-          errors.text = ex.response.data.text;
-          errors.sev = ex.response.data.sev;
-          errors.imageUrl = ex.response.data.img;
+          errors.text = ex.response.data.details.text;
+          errors.sev = ex.response.data.details.sev;
+          errors.imageUrl = ex.response.data.details.img;
         }
         this.setState({ errors });
       }
