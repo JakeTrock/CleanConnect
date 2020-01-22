@@ -413,12 +413,9 @@ router.post('/print/', passport.authenticate('jwt', {
                     svgbuff = svgbuff.replace('room' + ((b - (cbuff * 10))), list[g].name);
                     svgbuff = svgbuff.replace('img' + ((b - (cbuff * 10))), list[g].qrcode);
                     b++;
-                    console.log(((b - (cbuff * 10))));
                     if (b != 0 && b % 10 == 0) {
-                        console.log(g + "," + cbuff);
                         if (cbuff != 0) doc.addPage();
                         SVGtoPDF(doc, svgbuff, 0, 0);
-                        console.log("svgbuff");
                         svgbuff = data.toString();
                         cbuff++; //every tenth page, increment page position
                     }
@@ -428,15 +425,12 @@ router.post('/print/', passport.authenticate('jwt', {
                 for (var r = 0; r < 10; r++) {
                     svgbuff = svgbuff.replace('room' + r, '');
                     svgbuff = svgbuff.replace('img' + r, fillImg);
-                    console.log("rep");
                 }
                 doc.addPage();
                 SVGtoPDF(doc, svgbuff, 0, 0);
-                console.log("svgbuff");
                 // svgbuff = data.toString();
             }
             //finish writing to document
-            console.log("end");
             doc.end();
             //redirect user to pdf page
             res.json({
