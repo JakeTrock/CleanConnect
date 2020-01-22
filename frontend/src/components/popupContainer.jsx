@@ -7,14 +7,19 @@ export const ImageContainer = props => {
   return (
     <Popup position="right center" trigger={trigger} modal>
       {close => (
-        <div style={{ border: "5px solid black", margin: "-6px" }}>
-          <div style={{ margin: "10px", overflow: "hidden" }}>
-            <a className="close" onClick={close}>
+        <div
+          style={{
+            border: "5px solid black",
+            margin: "-6px"
+          }}
+        >
+          <div>
+            <div className="close" style={{ margin: "10px" }} onClick={close}>
               &times;
-            </a>
+            </div>
             <img
               className="centerObj"
-              style={{ width: "80%" }}
+              style={{ maxHeight: "95vh" }}
               src={imgLink}
               alt=""
             />
@@ -32,16 +37,20 @@ export const DeletePopupContainer = props => {
   const deleteData = props.deleteData;
   return (
     <Popup
-      trigger={<a href="#">{triggerText}</a>}
+      trigger={
+        <div className="unitLink" href="">
+          {triggerText}
+        </div>
+      }
       position="right center"
       modal
     >
       {close => (
         <div style={{ border: "5px solid black", margin: "-6px" }}>
           <div style={{ margin: "10px", overflow: "hidden" }}>
-            <a className="close" onClick={close}>
+            <div className="close" onClick={close}>
               &times;
-            </a>
+            </div>
             <h1>{customText}</h1>
             <button
               className="btn btn-danger"
