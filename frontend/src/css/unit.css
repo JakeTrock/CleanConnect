@@ -25,16 +25,17 @@
 .unitBody {
   overflow-y: hidden;
   overflow-x: hidden;
-
   text-align: left;
-  height: 40vh;
+  height: 50vh;
 }
 .unitText {
   font-size: 5vh;
   margin-bottom: auto;
   margin-left: 1%;
 }
-
+.largeText {
+  font-size: 15vh;
+}
 .addItem {
   display: flex;
   justify-content: center;
@@ -43,9 +44,12 @@
   height: 10vh;
   font-size: 15vh;
 }
-
-.unitFooter {
+.footer {
   border-top: solid #919191;
+}
+.unitFooter {
+  height: 10vh;
+  text-align: center;
 }
 input {
   width: 90%;
@@ -61,7 +65,20 @@ input {
 }
 .centerObj {
   display: block;
-  margin-left: auto;
-  margin-right: auto;
-  width: 25%;
+  margin: auto;
+  max-width: 95%;
+  max-height: 95%;
+  height: auto;
+  width: auto;
+}
+
+.unitLink {
+  cursor: pointer;
+  color: #3369ff;
+  text-decoration: none;
+  font-size: 100%;
+}
+.unitLink:hover {
+  color: #2453d4;
+  text-decoration: underline;
 }
