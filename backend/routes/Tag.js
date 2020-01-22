@@ -34,8 +34,6 @@ router.get('/getall', passport.authenticate('jwt', {
 }), (req, res) => {
     Tag.find({
         user: req.user._id
-    }).sort({
-        dateLastAccessed: -1
     }).then(posts => res.json(posts)).catch(err => res.status(404).json({
         success: false,
         simple: "No posts found.",
@@ -98,9 +96,7 @@ router.get('/getone/:id', passport.authenticate('jwt', {
     (req, res) => {
         Tag.findOne({
             _id: req.params.id
-        }).then(post => res.json({
-            success: true
-        })).catch(err => res.status(404).json({
+        }).catch(err => res.status(404).json({
             success: false,
             simple: "No posts found.",
             details: err
