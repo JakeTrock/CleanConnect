@@ -21,7 +21,19 @@ export function newTag(name) {
     return null;
   }
 }
-
+export function genCache() {
+  try {
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: user.getCurrentUser(true)
+    };
+    return axios.get(apiEndpoint + "/genimgs", {
+      headers: headers
+    });
+  } catch (ex) {
+    return null;
+  }
+}
 export function getTags() {
   try {
     const headers = {
@@ -47,6 +59,7 @@ export function getTag(token) {
     return null;
   }
 }
+
 export function tagExists(token) {
   try {
     return axios.get(apiEndpoint + "/exists/" + token);
@@ -68,7 +81,6 @@ export function deleteTag(id) {
   }
 }
 export function deleteComment(postId, commentId) {
-  console.log(commentId);
   try {
     const headers = {
       "Content-Type": "application/json",
@@ -93,6 +105,21 @@ export function commentOnTag(id, text, sev, img) {
     return axios.post(apiEndpoint + "/comment/" + id, payload, {
       headers: headers
     });
+  } catch (ex) {
+    return null;
+  }
+}
+
+export function print(printIteration) {
+  try {
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: user.getCurrentUser(true)
+    };
+    const data = { printIteration };
+    console.log(data);
+
+    return axios.post(apiEndpoint + "/print", { printIteration }, { headers });
   } catch (ex) {
     return null;
   }

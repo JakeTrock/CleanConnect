@@ -11,6 +11,8 @@ import Register from "./pages/register";
 import Change from "./pages/change";
 import Profile from "./pages/profile";
 import Tags from "./pages/tags";
+import PrintSheet from "./pages/printSheet";
+import Print from "./pages/print";
 import NotFound from "./pages/notFound";
 import Comment from "./pages/comment";
 
@@ -65,8 +67,13 @@ class App extends Component {
               path="/tags"
               render={props => <Tags {...props} user={user} />}
             />
+            <ProtectedRoute
+              path="/printSheet"
+              render={props => <PrintSheet {...props} user={user} />}
+            />
+            <Route path="/print/:token" component={Print} />
             <CaptchaRoute
-              path="/comment/:token"
+              path="/tag/:token"
               validated={captchaValidated}
               captchaSubmit={() => this.captchaSubmit()}
               component={Comment}
