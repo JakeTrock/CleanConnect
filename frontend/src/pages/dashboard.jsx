@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import Layout from "../components/layout";
 import Grid from "../components/grid";
 import Unit from "../components/unit";
+import Pagination from "../components/pagination";
+import { paginate } from "../services/pagination";
 import * as auth from "../services/tagsAuthentication";
 import * as file from "../services/fileAuthentication";
 import {
@@ -10,9 +12,12 @@ import {
 } from "../components/popupContainer";
 import "../css/unit.css";
 
+/* Unfinished, need to add stuff in footer*/
 class Dashboard extends Component {
   state = {
-    tags: []
+    tags: [],
+    currentPage: 1,
+    pageSize: 6
   };
   async stateSetter() {
     let { user } = this.props;
@@ -47,9 +52,13 @@ class Dashboard extends Component {
     if (prevProps === this.props) return;
     this.stateSetter();
   }
+  handlePageChange = page => {
+    this.setState({ currentPage: page });
+  };
   render() {
-    let { tags } = this.state;
+    let { tags, currentPage, pageSize } = this.state;
     if (!tags) tags = "";
+    let sortedTags = paginate(tags, currentPage, pageSize);
 
     function DeletePopup(data) {
       const customText =
@@ -113,20 +122,17 @@ class Dashboard extends Component {
                         style={{ cursor: "pointer" }}
                         src={comment.img}
                         alt=""
-                        onClick={() =>
-                          this.imagePopup(comment.img, comment._id)
-                        }
                       />
                     }
                     imgLink={comment.img}
                   />
-                  <div className="unitFooter" /> {/* TEMPORARY*/}
+                  <div className="footer" /> {/* TEMPORARY*/}
                   {/* Make small then big*/}
                 </React.Fragment>
               );
             }, this)}
           </div>
-          <div className="unitFooter"></div>
+          <div className="footer unitFooter"></div>
           {/* Add tag to printable sheet here? */}
         </Unit>
       );
@@ -135,10 +141,15 @@ class Dashboard extends Component {
       <React.Fragment>
         <Layout name="Issue Tracker">
           {this.state.popup}
-
+          <Pagination
+            itemsCount={tags.length}
+            pageSize={pageSize}
+            currentPage={currentPage}
+            onPageChange={this.handlePageChange}
+          />
           <Grid
             {...this.props}
-            items={tags}
+            items={sortedTags}
             idLocation={"_id"}
             customBehavior={customBehavior}
           ></Grid>
