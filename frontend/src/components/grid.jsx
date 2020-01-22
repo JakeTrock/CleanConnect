@@ -4,14 +4,14 @@ import _ from "lodash";
 
 class Grid extends Component {
   componentDidMount() {
-    this.customBehavior = this.props.customBehavior.bind(this);
+    console.log(this.customBehavior);
+    //this.customBehavior = this.props.customBehavior.bind(this);
     if (this.props.emptyBehavior)
       this.emptyBehavior = this.props.emptyBehavior.bind(this);
   }
   render() {
-    let { items, idLocation } = this.props;
+    let { items, idLocation, customBehavior, emptyBehavior } = this.props;
     items = _.chunk(items, 2);
-    const { customBehavior, emptyBehavior } = this;
     return (
       <React.Fragment>
         {items.map(function(list, i) {
