@@ -2,7 +2,7 @@ import axios from "axios"; //Will be used for http requests
 import FormData from "form-data";
 import { apiUrl } from "../config.json"; // Url of the server
 import * as user from "./userAuthentication";
-const apiEndpoint = apiUrl + "/tag";
+const apiEndpoint = process.env.REACT_APP_API_URL + "/tag";
 
 export function newTag(name) {
   try {

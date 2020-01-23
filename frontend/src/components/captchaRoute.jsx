@@ -12,7 +12,7 @@ const CaptchaRoute = ({
   ...rest
 }) => {
   const recaptchaRef = React.createRef();
-
+  const key = process.env.REACT_APP_CAPTCHA_KEY; //"6LeQ3csUAAAAAJMNvvh313yU9HCborrUzc4bzQ5t"
   const captchaCompleted = value => {
     if (value) captchaSubmit();
   };
@@ -25,7 +25,7 @@ const CaptchaRoute = ({
         <ReCAPTCHA
           size="compact"
           ref={recaptchaRef}
-          sitekey="6LeQ3csUAAAAAJMNvvh313yU9HCborrUzc4bzQ5t"
+          sitekey={key}
           onChange={captchaCompleted}
           align="center"
         />

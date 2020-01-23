@@ -4,7 +4,7 @@ import axios from "axios"; //Will be used for http requests
 import { apiUrl } from "../config.json"; // Url of the server
 import "./interceptor";
 
-const apiEndpoint = apiUrl + "/user";
+const apiEndpoint = process.env.REACT_APP_API_URL + "/user";
 const tokenKey = "token";
 
 export async function login(email, password) {
