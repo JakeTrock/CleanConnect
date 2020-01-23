@@ -28,13 +28,24 @@ For every server api path, in insomnia, you will have to create an account, usin
 
 In production, most likely, we would store the bearer key in a cookie. The bearer key is only valid to the server for 24 hours, so the cookie should be set accordingly.
 
-## Issue board
+## Issue board (both)
 * Add html/styling to email verification
 * Add payment with [this](https://developers.braintreepayments.com/guides/payment-methods/node)
-* Replace try/catch blocks eventually (Justin)
-* Bring back errors for form parts (Jake)
-* ask justin about react deployment
-* add git webhook to our webserver
+* Ask justin about react deployment
+
+## Issue board (Jake)
+* Add git webhook to our webserver
+* Bug where pdf for tags starts on second page if less than one page of tags
+* Delete units from tags pdf if empty
+* Potentially replace blobs with images
+
+## Issue board (Justin)
+* Replace try/catch blocks eventually
+* Implement environment variables to hide private info (server address too?)
+* Clean up code with comments, potentially cleaning up css files
+* Add text to main page describing project, as well as creating contact page
+* Add more routes for pages such as print?
+
 
 
 ### future

@@ -16,27 +16,27 @@ const keys = require("../config/keys");
 //Load user models
 const User = require("../models/User");
 const UserIndex = require("../models/UserIndex");
+//declare consts
+const creds = process.env.mailCreds;
+const topLevelDomain = "cleanconnect.jakesandbox.com";
+
 
 // ROUTE: GET user/test
 // DESCRIPTION: tests user route
 // INPUT: none
-router.get("/test", (req, res) => res.send("Routes Works"));
+router.get("/test", (req, res) => res.send("User Works"));
 
 //testing
-const creds = process.env.mailCreds;
-// var smtpTransport = nodemailer.createTransport({
-//     host: creds[0],
-//     port: creds[1],
-//     auth: {
-//         user: creds[2],
-//         pass: creds[3]
-//     }
-// });
-let smtpTransport = nodemailer.createTransport({
-    sendmail: true,
-    newline: 'unix',
-    path: '/usr/sbin/sendmail'
+var smtpTransport = nodemailer.createTransport({ sendmail: true });
+smtpTransport.on("error", err => {
+    console.log("SMTP error: ", err.message);
 });
+// let smtpTransport = nodemailer.createTransport({
+//     sendmail: true,
+//     newline: 'unix',
+//     path: '/usr/sbin/sendmail'
+// });
+
 smtpTransport.verify(function(error, success) {
     if (error) {
         console.error(error);
@@ -171,19 +171,19 @@ router.post("/register", (req, res) => {
                                     vToken.save().then(p => {
                                         // Send the email
                                         var mailOptions = {
-                                            from: "no-reply@" + req.headers.host,
+                                            from: "no-reply@" + topLevelDomain,
                                             to: req.body.email,
                                             subject: "Account Verification Token",
                                             text: "Hello,\n\n" +
                                                 "Please verify your account by clicking the link: \n" +
                                                 prefix +
-                                                req.headers.host +
+                                                topLevelDomain +
                                                 "/user/confirmation/" +
                                                 p.token +
                                                 ".\n"
                                         };
                                         console.log(
-                                            req.headers.host +
+                                            topLevelDomain +
                                             "/user/confirmation/" +
                                             p.token +
                                             ".\n"
@@ -251,19 +251,19 @@ router.post("/resend", (req, res) => {
             .then(p => {
                 // Send the email
                 var mailOptions = {
-                    from: "no-reply@" + req.headers.host,
+                    from: "no-reply@" + topLevelDomain,
                     to: req.body.email,
                     subject: "Account Verification Token",
                     text: "Hello,\n\n" +
                         "Please verify your account by clicking the link: \n" +
                         prefix +
-                        req.headers.host +
+                        topLevelDomain +
                         "/user/confirmation/" +
                         p.token +
                         ".\n"
                 };
                 console.log(
-                    req.headers.host + "/user/confirmation/" + p.token + "\n"
+                    topLevelDomain + "/user/confirmation/" + p.token + "\n"
                 );
                 smtpTransport.sendMail(mailOptions, function(err) {
                     if (err) {
@@ -348,13 +348,13 @@ router.delete("/deleteinfo", passport.authenticate("jwt", {
         .then(p => {
             // Send the email
             var mailOptions = {
-                from: "no-reply@" + req.headers.host,
+                from: "no-reply@" + topLevelDomain,
                 to: req.user.email,
                 subject: "Account Deletion",
                 text: "Hello,\n\n" +
                     "Please delete your account by clicking the link: \n" +
                     prefix +
-                    req.headers.host +
+                    topLevelDomain +
                     "/delete/" +
                     p.token +
                     ".\n"
@@ -418,13 +418,13 @@ router.post("/changeinfo", passport.authenticate("jwt", {
         .then(p => {
             // Send the email
             var mailOptions = {
-                from: "no-reply@" + req.headers.host,
+                from: "no-reply@" + topLevelDomain,
                 to: req.user.email,
                 subject: "Account Changes",
                 text: "Hello,\n\n" +
                     "Please alter your account by clicking the link: \n" +
                     prefix +
-                    req.headers.host +
+                    topLevelDomain +
                     "/change/" +
                     p.token +
                     ".\n"
