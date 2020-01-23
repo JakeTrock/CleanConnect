@@ -26,6 +26,12 @@ class Tags extends Component {
     let tags = "";
     if (user) {
       tags = await auth.getTags();
+      for (let i = 0; i < tags.length; i++) {
+        //contingency if a tag doesn't have a qr code
+        if (!tags[i].qrcode) {
+          await auth.genCache();
+        }
+      }
       tags = tags.data.reverse();
       let limit = null;
       if (user.tier === 0) limit = 5;
