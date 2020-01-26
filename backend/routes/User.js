@@ -4,10 +4,12 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
-const nodemailer = require("nodemailer");
+//const nodemailer = require("nodemailer");
+const aws = require('aws-sdk');
 const randomBytes = require("randombytes");
-//create express derivative access
+//create derivative access vars
 const router = express.Router();
+const ses = new aws.SES();
 // Load input validation
 const validateRegisterInput = require("../validation/register");
 const validateLoginInput = require("../validation/login");
@@ -18,7 +20,7 @@ const User = require("../models/User");
 const UserIndex = require("../models/UserIndex");
 //declare consts
 const creds = process.env.mailCreds;
-const topLevelDomain = "cleanconnect.jakesandbox.com";
+const topLevelDomain = "https://cleanconnect.jakesandbox.com";
 
 
 // ROUTE: GET user/test
@@ -26,31 +28,55 @@ const topLevelDomain = "cleanconnect.jakesandbox.com";
 // INPUT: none
 router.get("/test", (req, res) => res.send("User Works"));
 
-//testing
-var smtpTransport = nodemailer.createTransport({ sendmail: true });
-smtpTransport.on("error", err => {
-    console.log("SMTP error: ", err.message);
+//mail setup
+aws.config.update({
+    accessKeyId: "AKIAXHXVGIFH2YHQW45X",
+    secretAccessKey: "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",
+    region: "us-east-1",
 });
-// let smtpTransport = nodemailer.createTransport({
-//     sendmail: true,
-//     newline: 'unix',
-//     path: '/usr/sbin/sendmail'
+
+function sendMail(body, sub, to, cb) {
+    ses.sendEmail({
+        Destination: {
+            ToAddresses: [to]
+        },
+        Message: {
+            Body: {
+                Html: {
+                    Charset: 'UTF-8',
+                    Data: body
+                }
+            },
+            Subject: {
+                Charset: 'UTF-8',
+                Data: sub
+            }
+        },
+        ReturnPath: 'info@cleanconnect.jakesandbox.com',
+        Source: 'info@cleanconnect.jakesandbox.com'
+    }, (err, data) => {
+        if (err) cb(err)
+        else console.log(data)
+    })
+}
+// var smtpTransport = nodemailer.createTransport({
+//     SES: new aws.SES({
+//         apiVersion: '2010-12-01'
+//     })
 // });
 
-smtpTransport.verify(function(error, success) {
-    if (error) {
-        console.error(error);
-    } else {
-        console.log("mailserver online.");
-    }
-});
+// smtpTransport.on("error", err => {
+//     console.log("SMTP error: ", err.message);
+// });
 
-//https://codemoto.io/coding/nodejs/email-verification-node-express-mongodb
+// smtpTransport.verify(function(error, success) {
+//     if (error) {
+//         console.error(error);
+//     } else {
+//         console.log("mailserver online.");
+//     }
+// });
 
-//production
-// const smtpTransport = nodemailer.createTransport({
-//          name: 'localhost'
-// })
 
 // ROUTE: POST user/register
 // DESCRIPTION: sends registration email to user
@@ -170,25 +196,19 @@ router.post("/register", (req, res) => {
                                     });
                                     vToken.save().then(p => {
                                         // Send the email
-                                        var mailOptions = {
-                                            from: "no-reply@" + topLevelDomain,
-                                            to: req.body.email,
-                                            subject: "Account Verification Token",
-                                            text: "Hello,\n\n" +
-                                                "Please verify your account by clicking the link: \n" +
-                                                prefix +
-                                                topLevelDomain +
-                                                "/user/confirmation/" +
-                                                p.token +
-                                                ".\n"
-                                        };
+
                                         console.log(
                                             topLevelDomain +
                                             "/user/confirmation/" +
                                             p.token +
-                                            ".\n"
+                                            "\n"
                                         );
-                                        smtpTransport.sendMail(mailOptions, function(err) {
+                                        sendMail(("Hello,\n\n" +
+                                            "Please verify your account by clicking the link: \n" +
+                                            topLevelDomain +
+                                            "/user/confirmation/" +
+                                            p.token +
+                                            ".\n"), ("CleanConnect Account Verification"), req.body.email, function(err) {
                                             if (err) {
                                                 return res.status(500).json({
                                                     success: false,
@@ -250,22 +270,13 @@ router.post("/resend", (req, res) => {
             .save()
             .then(p => {
                 // Send the email
-                var mailOptions = {
-                    from: "no-reply@" + topLevelDomain,
-                    to: req.body.email,
-                    subject: "Account Verification Token",
-                    text: "Hello,\n\n" +
-                        "Please verify your account by clicking the link: \n" +
-                        prefix +
-                        topLevelDomain +
-                        "/user/confirmation/" +
-                        p.token +
-                        ".\n"
-                };
-                console.log(
-                    topLevelDomain + "/user/confirmation/" + p.token + "\n"
-                );
-                smtpTransport.sendMail(mailOptions, function(err) {
+                console.log(topLevelDomain + "/user/confirmation/" + p.token + "\n");
+                sendMail(("Hello,\n\n" +
+                    "Please verify your account by clicking the link: \n" +
+                    topLevelDomain +
+                    "/user/confirmation/" +
+                    p.token +
+                    ".\n"), ("CleanConnect Account Verification"), req.body.email, function(err) {
                     if (err) {
                         return res.status(500).json({
                             success: false,
@@ -347,19 +358,12 @@ router.delete("/deleteinfo", passport.authenticate("jwt", {
         .save()
         .then(p => {
             // Send the email
-            var mailOptions = {
-                from: "no-reply@" + topLevelDomain,
-                to: req.user.email,
-                subject: "Account Deletion",
-                text: "Hello,\n\n" +
-                    "Please delete your account by clicking the link: \n" +
-                    prefix +
-                    topLevelDomain +
-                    "/delete/" +
-                    p.token +
-                    ".\n"
-            };
-            smtpTransport.sendMail(mailOptions, function(err) {
+            sendMail(("Hello,\n\n" +
+                "Please delete your account by clicking the link: \n" +
+                topLevelDomain +
+                "/delete/" +
+                p.token +
+                ".\n"), ("CleanConnect Account Deletion"), req.user.email, function(err) {
                 if (err) {
                     return res.status(500).json({
                         success: false,
@@ -417,19 +421,12 @@ router.post("/changeinfo", passport.authenticate("jwt", {
         .save()
         .then(p => {
             // Send the email
-            var mailOptions = {
-                from: "no-reply@" + topLevelDomain,
-                to: req.user.email,
-                subject: "Account Changes",
-                text: "Hello,\n\n" +
-                    "Please alter your account by clicking the link: \n" +
-                    prefix +
-                    topLevelDomain +
-                    "/change/" +
-                    p.token +
-                    ".\n"
-            };
-            smtpTransport.sendMail(mailOptions, function(err) {
+            sendMail(("Hello,\n\n" +
+                "Please alter your account by clicking the link: \n" +
+                topLevelDomain +
+                "/change/" +
+                p.token +
+                ".\n"), ("CleanConnect Account Changes"), req.user.email, function(err) {
                 if (err) {
                     return res.status(500).json({
                         success: false,

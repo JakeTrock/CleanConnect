@@ -21,7 +21,7 @@ const app = express();
 const router = express.Router();
 router.use(fileUpload());
 //document settings and blank template image for pdf creator
-const fillImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKQAAACkAQMAAAAjexcCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAA1BMVEX///+nxBvIAAAAGUlEQVQYGe3BAQEAAACCoP6vdkjAAAAAuBYOGAABPIptXAAAAABJRU5ErkJggg==';
+// const fillImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKQAAACkAQMAAAAjexcCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAA1BMVEX///+nxBvIAAAAGUlEQVQYGe3BAQEAAACCoP6vdkjAAAAAuBYOGAABPIptXAAAAABJRU5ErkJggg==';
 const docsettings = [{ size: 'LETTER' }];
 // ROUTE: GET tag/test
 // DESCRIPTION: Tests post route
@@ -358,7 +358,7 @@ router.post('/print/', passport.authenticate('jwt', {
             if (err) return callback(err);
             try {
                 if (list[i].qrcode == undefined) {
-                    QRCode.toDataURL('http://localhost:3000/tag/' + pos._id, function(err, url) {
+                    QRCode.toDataURL('http://cleanconnect.jakesandbox.com/tag/' + pos._id, function(err, url) {
 
                         if (err) res.status(500).json({
                             success: false,
@@ -405,13 +405,16 @@ router.post('/print/', passport.authenticate('jwt', {
             var cbuff = 0;
             const doc = new PDFDocument(docsettings);
             const fn = uuidv1();
+
             doc.pipe(fs.createWriteStream(process.env.rootDir + '/temp/' + fn + '.pdf'));
             var b = 0;
-            for (var g = 0; g < pi.length; g++) { //adds one less page than it should??!!!!!!
+            for (var g = 0; g < pi.length; g++) {
                 for (var i = 0; i < pi[g]; i++) {
                     //replace image and room name dummy values with values from json req
                     svgbuff = svgbuff.replace('room' + ((b - (cbuff * 10))), list[g].name);
                     svgbuff = svgbuff.replace('img' + ((b - (cbuff * 10))), list[g].qrcode);
+                    svgbuff = svgbuff.replace('<!-- bimgrp' + ((b - (cbuff * 10))) + ' -->', '');
+                    svgbuff = svgbuff.replace('<!-- ' + ((b - (cbuff * 10))) + 'eimgrp -->', '');
                     b++;
                     if (b != 0 && b % 10 == 0) {
                         if (cbuff != 0) doc.addPage();
@@ -423,12 +426,10 @@ router.post('/print/', passport.authenticate('jwt', {
             }
             if (svgbuff.indexOf("room9") !== -1) {
                 for (var r = 0; r < 10; r++) {
-                    svgbuff = svgbuff.replace('room' + r, '');
-                    svgbuff = svgbuff.replace('img' + r, fillImg);
+                    svgbuff = svgbuff.replace(/(bimgrp)(.*?)(eimgrp)/, "");
                 }
                 doc.addPage();
                 SVGtoPDF(doc, svgbuff, 0, 0);
-                // svgbuff = data.toString();
             }
             //finish writing to document
             doc.end();

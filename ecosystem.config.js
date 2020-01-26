@@ -14,13 +14,7 @@ module.exports = {
       NODE_ENV: 'development'
     },
     env_production: {
-      NODE_ENV: 'production',
-      mailServer: 'smtp.ethereal.email',
-        mailPort: 587,
-        mailUser: 'lilian.bernhard@ethereal.email',
-        mailPass: 'fCc7CKMVv1VvuvrsaR',
-      url: "mongodb://localhost/CleanConnectProd",
-        secretOrKey: 'c9:4b:ed:35:ed:9d'
+      NODE_ENV: 'production'
     }
   }],
 
