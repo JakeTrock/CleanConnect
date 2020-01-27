@@ -55,6 +55,7 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * pre-cache qrcode urls
 * inventory system
 * wireframe floorplans with color status
+* take email system out of beta https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html
 
 ### Bizdev
 * Ask about payment system(how much each tag tier should cost)
