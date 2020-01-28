@@ -5,11 +5,11 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
 //const nodemailer = require("nodemailer");
-const aws = require('aws-sdk');
+// const aws = require('aws-sdk');
 const randomBytes = require("randombytes");
 //create derivative access vars
 const router = express.Router();
-const ses = new aws.SES();
+// const ses = new aws.SES();
 // Load input validation
 const validateRegisterInput = require("../validation/register");
 const validateLoginInput = require("../validation/login");
@@ -29,40 +29,38 @@ const topLevelDomain = "https://cleanconnect.jakesandbox.com";
 router.get("/test", (req, res) => res.send("User Works"));
 
 //mail setup
-aws.config.update({
-    accessKeyId: "AKIAXHXVGIFH2YHQW45X",
-    secretAccessKey: "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",
-    region: "us-east-1",
-});
+// aws.config.update({
+//     accessKeyId: "AKIAXHXVGIFH2YHQW45X",
+//     secretAccessKey: "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",
+//     region: "us-east-1",
+// });
 
-function sendMail(body, sub, to, cb) {
-    ses.sendEmail({
-        Destination: {
-            ToAddresses: [to]
-        },
-        Message: {
-            Body: {
-                Html: {
-                    Charset: 'UTF-8',
-                    Data: body
-                }
-            },
-            Subject: {
-                Charset: 'UTF-8',
-                Data: sub
-            }
-        },
-        ReturnPath: 'info@cleanconnect.jakesandbox.com',
-        Source: 'info@cleanconnect.jakesandbox.com'
-    }, (err, data) => {
-        if (err) cb(err)
-        else console.log(data)
-    })
-}
-// var smtpTransport = nodemailer.createTransport({
-//     SES: new aws.SES({
-//         apiVersion: '2010-12-01'
+// function sendMail(body, sub, to, cb) {
+//     ses.sendEmail({
+//         Destination: {
+//             ToAddresses: [to]
+//         },
+//         Message: {
+//             Body: {
+//                 Html: {
+//                     Charset: 'UTF-8',
+//                     Data: body
+//                 }
+//             },
+//             Subject: {
+//                 Charset: 'UTF-8',
+//                 Data: sub
+//             }
+//         },
+//         ReturnPath: 'info@cleanconnect.jakesandbox.com',
+//         Source: 'info@cleanconnect.jakesandbox.com'
+//     }, (err, data) => {
+//         if (err) cb(err)
+//         else console.log(data)
 //     })
+// }
+// var smtpTransport = nodemailer.createTransport({
+//     sendmail:true
 // });
 
 // smtpTransport.on("error", err => {
@@ -82,6 +80,8 @@ function sendMail(body, sub, to, cb) {
 // DESCRIPTION: sends registration email to user
 // INPUT: user name, email and password(all as strings), via json body
 router.post("/register", (req, res) => {
+    var temp; //REMOVE ME
+
     const { errors, isValid } = validateRegisterInput(req.body);
     //check validation
     if (!isValid) {
@@ -91,148 +91,149 @@ router.post("/register", (req, res) => {
             details: errors
         });
     }
-    if (req.body.email == "fake@test.com") { //check for testing var
-        const newUser = new User({
-            name: req.body.name,
-            email: req.body.email,
-            password: req.body.password
-        });
+    // if (req.body.email == "fake@test.com") { //check for testing var
+    //     const newUser = new User({
+    //         name: req.body.name,
+    //         email: req.body.email,
+    //         password: req.body.password
+    //     });
 
-        bcrypt.genSalt(10, (err, salt) => {
-            bcrypt.hash(newUser.password, salt, (err, hash) => {
-                if (err) {
-                    return res.json({
-                        success: false,
-                        simple: "Failed to generate password.",
-                        details: err
-                    });
-                }
-                newUser.password = hash;
-                newUser.save(function(err) {
-                    if (err) {
-                        return res.status(500).json({
-                            success: false,
-                            simple: "Failed to save user.",
-                            details: err.message
-                        });
-                    }
-                    // Create a verification token for this user
-                    User.findOne({
-                            email: req.body.email
-                        },
-                        "_id"
-                    ).exec(function(err, user) {
+    //     bcrypt.genSalt(10, (err, salt) => {
+    //         bcrypt.hash(newUser.password, salt, (err, hash) => {
+    //             if (err) {
+    //                 return res.json({
+    //                     success: false,
+    //                     simple: "Failed to generate password.",
+    //                     details: err
+    //                 });
+    //             }
+    //             newUser.password = hash;
+    //             newUser.save(function(err) {
+    //                 if (err) {
+    //                     return res.status(500).json({
+    //                         success: false,
+    //                         simple: "Failed to save user.",
+    //                         details: err.message
+    //                     });
+    //                 }
+    //                 // Create a verification token for this user
+    //                 User.findOne({
+    //                         email: req.body.email
+    //                     },
+    //                     "_id"
+    //                 ).exec(function(err, user) {
+    //                     if (err) {
+    //                         return res.status(500).json({
+    //                             success: false,
+    //                             simple: "Failed to find user.",
+    //                             details: err.message
+    //                         });
+    //                     }
+    //                     const vToken = new UserIndex({
+    //                         _userId: user,
+    //                         token: randomBytes(16).toString("hex"),
+    //                         isCritical: true
+    //                     });
+    //                     vToken.save().then(p => res.json({
+    //                         success: true,
+    //                         email: "/user/confirmation/" + p.token
+    //                     }));
+    //                 });
+    //             });
+    //         });
+    //     });
+    // } else {
+    User.findOne({
+            email: req.body.email
+        })
+        .then(user => {
+            if (user) {
+                errors.email = "Email already exists";
+                return res.status(400).json({
+                    success: false,
+                    simple: "Invalid post body",
+                    details: errors
+                });
+            } else {
+                const newUser = new User({
+                    name: req.body.name,
+                    email: req.body.email,
+                    password: req.body.password
+                });
+                bcrypt.genSalt(10, (err, salt) => {
+                    bcrypt.hash(newUser.password, salt, (err, hash) => {
                         if (err) {
-                            return res.status(500).json({
+                            return res.json({
                                 success: false,
-                                simple: "Failed to find user.",
-                                details: err.message
+                                simple: "Failed to generate password.",
+                                details: err
                             });
                         }
-                        const vToken = new UserIndex({
-                            _userId: user,
-                            token: randomBytes(16).toString("hex"),
-                            isCritical: true
-                        });
-                        vToken.save().then(p => res.json({
-                            success: true,
-                            email: "/user/confirmation/" + p.token
-                        }));
-                    });
-                });
-            });
-        });
-    } else {
-        User.findOne({
-                email: req.body.email
-            })
-            .then(user => {
-                if (user) {
-                    errors.email = "Email already exists";
-                    return res.status(400).json({
-                        success: false,
-                        simple: "Invalid post body",
-                        details: errors
-                    });
-                } else {
-                    const newUser = new User({
-                        name: req.body.name,
-                        email: req.body.email,
-                        password: req.body.password
-                    });
-                    bcrypt.genSalt(10, (err, salt) => {
-                        bcrypt.hash(newUser.password, salt, (err, hash) => {
+                        newUser.password = hash;
+                        newUser.save(function(err) {
                             if (err) {
-                                return res.json({
+                                return res.status(500).json({
                                     success: false,
-                                    simple: "Failed to generate password.",
-                                    details: err
+                                    simple: "Failed to save user.",
+                                    details: err.message
                                 });
                             }
-                            newUser.password = hash;
-                            newUser.save(function(err) {
+                            // Create a verification token for this user
+                            User.findOne({
+                                email: req.body.email
+                            }, "_id").exec(function(err, user) {
                                 if (err) {
                                     return res.status(500).json({
                                         success: false,
-                                        simple: "Failed to save user.",
+                                        simple: "Failed to find user.",
                                         details: err.message
                                     });
                                 }
-                                // Create a verification token for this user
-                                User.findOne({
-                                    email: req.body.email
-                                }, "_id").exec(function(err, user) {
-                                    if (err) {
-                                        return res.status(500).json({
-                                            success: false,
-                                            simple: "Failed to find user.",
-                                            details: err.message
-                                        });
-                                    }
-                                    const vToken = new UserIndex({
-                                        _userId: user,
-                                        token: randomBytes(16).toString("hex"),
-                                        isCritical: true
-                                    });
-                                    vToken.save().then(p => {
-                                        // Send the email
-
-                                        console.log(
-                                            topLevelDomain +
-                                            "/user/confirmation/" +
-                                            p.token +
-                                            "\n"
-                                        );
-                                        sendMail(("Hello,\n\n" +
-                                            "Please verify your account by clicking the link: \n" +
-                                            topLevelDomain +
-                                            "/user/confirmation/" +
-                                            p.token +
-                                            ".\n"), ("CleanConnect Account Verification"), req.body.email, function(err) {
-                                            if (err) {
-                                                return res.status(500).json({
-                                                    success: false,
-                                                    simple: "Failed to send mail.",
-                                                    details: err.message
-                                                });
-                                            }
-                                        });
-                                    }).then(res.json({
-                                        success: true,
-                                        status: "A verification email has been sent to " + req.body.email + "."
-                                    })).catch(err => res.json({
-                                        success: false,
-                                        simple: "Failed to send mail.",
-                                        details: err
-                                    }));
+                                const vToken = new UserIndex({
+                                    _userId: user,
+                                    token: randomBytes(16).toString("hex"),
+                                    isCritical: true
                                 });
+                                vToken.save().then(p => {
+                                    // Send the email
+                                    temp = p;
+                                    console.log(
+                                        topLevelDomain +
+                                        "/user/confirmation/" +
+                                        p.token +
+                                        "\n"
+                                    );
+                                    // sendMail(("Hello,\n\n" +
+                                    //     "Please verify your account by clicking the link: \n" +
+                                    //     topLevelDomain +
+                                    //     "/user/confirmation/" +
+                                    //     p.token +
+                                    //     ".\n"), ("CleanConnect Account Verification"), req.body.email, function(err) {
+                                    //     if (err) {
+                                    //         return res.status(500).json({
+                                    //             success: false,
+                                    //             simple: "Failed to send mail.",
+                                    //             details: err.message
+                                    //         });
+                                    //     }
+                                    // });
+                                }).then(res.json({
+                                    success: true,
+                                    status: "A verification email has been sent to " + req.body.email + ".",
+                                    url: "/user/confirmation/" + temp.token
+                                })).catch(err => res.json({
+                                    success: false,
+                                    simple: "Failed to send mail.",
+                                    details: err
+                                }));
                             });
                         });
                     });
-                }
-            })
-            .catch(e => console.error(e));
-    }
+                });
+            }
+        })
+        .catch(e => console.error(e));
+    // }
 });
 
 // ROUTE: GET user/resend
@@ -246,6 +247,7 @@ router.post("/resend", (req, res) => {
     // // Check for validation errors
     // var errors = req.validationErrors();
     // if (errors) return res.status(400).send(errors);
+    var temp; //REMOVE ME
 
     User.findOne({ email: req.body.email }, function(err, user) {
         if (!user)
@@ -269,25 +271,27 @@ router.post("/resend", (req, res) => {
         vToken
             .save()
             .then(p => {
+                temp = p;
                 // Send the email
                 console.log(topLevelDomain + "/user/confirmation/" + p.token + "\n");
-                sendMail(("Hello,\n\n" +
-                    "Please verify your account by clicking the link: \n" +
-                    topLevelDomain +
-                    "/user/confirmation/" +
-                    p.token +
-                    ".\n"), ("CleanConnect Account Verification"), req.body.email, function(err) {
-                    if (err) {
-                        return res.status(500).json({
-                            success: false,
-                            simple: "Failed to send mail.",
-                            details: err.message
-                        });
-                    }
-                });
+                // sendMail(("Hello,\n\n" +
+                //     "Please verify your account by clicking the link: \n" +
+                //     topLevelDomain +
+                //     "/user/confirmation/" +
+                //     p.token +
+                //     ".\n"), ("CleanConnect Account Verification"), req.body.email, function(err) {
+                //     if (err) {
+                //         return res.status(500).json({
+                //             success: false,
+                //             simple: "Failed to send mail.",
+                //             details: err.message
+                //         });
+                //     }
+                // });
             }).then(res.json({
                 success: true,
-                status: "A verification email has been sent to " + req.body.email + "."
+                status: "A verification email has been sent to " + req.body.email + ".",
+                url: "/user/confirmation/" + temp.token
             })).catch(err => res.json({
                 success: false,
                 simple: "Failed to send mail.",
@@ -349,6 +353,7 @@ router.get("/confirmation/:token", (req, res) => {
 router.delete("/deleteinfo", passport.authenticate("jwt", {
     session: false
 }), (req, res) => {
+    var temp; //REMOVE ME
     const vToken = new UserIndex({
         _userId: req.user.id,
         token: randomBytes(16).toString("hex"),
@@ -357,24 +362,26 @@ router.delete("/deleteinfo", passport.authenticate("jwt", {
     vToken
         .save()
         .then(p => {
+            temp = p;
             // Send the email
-            sendMail(("Hello,\n\n" +
-                "Please delete your account by clicking the link: \n" +
-                topLevelDomain +
-                "/delete/" +
-                p.token +
-                ".\n"), ("CleanConnect Account Deletion"), req.user.email, function(err) {
-                if (err) {
-                    return res.status(500).json({
-                        success: false,
-                        simple: "Failed to send mail.",
-                        details: err.message
-                    });
-                }
-            });
+            // sendMail(("Hello,\n\n" +
+            //     "Please delete your account by clicking the link: \n" +
+            //     topLevelDomain +
+            //     "/delete/" +
+            //     p.token +
+            //     ".\n"), ("CleanConnect Account Deletion"), req.user.email, function(err) {
+            //     if (err) {
+            //         return res.status(500).json({
+            //             success: false,
+            //             simple: "Failed to send mail.",
+            //             details: err.message
+            //         });
+            //     }
+            // });
         }).then(res.json({
             success: false,
-            status: "A deletion email has been sent to " + req.user.email + "."
+            status: "A deletion email has been sent to " + req.user.email + ".",
+            url: "/user/confirmation/" + temp.token
         }))
         .catch(err => res.json({
             success: false,
@@ -412,6 +419,7 @@ router.get("/delete/:token", passport.authenticate("jwt", {
 router.post("/changeinfo", passport.authenticate("jwt", {
     session: false
 }), (req, res) => {
+    var temp; //REMOVE ME
     const vToken = new UserIndex({
         _userId: req.user.id,
         token: randomBytes(16).toString("hex"),
@@ -420,26 +428,28 @@ router.post("/changeinfo", passport.authenticate("jwt", {
     vToken
         .save()
         .then(p => {
+            temp = p;
             // Send the email
-            sendMail(("Hello,\n\n" +
-                "Please alter your account by clicking the link: \n" +
-                topLevelDomain +
-                "/change/" +
-                p.token +
-                ".\n"), ("CleanConnect Account Changes"), req.user.email, function(err) {
-                if (err) {
-                    return res.status(500).json({
-                        success: false,
-                        simple: "Failed to send mail.",
-                        details: err.message
-                    });
-                }
-            });
+            // sendMail(("Hello,\n\n" +
+            //     "Please alter your account by clicking the link: \n" +
+            //     topLevelDomain +
+            //     "/change/" +
+            //     p.token +
+            //     ".\n"), ("CleanConnect Account Changes"), req.user.email, function(err) {
+            //     if (err) {
+            //         return res.status(500).json({
+            //             success: false,
+            //             simple: "Failed to send mail.",
+            //             details: err.message
+            //         });
+            //     }
+            // });
         })
         .then(
             res.json({
                 success: true,
-                status: "A settings email has been sent to " + req.user.email + "."
+                status: "A settings email has been sent to " + req.user.email + ".",
+                url: "/user/confirmation/" + temp.token
             })
         )
         .catch(err => res.json({
