@@ -21,7 +21,6 @@ const app = express();
 const router = express.Router();
 router.use(fileUpload());
 //document settings and blank template image for pdf creator
-// const fillImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKQAAACkAQMAAAAjexcCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAA1BMVEX///+nxBvIAAAAGUlEQVQYGe3BAQEAAACCoP6vdkjAAAAAuBYOGAABPIptXAAAAABJRU5ErkJggg==';
 const docsettings = [{ size: 'LETTER' }];
 // ROUTE: GET tag/test
 // DESCRIPTION: Tests post route
