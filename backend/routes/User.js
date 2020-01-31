@@ -4,12 +4,10 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
-//const nodemailer = require("nodemailer");
-const aws = require('aws-sdk');
+const nodemailer = require("nodemailer");
 const randomBytes = require("randombytes");
 //create derivative access vars
 const router = express.Router();
-const ses = new aws.SES();
 // Load input validation
 const validateRegisterInput = require("../validation/register");
 const validateLoginInput = require("../validation/login");
@@ -19,7 +17,7 @@ const keys = require("../config/keys");
 const User = require("../models/User");
 const UserIndex = require("../models/UserIndex");
 //declare consts
-const creds = process.env.mailCreds;
+// const creds = process.env.mailCreds;
 const topLevelDomain = "https://cleanconnect.jakesandbox.com";
 
 
@@ -29,53 +27,38 @@ const topLevelDomain = "https://cleanconnect.jakesandbox.com";
 router.get("/test", (req, res) => res.send("User Works"));
 
 //mail setup
-aws.config.update({
-    accessKeyId: "AKIAXHXVGIFH2YHQW45X",
-    secretAccessKey: "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",
-    region: "us-east-1",
+const smtpTransport = nodemailer.createTransport({
+    // sendmail: true,
+    // newline: 'unix',
+    // path: '/usr/sbin/sendmail'
+    service: 'gmail',
+    auth: {
+        user: 'hokugpn@gmail.com',
+        pass: 'Upgame11'
+    }
 });
 
 function sendMail(body, sub, to, cb) {
-    ses.sendEmail({
-        Destination: {
-            ToAddresses: [to]
-        },
-        Message: {
-            Body: {
-                Html: {
-                    Charset: 'UTF-8',
-                    Data: body
-                }
-            },
-            Subject: {
-                Charset: 'UTF-8',
-                Data: sub
-            }
-        },
-        ReturnPath: 'info@cleanconnect.jakesandbox.com',
-        Source: 'info@cleanconnect.jakesandbox.com'
-    }, (err, data) => {
-        if (err) cb(err)
-        else console.log(data)
-    })
+    smtpTransport.sendMail({
+        from: "no-reply@" + "cleanconnect.jakesandbox.com",
+        to: to,
+        subject: sub,
+        text: body
+    }, function(err) { if (err) cb(err) });
 }
-// var smtpTransport = nodemailer.createTransport({
-//     SES: new aws.SES({
-//         apiVersion: '2010-12-01'
-//     })
-// });
 
-// smtpTransport.on("error", err => {
-//     console.log("SMTP error: ", err.message);
-// });
 
-// smtpTransport.verify(function(error, success) {
-//     if (error) {
-//         console.error(error);
-//     } else {
-//         console.log("mailserver online.");
-//     }
-// });
+smtpTransport.on("error", err => {
+    console.log("SMTP error: ", err.message);
+});
+
+smtpTransport.verify(function(error, success) {
+    if (error) {
+        console.error(error);
+    } else {
+        console.log("mailserver online.");
+    }
+});
 
 
 // ROUTE: POST user/register
@@ -197,12 +180,6 @@ router.post("/register", (req, res) => {
                                     vToken.save().then(p => {
                                         // Send the email
 
-                                        console.log(
-                                            topLevelDomain +
-                                            "/user/confirmation/" +
-                                            p.token +
-                                            "\n"
-                                        );
                                         sendMail(("Hello,\n\n" +
                                             "Please verify your account by clicking the link: \n" +
                                             topLevelDomain +
@@ -217,14 +194,12 @@ router.post("/register", (req, res) => {
                                                 });
                                             }
                                         });
-                                    }).then(res.json({
-                                        success: true,
-                                        status: "A verification email has been sent to " + req.body.email + "."
-                                    })).catch(err => res.json({
-                                        success: false,
-                                        simple: "Failed to send mail.",
-                                        details: err
-                                    }));
+                                        console.log(topLevelDomain + "/user/confirmation/" + p.token + "\n");
+                                        res.json({
+                                            success: true,
+                                            status: "A verification email has been sent to " + req.body.email + "."
+                                        });
+                                    });
                                 });
                             });
                         });
@@ -270,7 +245,6 @@ router.post("/resend", (req, res) => {
             .save()
             .then(p => {
                 // Send the email
-                console.log(topLevelDomain + "/user/confirmation/" + p.token + "\n");
                 sendMail(("Hello,\n\n" +
                     "Please verify your account by clicking the link: \n" +
                     topLevelDomain +
@@ -285,14 +259,12 @@ router.post("/resend", (req, res) => {
                         });
                     }
                 });
-            }).then(res.json({
-                success: true,
-                status: "A verification email has been sent to " + req.body.email + "."
-            })).catch(err => res.json({
-                success: false,
-                simple: "Failed to send mail.",
-                details: err
-            }));
+                console.log(topLevelDomain + "/user/confirmation/" + p.token + "\n");
+                res.json({
+                    success: true,
+                    status: "A verification email has been sent to " + req.body.email + "."
+                });
+            });
     });
 });
 
@@ -372,15 +344,11 @@ router.delete("/deleteinfo", passport.authenticate("jwt", {
                     });
                 }
             });
-        }).then(res.json({
-            success: false,
-            status: "A deletion email has been sent to " + req.user.email + "."
-        }))
-        .catch(err => res.json({
-            success: false,
-            simple: "Failed to send mail.",
-            details: err
-        }));
+            res.json({
+                success: false,
+                status: "A deletion email has been sent to " + req.user.email + "."
+            });
+        });
 });
 
 // ROUTE: GET user/delete/:token
@@ -433,20 +401,14 @@ router.post("/changeinfo", passport.authenticate("jwt", {
                         simple: "Failed to send mail.",
                         details: err.message
                     });
+                } else {
+                    res.json({
+                        success: true,
+                        status: "A settings email has been sent to " + req.user.email + "."
+                    })
                 }
             });
-        })
-        .then(
-            res.json({
-                success: true,
-                status: "A settings email has been sent to " + req.user.email + "."
-            })
-        )
-        .catch(err => res.json({
-            success: false,
-            simple: "Failed to send mail.",
-            details: err
-        }));
+        });
 });
 
 // ROUTE: POST user/change/:token
@@ -481,7 +443,7 @@ router.post(
                             .then(profile => {
                                 if (profile) {
                                     //update a profile
-                                    Profile.findOneAndUpdate({
+                                    User.findOneAndUpdate({
                                         _id: req.user.id
                                     }, {
                                         $set: profileFields

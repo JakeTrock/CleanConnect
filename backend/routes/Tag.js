@@ -3,11 +3,11 @@ const express = require('express');
 const fileUpload = require('express-fileupload');
 const mongoose = require('mongoose');
 const passport = require('passport');
-const validate = require('uuid-validate');
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
 const SVGtoPDF = require('svg-to-pdfkit');
-const uuidv1 = require('uuid/v1');
+const randomBytes = require("randombytes");
+
 const fs = require('fs');
 var async = require('async');
 //Tag model import
@@ -259,7 +259,7 @@ router.post('/comment/:id', (req, res) => {
         if (req.files) {
             let image = req.files.img;
             if (image.size < 5100000 && (image.mimetype == "video/mp4" || image.mimetype == "video/webm" || image.mimetype == "image/webp" || image.mimetype == "image/gif" || image.mimetype == "image/jpeg" || image.mimetype == "image/png" || image.mimetype == "image/jpg" || image.mimetype == "image/tiff")) {
-                const name = uuidv1() + "." + image.name.split(".")[1];
+                const name = randomBytes(16).toString("hex") + "." + image.name.split(".")[1];
                 image.mv('./temp/' + name);
                 comment = {
                     img: name,
@@ -403,7 +403,7 @@ router.post('/print/', passport.authenticate('jwt', {
             //cbuff stores page position
             var cbuff = 0;
             const doc = new PDFDocument(docsettings);
-            const fn = uuidv1();
+            const fn = randomBytes(16).toString("hex");
 
             doc.pipe(fs.createWriteStream(process.env.rootDir + '/temp/' + fn + '.pdf'));
             var b = 0;

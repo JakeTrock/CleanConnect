@@ -30,8 +30,6 @@
         "qrcode": "^1.4.4",
         "randombytes": "^2.1.0",
         "svg-to-pdfkit": "^0.1.8",
-        "uuid": "^3.3.3",
-        "uuid-validate": "0.0.3",
         "validator": "^10.4.0"
     },
     "devDependencies": {

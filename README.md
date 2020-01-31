@@ -38,6 +38,7 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * Bug where pdf for tags starts on second page if less than one page of tags
 * Delete units from tags pdf if empty
 * Potentially replace blobs with images
+* create anon route for read-only status updates
 
 ## Issue board (Justin)
 * Replace try/catch blocks eventually
@@ -55,7 +56,6 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * pre-cache qrcode urls
 * inventory system
 * wireframe floorplans with color status
-* take email system out of beta https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html
 
 ### Bizdev
 * Ask about payment system(how much each tag tier should cost)

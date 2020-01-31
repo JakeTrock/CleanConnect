@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const uuidv1 = require('uuid/v1');
 
 // Create Schema
 const UserSchema = new Schema({
@@ -12,7 +11,7 @@ const UserSchema = new Schema({
         type: String,
         required: true,
         unique: true,
-        index:true
+        index: true
     },
     password: {
         type: String,
