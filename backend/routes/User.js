@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const nodemailer = require("nodemailer");
 const randomBytes = require("randombytes");
-//create express derivative access
+//create derivative access vars
 const router = express.Router();
 // Load input validation
 const validateRegisterInput = require("../validation/register");
@@ -17,8 +17,8 @@ const keys = require("../config/keys");
 const User = require("../models/User");
 const UserIndex = require("../models/UserIndex");
 //declare consts
-const creds = process.env.mailCreds;
-const topLevelDomain = "cleanconnect.jakesandbox.com";
+// const creds = process.env.mailCreds;
+const topLevelDomain = "https://cleanconnect.jakesandbox.com";
 
 
 // ROUTE: GET user/test
@@ -26,16 +26,31 @@ const topLevelDomain = "cleanconnect.jakesandbox.com";
 // INPUT: none
 router.get("/test", (req, res) => res.send("User Works"));
 
-//testing
-var smtpTransport = nodemailer.createTransport({ sendmail: true });
+//mail setup
+const smtpTransport = nodemailer.createTransport({
+    // sendmail: true,
+    // newline: 'unix',
+    // path: '/usr/sbin/sendmail'
+    service: 'gmail',
+    auth: {
+        user: 'hokugpn@gmail.com',
+        pass: 'Upgame11'
+    }
+});
+
+function sendMail(body, sub, to, cb) {
+    smtpTransport.sendMail({
+        from: "no-reply@" + "cleanconnect.jakesandbox.com",
+        to: to,
+        subject: sub,
+        text: body
+    }, function(err) { if (err) cb(err) });
+}
+
+
 smtpTransport.on("error", err => {
     console.log("SMTP error: ", err.message);
 });
-// let smtpTransport = nodemailer.createTransport({
-//     sendmail: true,
-//     newline: 'unix',
-//     path: '/usr/sbin/sendmail'
-// });
 
 smtpTransport.verify(function(error, success) {
     if (error) {
@@ -45,12 +60,6 @@ smtpTransport.verify(function(error, success) {
     }
 });
 
-//https://codemoto.io/coding/nodejs/email-verification-node-express-mongodb
-
-//production
-// const smtpTransport = nodemailer.createTransport({
-//          name: 'localhost'
-// })
 
 // ROUTE: POST user/register
 // DESCRIPTION: sends registration email to user
@@ -170,25 +179,13 @@ router.post("/register", (req, res) => {
                                     });
                                     vToken.save().then(p => {
                                         // Send the email
-                                        var mailOptions = {
-                                            from: "no-reply@" + topLevelDomain,
-                                            to: req.body.email,
-                                            subject: "Account Verification Token",
-                                            text: "Hello,\n\n" +
-                                                "Please verify your account by clicking the link: \n" +
-                                                prefix +
-                                                topLevelDomain +
-                                                "/user/confirmation/" +
-                                                p.token +
-                                                ".\n"
-                                        };
-                                        console.log(
+
+                                        sendMail(("Hello,\n\n" +
+                                            "Please verify your account by clicking the link: \n" +
                                             topLevelDomain +
                                             "/user/confirmation/" +
                                             p.token +
-                                            ".\n"
-                                        );
-                                        smtpTransport.sendMail(mailOptions, function(err) {
+                                            ".\n"), ("CleanConnect Account Verification"), req.body.email, function(err) {
                                             if (err) {
                                                 return res.status(500).json({
                                                     success: false,
@@ -197,14 +194,12 @@ router.post("/register", (req, res) => {
                                                 });
                                             }
                                         });
-                                    }).then(res.json({
-                                        success: true,
-                                        status: "A verification email has been sent to " + req.body.email + "."
-                                    })).catch(err => res.json({
-                                        success: false,
-                                        simple: "Failed to send mail.",
-                                        details: err
-                                    }));
+                                        console.log(topLevelDomain + "/user/confirmation/" + p.token + "\n");
+                                        res.json({
+                                            success: true,
+                                            status: "A verification email has been sent to " + req.body.email + "."
+                                        });
+                                    });
                                 });
                             });
                         });
@@ -250,22 +245,12 @@ router.post("/resend", (req, res) => {
             .save()
             .then(p => {
                 // Send the email
-                var mailOptions = {
-                    from: "no-reply@" + topLevelDomain,
-                    to: req.body.email,
-                    subject: "Account Verification Token",
-                    text: "Hello,\n\n" +
-                        "Please verify your account by clicking the link: \n" +
-                        prefix +
-                        topLevelDomain +
-                        "/user/confirmation/" +
-                        p.token +
-                        ".\n"
-                };
-                console.log(
-                    topLevelDomain + "/user/confirmation/" + p.token + "\n"
-                );
-                smtpTransport.sendMail(mailOptions, function(err) {
+                sendMail(("Hello,\n\n" +
+                    "Please verify your account by clicking the link: \n" +
+                    topLevelDomain +
+                    "/user/confirmation/" +
+                    p.token +
+                    ".\n"), ("CleanConnect Account Verification"), req.body.email, function(err) {
                     if (err) {
                         return res.status(500).json({
                             success: false,
@@ -274,14 +259,12 @@ router.post("/resend", (req, res) => {
                         });
                     }
                 });
-            }).then(res.json({
-                success: true,
-                status: "A verification email has been sent to " + req.body.email + "."
-            })).catch(err => res.json({
-                success: false,
-                simple: "Failed to send mail.",
-                details: err
-            }));
+                console.log(topLevelDomain + "/user/confirmation/" + p.token + "\n");
+                res.json({
+                    success: true,
+                    status: "A verification email has been sent to " + req.body.email + "."
+                });
+            });
     });
 });
 
@@ -347,19 +330,12 @@ router.delete("/deleteinfo", passport.authenticate("jwt", {
         .save()
         .then(p => {
             // Send the email
-            var mailOptions = {
-                from: "no-reply@" + topLevelDomain,
-                to: req.user.email,
-                subject: "Account Deletion",
-                text: "Hello,\n\n" +
-                    "Please delete your account by clicking the link: \n" +
-                    prefix +
-                    topLevelDomain +
-                    "/delete/" +
-                    p.token +
-                    ".\n"
-            };
-            smtpTransport.sendMail(mailOptions, function(err) {
+            sendMail(("Hello,\n\n" +
+                "Please delete your account by clicking the link: \n" +
+                topLevelDomain +
+                "/delete/" +
+                p.token +
+                ".\n"), ("CleanConnect Account Deletion"), req.user.email, function(err) {
                 if (err) {
                     return res.status(500).json({
                         success: false,
@@ -368,15 +344,11 @@ router.delete("/deleteinfo", passport.authenticate("jwt", {
                     });
                 }
             });
-        }).then(res.json({
-            success: false,
-            status: "A deletion email has been sent to " + req.user.email + "."
-        }))
-        .catch(err => res.json({
-            success: false,
-            simple: "Failed to send mail.",
-            details: err
-        }));
+            res.json({
+                success: false,
+                status: "A deletion email has been sent to " + req.user.email + "."
+            });
+        });
 });
 
 // ROUTE: GET user/delete/:token
@@ -417,39 +389,26 @@ router.post("/changeinfo", passport.authenticate("jwt", {
         .save()
         .then(p => {
             // Send the email
-            var mailOptions = {
-                from: "no-reply@" + topLevelDomain,
-                to: req.user.email,
-                subject: "Account Changes",
-                text: "Hello,\n\n" +
-                    "Please alter your account by clicking the link: \n" +
-                    prefix +
-                    topLevelDomain +
-                    "/change/" +
-                    p.token +
-                    ".\n"
-            };
-            smtpTransport.sendMail(mailOptions, function(err) {
+            sendMail(("Hello,\n\n" +
+                "Please alter your account by clicking the link: \n" +
+                topLevelDomain +
+                "/change/" +
+                p.token +
+                ".\n"), ("CleanConnect Account Changes"), req.user.email, function(err) {
                 if (err) {
                     return res.status(500).json({
                         success: false,
                         simple: "Failed to send mail.",
                         details: err.message
                     });
+                } else {
+                    res.json({
+                        success: true,
+                        status: "A settings email has been sent to " + req.user.email + "."
+                    })
                 }
             });
-        })
-        .then(
-            res.json({
-                success: true,
-                status: "A settings email has been sent to " + req.user.email + "."
-            })
-        )
-        .catch(err => res.json({
-            success: false,
-            simple: "Failed to send mail.",
-            details: err
-        }));
+        });
 });
 
 // ROUTE: POST user/change/:token
@@ -484,7 +443,7 @@ router.post(
                             .then(profile => {
                                 if (profile) {
                                     //update a profile
-                                    Profile.findOneAndUpdate({
+                                    User.findOneAndUpdate({
                                         _id: req.user.id
                                     }, {
                                         $set: profileFields

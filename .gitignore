@@ -78,3 +78,4 @@ typings/
 frontend/.env
 frontend/.env.development
 frontend/.env.production
+log.txt

@@ -3,11 +3,11 @@ const express = require('express');
 const fileUpload = require('express-fileupload');
 const mongoose = require('mongoose');
 const passport = require('passport');
-const validate = require('uuid-validate');
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
 const SVGtoPDF = require('svg-to-pdfkit');
-const uuidv1 = require('uuid/v1');
+const randomBytes = require("randombytes");
+
 const fs = require('fs');
 var async = require('async');
 //Tag model import
@@ -21,7 +21,6 @@ const app = express();
 const router = express.Router();
 router.use(fileUpload());
 //document settings and blank template image for pdf creator
-const fillImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKQAAACkAQMAAAAjexcCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAA1BMVEX///+nxBvIAAAAGUlEQVQYGe3BAQEAAACCoP6vdkjAAAAAuBYOGAABPIptXAAAAABJRU5ErkJggg==';
 const docsettings = [{ size: 'LETTER' }];
 // ROUTE: GET tag/test
 // DESCRIPTION: Tests post route
@@ -260,7 +259,7 @@ router.post('/comment/:id', (req, res) => {
         if (req.files) {
             let image = req.files.img;
             if (image.size < 5100000 && (image.mimetype == "video/mp4" || image.mimetype == "video/webm" || image.mimetype == "image/webp" || image.mimetype == "image/gif" || image.mimetype == "image/jpeg" || image.mimetype == "image/png" || image.mimetype == "image/jpg" || image.mimetype == "image/tiff")) {
-                const name = uuidv1() + "." + image.name.split(".")[1];
+                const name = randomBytes(16).toString("hex") + "." + image.name.split(".")[1];
                 image.mv('./temp/' + name);
                 comment = {
                     img: name,
@@ -358,7 +357,7 @@ router.post('/print/', passport.authenticate('jwt', {
             if (err) return callback(err);
             try {
                 if (list[i].qrcode == undefined) {
-                    QRCode.toDataURL('http://localhost:3000/tag/' + pos._id, function(err, url) {
+                    QRCode.toDataURL('http://cleanconnect.jakesandbox.com/tag/' + pos._id, function(err, url) {
 
                         if (err) res.status(500).json({
                             success: false,
@@ -404,14 +403,17 @@ router.post('/print/', passport.authenticate('jwt', {
             //cbuff stores page position
             var cbuff = 0;
             const doc = new PDFDocument(docsettings);
-            const fn = uuidv1();
+            const fn = randomBytes(16).toString("hex");
+
             doc.pipe(fs.createWriteStream(process.env.rootDir + '/temp/' + fn + '.pdf'));
             var b = 0;
-            for (var g = 0; g < pi.length; g++) { //adds one less page than it should??!!!!!!
+            for (var g = 0; g < pi.length; g++) {
                 for (var i = 0; i < pi[g]; i++) {
                     //replace image and room name dummy values with values from json req
                     svgbuff = svgbuff.replace('room' + ((b - (cbuff * 10))), list[g].name);
                     svgbuff = svgbuff.replace('img' + ((b - (cbuff * 10))), list[g].qrcode);
+                    svgbuff = svgbuff.replace('<!-- bimgrp' + ((b - (cbuff * 10))) + ' -->', '');
+                    svgbuff = svgbuff.replace('<!-- ' + ((b - (cbuff * 10))) + 'eimgrp -->', '');
                     b++;
                     if (b != 0 && b % 10 == 0) {
                         if (cbuff != 0) doc.addPage();
@@ -423,12 +425,10 @@ router.post('/print/', passport.authenticate('jwt', {
             }
             if (svgbuff.indexOf("room9") !== -1) {
                 for (var r = 0; r < 10; r++) {
-                    svgbuff = svgbuff.replace('room' + r, '');
-                    svgbuff = svgbuff.replace('img' + r, fillImg);
+                    svgbuff = svgbuff.replace(/(bimgrp)(.*?)(eimgrp)/, "");
                 }
                 doc.addPage();
                 SVGtoPDF(doc, svgbuff, 0, 0);
-                // svgbuff = data.toString();
             }
             //finish writing to document
             doc.end();

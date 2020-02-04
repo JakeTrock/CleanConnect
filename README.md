@@ -38,6 +38,7 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * Bug where pdf for tags starts on second page if less than one page of tags
 * Delete units from tags pdf if empty
 * Potentially replace blobs with images
+* create anon route for read-only status updates
 
 ## Issue board (Justin)
 * Replace try/catch blocks eventually

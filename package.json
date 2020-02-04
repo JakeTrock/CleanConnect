@@ -1,37 +1,37 @@
 {
-  "name": "CleanConnect",
-  "version": "1.0.0",
-  "description": "Janitorial coordination system",
-  "main": "",
-  "scripts": {
-    "client": "cd frontend && npm start",
-    "server": "cd backend && npm start",
-    "prodClient": "cd frontend && serve -s build -l 3000",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently --kill-others \"npm run server\" \"npm run client\"",
-    "prod": "concurrently --kill-others \"npm run server\" \"npm run prodClient\""
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/hokuco/CleanConnect.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/hokuco/CleanConnect/issues"
-  },
-  "homepage": "https://github.com/hokuco/CleanConnect#readme",
-  "dependencies": {
-    "concurrently": "^5.0.0"
-  },
-  "devDependencies": {
-    "eslint": "^6.7.2",
-    "eslint-config-standard": "^14.1.0",
-    "eslint-plugin-import": "^2.19.1",
-    "eslint-plugin-node": "^10.0.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-react": "^7.17.0",
-    "eslint-plugin-standard": "^4.0.1"
-  }
+    "name": "CleanConnect",
+    "version": "1.0.0",
+    "description": "Janitorial coordination system",
+    "main": "",
+    "scripts": {
+        "client": "cd frontend && npm start",
+        "server": "cd backend && npm start",
+        "prodClient": "cd frontend && serve -s build -l 3000",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev": "concurrently --kill-others \"npm run server\" \"npm run client\"",
+        "prod": "concurrently --kill-others \"npm run server\" \"npm run prodClient\""
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/hokuco/CleanConnect.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/hokuco/CleanConnect/issues"
+    },
+    "homepage": "https://github.com/hokuco/CleanConnect#readme",
+    "dependencies": {
+        "concurrently": "^5.0.0"
+    },
+    "devDependencies": {
+        "eslint": "^6.7.2",
+        "eslint-config-standard": "^14.1.0",
+        "eslint-plugin-import": "^2.19.1",
+        "eslint-plugin-node": "^10.0.0",
+        "eslint-plugin-promise": "^4.2.1",
+        "eslint-plugin-react": "^7.17.0",
+        "eslint-plugin-standard": "^4.0.1"
+    }
 }
