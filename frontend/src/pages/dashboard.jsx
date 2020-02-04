@@ -137,6 +137,8 @@ class Dashboard extends Component {
         </Unit>
       );
     }
+    customBehavior = customBehavior.bind(this);
+
     return (
       <React.Fragment>
         <Layout name="Issue Tracker">
