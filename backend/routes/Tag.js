@@ -1,23 +1,24 @@
 //import all libs
 const express = require('express');
 const fileUpload = require('express-fileupload');
-const mongoose = require('mongoose');
+//const mongoose = require('mongoose');
 const passport = require('passport');
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
 const SVGtoPDF = require('svg-to-pdfkit');
 const randomBytes = require("randombytes");
-
 const fs = require('fs');
 var async = require('async');
 //Tag model import
 const Tag = require('../models/Tag.js');
+const Comment = require('../models/Comment.js');
+
 // Validation Part for input
 const validatePostInput = require('../validation/tag.js');
 const apr = require('../validation/apr.js');
 const isprintable = require('../validation/is-printable.js');
 //configure express addons
-const app = express();
+// const app = express();
 const router = express.Router();
 router.use(fileUpload());
 //document settings and blank template image for pdf creator
@@ -30,15 +31,33 @@ router.get('/test', (req, res) => res.send("Tag Works"));
 // DESCRIPTION: pregenerates qr codes, skipping tags that are already generated
 router.get('/getall', passport.authenticate('jwt', {
     session: false
-}), (req, res) => {
-    Tag.find({
+}), async(req, res) => {
+    await Tag.find({
         user: req.user._id
-    }).then(posts => res.json(posts)).catch(err => res.status(404).json({
+    }).then(async posts => {
+        if (posts) {
+            for (var n in posts) {
+                await Comment.find({
+                    tag: posts[n]._id
+                }).then(cmts => {
+                    if (cmts) {
+                        var tmpcmt = [];
+                        for (var z in cmts) {
+                            tmpcmt.push(cmts[z]);
+                        }
+                        posts[n].comments = tmpcmt;
+                    }
+                });
+            }
+            res.json(posts);
+        }
+    }).catch(err => res.status(404).json({
         success: false,
         simple: "No posts found.",
         details: err
     }));
 });
+
 // ROUTE: GET tag/genimgs
 // DESCRIPTION: gets all tags of user based on their session token id
 router.get('/genimgs', passport.authenticate('jwt', {
@@ -52,8 +71,7 @@ router.get('/genimgs', passport.authenticate('jwt', {
             if (err) return callback(err);
             try {
                 if (list[i].qrcode == undefined) {
-                    QRCode.toDataURL('http://localhost:3000/tag/' + pos._id, function(err, url) {
-
+                    QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/tag/' + pos._id, function(err, url) {
                         if (err) res.status(500).json({
                             success: false,
                             simple: "Error generating cache.",
@@ -144,7 +162,7 @@ router.post('/new', passport.authenticate('jwt', {
             new Tag({
                 name: tagName,
                 user: req.user._id
-            }).save().then(post => res.json({
+            }).save().then(res.json({
                 success: true
             })).catch((e) => res.status(500).json({
                 success: false,
@@ -189,27 +207,27 @@ router.post('/edit/:id', passport.authenticate('jwt', {
                 sc = false;
             }
         }
-        if (sc)
+        if (sc) {
             Tag.findOneAndUpdate({
-                _id: req.params.id,
-                user: req.user._id.toString()
-            }, {
-                $set: { name: tagName }
-            }, {
-                new: true
-            }).then(res.json({ success: true }))
-            .catch(e => res.json({
-                success: false,
-                simple: "Error updating tag",
-                details: e
-            }));
-        else
+                    _id: req.params.id,
+                    user: req.user._id.toString()
+                }, {
+                    $set: { name: tagName }
+                }, {
+                    new: true
+                }).then(res.json({ success: true }))
+                .catch(e => res.json({
+                    success: false,
+                    simple: "Error updating tag",
+                    details: e
+                }));
+        } else {
             res.status(400).json({
                 success: false,
                 simple: "Name not unique."
             });
+        }
     });
-
 });
 
 // ROUTE: DELETE tag/:id
@@ -220,19 +238,35 @@ router.delete('/:id', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     Tag.findOne({
-            _id: req.params.id,
-            user: req.user.id
-        })
-        .then(post => {
-            post.deleteOne().then(() => res.json({
-                success: true
-            }));
-        })
-        .catch(err => res.status(404).json({
+        _id: req.params.id,
+        user: req.user.id
+    }).then(post => {
+        post.markedForDeletion = true;
+        post.removedAt = new Date();
+        Comment.find({
+            tag: post._id
+        }).then(cmts => {
+            if (cmts) {
+                for (var n in cmts) {
+                    n.markedForDeletion = true;
+                    n.removedAt = new Date();
+                }
+            }
+        }).catch(err => res.status(404).json({
             success: false,
-            simple: "Tag not found",
+            simple: "No posts found.",
             details: err
         }));
+        post.save()
+            //post.deleteOne()
+            .then(() => res.json({
+                success: true
+            }));
+    }).catch(err => res.status(404).json({
+        success: false,
+        simple: "Tag not found",
+        details: err
+    }));
 });
 
 
@@ -262,12 +296,14 @@ router.post('/comment/:id', (req, res) => {
                 const name = randomBytes(16).toString("hex") + "." + image.name.split(".")[1];
                 image.mv('./temp/' + name);
                 comment = {
+                    tag: req.params.id,
                     img: name,
                     text: req.body.text,
                     sev: req.body.sev //severity 0 to 2, 0 being green, 2 being red
                 };
             } else {
                 return res.status(400).json({
+                    tag: req.params.id,
                     success: false,
                     simple: "invalid filetype",
                 });
@@ -279,15 +315,20 @@ router.post('/comment/:id', (req, res) => {
             };
         }
         // Add comment to the array
-        post.comments.unshift(comment);
-        post.dateLastAccessed = Date.now();
-        //save
-        post.save().then(post => res.json({
-            success: true
-        })).catch((e) => res.json({
-            success: false,
-            details: e
-        }));
+        try {
+            post.dateLastAccessed = new Date();
+            new Comment(comment).save();
+            post.save();
+            res.json({
+                success: true
+            })
+        } catch (e) {
+            res.status(500).json({
+                success: false,
+                simple: "Error creating tag.",
+                details: e
+            })
+        }
     });
 });
 
@@ -298,39 +339,35 @@ router.post('/comment/:id', (req, res) => {
 router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
-    Tag.findOne({
-        _id: req.params.id,
-        user: req.user.id
+    Comment.findOne({
+        tag: req.params.id,
+        user: req.params.comment_id
     }).then(post => {
         // Check if the comment exists
-        if (post.comments.filter(comment => comment.cid.toString() === req.params.comment_id).length === 0) {
+        if (!post) {
             return res.status(404).json({
                 success: false,
                 simple: "Your comment doesn't exist"
             });
         }
-        // Get remove index
-
-        const removeIndex = post.comments
-            .map(item => item.cid.toString())
-            .indexOf(req.params.comment_id);
-
-        // Splice comment out of the array
-        post.comments.splice(removeIndex, 1);
-
+        // post.comments.splice(removeIndex, 1);
+        post.markedForDeletion = true;
+        post.removedAt = new Date();
         post.save().then(res.json({
             success: true
         })).catch((e) => res.json({
             success: false,
-            simple: "Error saving tag.",
+            simple: "Error saving comment.",
             details: e
         }));
     }).catch(err => res.status(404).json({
         success: false,
-        simple: "Tag not found.",
+        simple: "Comment not found.",
         details: err
     }));
 });
+
+
 // ROUTE: GET tag/print/
 // DESCRIPTION: prints tags as qr codes, allowing people to access them in real life
 // INPUT: an array as long as the number of tags you have, containing numbers which tell the program the number of times to print each tag, and an array of tags(in the same format as they are in getall)
@@ -357,7 +394,7 @@ router.post('/print/', passport.authenticate('jwt', {
             if (err) return callback(err);
             try {
                 if (list[i].qrcode == undefined) {
-                    QRCode.toDataURL('http://cleanconnect.jakesandbox.com/tag/' + pos._id, function(err, url) {
+                    QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/tag/' + pos._id, function(err, url) {
 
                         if (err) res.status(500).json({
                             success: false,
