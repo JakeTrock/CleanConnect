@@ -32,13 +32,15 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * Add html/styling to email verification
 * Add payment with [this](https://developers.braintreepayments.com/guides/payment-methods/node)
 * Ask justin about react deployment
+* optimize https://medium.com/skyshidigital/6-tricks-to-speed-up-and-improve-your-node-js-performance-fadc06d15cbe
 
 ## Issue board (Jake)
 * Add git webhook to our webserver
 * Bug where pdf for tags starts on second page if less than one page of tags
 * Delete units from tags pdf if empty
 * Potentially replace blobs with images
-* create anon route for read-only status updates
+* `Delete failed with error: ${err}` might work for print reps
+* possibly remove unneeded = xxx = from models
 
 ## Issue board (Justin)
 * Replace try/catch blocks eventually
