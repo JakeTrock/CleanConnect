@@ -1,1 +1,1 @@
-sudo systemctl stop mongodb docker 
+sudo systemctl stop mongodb

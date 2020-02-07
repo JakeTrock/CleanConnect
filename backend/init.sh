@@ -1,1 +1,1 @@
-sudo systemctl start mongodb docker 
+sudo systemctl start mongodb
