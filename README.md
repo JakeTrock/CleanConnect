@@ -40,7 +40,6 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * Delete units from tags pdf if empty
 * Potentially replace blobs with images
 * `Delete failed with error: ${err}` might work for print reps
-* possibly remove unneeded = xxx = from models
 
 ## Issue board (Justin)
 * Replace try/catch blocks eventually

@@ -23,4 +23,4 @@ const UserIndexSchema = new Schema({
     }
 });
 
-module.exports = UserIndex = mongoose.model('UserIndex', UserIndexSchema);
+module.exports = mongoose.model('UserIndex', UserIndexSchema);
