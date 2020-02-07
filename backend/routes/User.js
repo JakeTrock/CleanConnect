@@ -1,5 +1,4 @@
 //import modules
-const fs = require('fs');
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -16,9 +15,9 @@ const keys = require("../config/keys");
 //Load user models
 const User = require("../models/User");
 const UserIndex = require("../models/UserIndex");
+const Tag = require('../models/Tag.js');
 //declare consts
 // const creds = process.env.mailCreds;
-const topLevelDomain = "https://cleanconnect.jakesandbox.com";
 
 
 // ROUTE: GET user/test
@@ -40,7 +39,7 @@ const smtpTransport = nodemailer.createTransport({
 
 function sendMail(body, sub, to, cb) {
     smtpTransport.sendMail({
-        from: "no-reply@" + "cleanconnect.jakesandbox.com",
+        from: "no-reply@" + process.env.topLevelDomain,
         to: to,
         subject: sub,
         text: body
@@ -52,7 +51,7 @@ smtpTransport.on("error", err => {
     console.log("SMTP error: ", err.message);
 });
 
-smtpTransport.verify(function(error, success) {
+smtpTransport.verify(function(error) {
     if (error) {
         console.error(error);
     } else {
@@ -182,7 +181,7 @@ router.post("/register", (req, res) => {
 
                                         sendMail(("Hello,\n\n" +
                                             "Please verify your account by clicking the link: \n" +
-                                            topLevelDomain +
+                                            process.env.domainPrefix + process.env.topLevelDomain +
                                             "/user/confirmation/" +
                                             p.token +
                                             ".\n"), ("CleanConnect Account Verification"), req.body.email, function(err) {
@@ -194,7 +193,7 @@ router.post("/register", (req, res) => {
                                                 });
                                             }
                                         });
-                                        console.log(topLevelDomain + "/user/confirmation/" + p.token + "\n");
+                                        console.log(process.env.domainPrefix + process.env.topLevelDomain + "/user/confirmation/" + p.token + "\n");
                                         res.json({
                                             success: true,
                                             status: "A verification email has been sent to " + req.body.email + "."
@@ -247,7 +246,7 @@ router.post("/resend", (req, res) => {
                 // Send the email
                 sendMail(("Hello,\n\n" +
                     "Please verify your account by clicking the link: \n" +
-                    topLevelDomain +
+                    process.env.domainPrefix + process.env.topLevelDomain +
                     "/user/confirmation/" +
                     p.token +
                     ".\n"), ("CleanConnect Account Verification"), req.body.email, function(err) {
@@ -259,7 +258,7 @@ router.post("/resend", (req, res) => {
                         });
                     }
                 });
-                console.log(topLevelDomain + "/user/confirmation/" + p.token + "\n");
+                console.log(process.env.domainPrefix + process.env.topLevelDomain + "/user/confirmation/" + p.token + "\n");
                 res.json({
                     success: true,
                     status: "A verification email has been sent to " + req.body.email + "."
@@ -332,7 +331,7 @@ router.delete("/deleteinfo", passport.authenticate("jwt", {
             // Send the email
             sendMail(("Hello,\n\n" +
                 "Please delete your account by clicking the link: \n" +
-                topLevelDomain +
+                process.env.domainPrefix + process.env.topLevelDomain +
                 "/delete/" +
                 p.token +
                 ".\n"), ("CleanConnect Account Deletion"), req.user.email, function(err) {
@@ -361,6 +360,7 @@ router.get("/delete/:token", passport.authenticate("jwt", {
         if (tk._userId == req.user._id)
             User.findOneAndRemove({ _id: tk._userId })
             .then(UserIndex.findOneAndRemove({ _userId: tk._userId }))
+            .then(Tag.deleteMany({ user: req.user._id }))
             .then(() => res.json({
                 success: true
             }))
@@ -391,7 +391,7 @@ router.post("/changeinfo", passport.authenticate("jwt", {
             // Send the email
             sendMail(("Hello,\n\n" +
                 "Please alter your account by clicking the link: \n" +
-                topLevelDomain +
+                process.env.domainPrefix + process.env.topLevelDomain +
                 "/change/" +
                 p.token +
                 ".\n"), ("CleanConnect Account Changes"), req.user.email, function(err) {
