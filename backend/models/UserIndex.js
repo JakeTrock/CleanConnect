@@ -10,7 +10,7 @@ const UserIndexSchema = new Schema({
     token: {
         type: String,
         required: true,
-        index:true
+        index: true
     },
     isCritical: {
         type: Boolean,
@@ -19,8 +19,7 @@ const UserIndexSchema = new Schema({
     createdAt: {
         type: Date,
         required: true,
-        default: Date.now,
-        expires: 43200
+        default: new Date()
     }
 });
 

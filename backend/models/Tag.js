@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const PostSchema = new Schema({
+const TagSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
         ref: 'User',
-        index:true
+        index: true
     },
     qrcode: {
         type: String
@@ -14,33 +14,20 @@ const PostSchema = new Schema({
         type: String,
         required: true
     },
-    comments: [{
-        cid: {
-            type: String,
-            default:Math.random().toString(36).substring(7),
-            index:true
-        },
-        img: {
-            type: String,
-            data: Buffer
-        },
-        text: {
-            type: String,
-            required: true
-        },
-        sev: {
-            type: Number,
-            required: true
-        },
-        date: {
-            type: Date,
-            default: Date.now
-        }
-    }],
+    comments: {
+        type: Array
+    },
+    markedForDeletion: {
+        type: Boolean,
+        index: true
+    },
+    removedAt: {
+        type: Date
+    },
     dateLastAccessed: {
         type: Date,
-        default: Date.now
+        default: new Date()
     }
 });
 
-module.exports = Post = mongoose.model('Post', PostSchema);
+module.exports = Tag = mongoose.model('Tag', TagSchema);
