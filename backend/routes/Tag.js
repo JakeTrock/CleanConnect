@@ -446,11 +446,10 @@ router.post('/print/', passport.authenticate('jwt', {
             var b = 0;
             for (var g = 0; g < pi.length; g++) {
                 for (var i = 0; i < pi[g]; i++) {
-                    //replace image and room name dummy values with values from json req
-                    svgbuff = svgbuff.replace('room' + ((b - (cbuff * 10))), list[g].name);
-                    svgbuff = svgbuff.replace('img' + ((b - (cbuff * 10))), list[g].qrcode);
-                    svgbuff = svgbuff.replace('<!-- bimgrp' + ((b - (cbuff * 10))) + ' -->', '');
-                    svgbuff = svgbuff.replace('<!-- ' + ((b - (cbuff * 10))) + 'eimgrp -->', '');
+                    svgbuff = svgbuff.replace(`room${((b - (cbuff * 10)))}`, list[g].name);
+                    svgbuff = svgbuff.replace(`img${((b - (cbuff * 10)))}`, list[g].qrcode);
+                    svgbuff = svgbuff.replace(`<!-- bimgrp${((b - (cbuff * 10)))} -->`, '');
+                    svgbuff = svgbuff.replace(`<!-- ${((b - (cbuff * 10)))}eimgrp -->`, '');
                     b++;
                     if (b != 0 && b % 10 == 0) {
                         if (cbuff != 0) doc.addPage();
