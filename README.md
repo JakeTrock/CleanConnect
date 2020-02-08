@@ -36,9 +36,6 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * new slogan needed for qr stickers
 
 ## Issue board (Jake)
-* Add git webhook to our webserver
-* Bug where pdf for tags starts on second page if less than one page of tags
-* Delete units from tags pdf if empty
 * Potentially replace blobs with images
 
 ## Issue board (Justin)
