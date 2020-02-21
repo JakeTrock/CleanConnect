@@ -37,6 +37,9 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 
 ## Issue board (Jake)
 * Potentially replace blobs with images
+* allow user to call getall with boolean and see deleted tags
+* for some reason, first tag dosen't have qrurl
+* prevent the same image/pdf from being used twice(maybe use its hash as a name, so it cant be replicated)
 
 ## Issue board (Justin)
 * Replace try/catch blocks eventually
@@ -48,6 +51,7 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 
 
 ### future
+* use this for pdf in future? https://github.com/kazuhikoarase/sticker-works
 * add email notifications of errors
 * OR
 * add frontend issues panel that shows errors as they happen
@@ -77,8 +81,6 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 
 
 ### Jake-specific:
-/home/bluushift/Desktop/CleanConnect/backend/config,/home/bluushift/Desktop/CleanConnect/backend/models,/home/bluushift/Desktop/CleanConnect/backend/routes,/home/bluushift/Desktop/CleanConnect/backend/temp,/home/bluushift/Desktop/CleanConnect/backend/TESTING,/home/bluushift/Desktop/CleanConnect/backend/validation
-
 
 ### Justin-specific:
 
