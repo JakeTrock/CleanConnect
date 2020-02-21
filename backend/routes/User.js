@@ -12,10 +12,11 @@ const validateRegisterInput = require("../validation/register");
 const validateLoginInput = require("../validation/login");
 //load keys
 const keys = require("../config/keys");
-//Load user models
+//Load models
 const User = require("../models/User");
 const UserIndex = require("../models/UserIndex");
 const Tag = require('../models/Tag.js');
+const Comment = require('../models/Comment.js');
 //declare consts
 // const creds = process.env.mailCreds;
 
@@ -77,6 +78,7 @@ router.post("/register", (req, res) => {
         const newUser = new User({
             name: req.body.name,
             email: req.body.email,
+            dashUrl: randomBytes(16).toString("hex").substring(8),
             password: req.body.password
         });
 
@@ -628,10 +630,48 @@ router.get('/current', passport.authenticate('jwt', {
             tier: profile.tier,
             _id: profile._id,
             name: profile.name,
+            dashUrl: profile.dashUrl,
             email: profile.email,
             date: profile.date,
         });
     })
+});
+
+// ROUTE: GET tag/dash/:id
+// DESCRIPTION: anonymous dashboard only accessible with secret keystring
+router.get('/dash/:id', async(req, res) => {
+    await User.findOne({
+        dashUrl: req.params.id
+    }).then(async user => {
+        await Tag.find({
+            user: user._id
+        }).then(async posts => {
+            if (posts) {
+                for (var n in posts) {
+                    await Comment.find({
+                        tag: posts[n]._id
+                    }).then(cmts => {
+                        if (cmts) {
+                            var tmpcmt = [];
+                            for (var z in cmts) {
+                                tmpcmt.push(cmts[z]);
+                            }
+                            posts[n].comments = tmpcmt;
+                        }
+                    });
+                }
+                res.json(posts);
+            }
+        }).catch(err => res.status(404).json({
+            success: false,
+            simple: "No posts found.",
+            details: err
+        }));
+    }).catch(err => res.status(404).json({
+        success: false,
+        simple: "No users found.",
+        details: err
+    }));
 });
 //exports current script as module
 module.exports = router;

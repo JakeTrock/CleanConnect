@@ -1,15 +1,13 @@
 //import all libs
 const express = require('express');
 const fileUpload = require('express-fileupload');
-//const mongoose = require('mongoose');
 const passport = require('passport');
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
 const SVGtoPDF = require('svg-to-pdfkit');
 const randomBytes = require("randombytes");
 const fs = require('fs');
-var async = require('async');
-//Tag model import
+//model import
 const Tag = require('../models/Tag.js');
 const Comment = require('../models/Comment.js');
 
@@ -18,7 +16,6 @@ const validatePostInput = require('../validation/tag.js');
 const apr = require('../validation/apr.js');
 const isprintable = require('../validation/is-printable.js');
 //configure express addons
-// const app = express();
 const router = express.Router();
 router.use(fileUpload());
 //document settings and blank template image for pdf creator
@@ -29,82 +26,64 @@ router.get('/test', (req, res) => res.send("Tag Works"));
 
 // ROUTE: GET tag/getall
 // DESCRIPTION: pregenerates qr codes, skipping tags that are already generated
-router.get('/getall', passport.authenticate('jwt', {
+router.post('/getall', passport.authenticate('jwt', {
     session: false
 }), async(req, res) => {
-    await Tag.find({
-        user: req.user._id
-    }).then(async posts => {
-        if (posts) {
-            for (var n in posts) {
-                await Comment.find({
-                    tag: posts[n]._id
-                }).then(cmts => {
-                    if (cmts) {
-                        var tmpcmt = [];
-                        for (var z in cmts) {
-                            tmpcmt.push(cmts[z]);
+    if (req.body.showDead) {
+        await Tag.find({
+            user: req.user._id
+        }).then(async posts => {
+            if (posts) {
+                for (var n in posts) {
+                    await Comment.find({
+                        tag: posts[n]._id
+                    }).then(cmts => {
+                        if (cmts) {
+                            var tmpcmt = [];
+                            for (var z in cmts) {
+                                tmpcmt.push(cmts[z]);
+                            }
+                            posts[n].comments = tmpcmt;
                         }
-                        posts[n].comments = tmpcmt;
-                    }
-                });
-            }
-            res.json(posts);
-        }
-    }).catch(err => res.status(404).json({
-        success: false,
-        simple: "No posts found.",
-        details: err
-    }));
-});
-
-// ROUTE: GET tag/genimgs
-// DESCRIPTION: gets all tags of user based on their session token id
-router.get('/genimgs', passport.authenticate('jwt', {
-    session: false
-}), (req, res) => {
-    Tag.find({
-        user: req.user._id
-    }, function(err, list) {
-        async.forEachOf(list, function(pos, i, callback) {
-            //create data url, call insertion function
-            if (err) return callback(err);
-            try {
-                if (list[i].qrcode == undefined) {
-                    QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/tag/' + pos._id, function(err, url) {
-                        if (err) res.status(500).json({
-                            success: false,
-                            simple: "Error generating cache.",
-                            details: err
-                        });
-                        Tag.findOneAndUpdate({
-                            _id: pos._id
-                        }, {
-                            qrcode: url
-                        }, {
-                            new: true
-                        }).catch(err => res.status(500).json({
-                            success: false,
-                            simple: "Error generating cache.",
-                            details: err
-                        }));
                     });
                 }
-            } catch (e) {
-                return callback(e)
+                res.json(posts);
             }
-            //call callback when finished
-            callback();
-        }, err => {
-            if (err) return res.status(500).json({
-                success: false,
-                simple: "Error generating cache.",
-                details: err.message
-            });
-            res.json({ success: true });
-        })
-    });
+        }).catch(err => res.status(404).json({
+            success: false,
+            simple: "No posts found.",
+            details: err
+        }));
+    } else {
+        await Tag.find({
+            user: req.user._id,
+            markedForDeletion: false
+        }).then(async posts => {
+            if (posts) {
+                for (var n in posts) {
+                    await Comment.find({
+                        tag: posts[n]._id,
+                        markedForDeletion: false
+                    }).then(cmts => {
+                        if (cmts) {
+                            var tmpcmt = [];
+                            for (var z in cmts) {
+                                tmpcmt.push(cmts[z]);
+                            }
+                            posts[n].comments = tmpcmt;
+                        }
+                    });
+                }
+                res.json(posts);
+            }
+        }).catch(err => res.status(404).json({
+            success: false,
+            simple: "No posts found.",
+            details: err
+        }));
+    }
 });
+
 // ROUTE: GET tag/getone/id
 // DESCRIPTION: gets the metadata of a single tag based on its id, can also be used to confirm if a tag exists
 router.get('/getone/:id', passport.authenticate('jwt', {
@@ -162,9 +141,20 @@ router.post('/new', passport.authenticate('jwt', {
             new Tag({
                 name: tagName,
                 user: req.user._id
-            }).save().then(res.json({
-                success: true
-            })).catch((e) => res.status(500).json({
+            }).save().then(
+                QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/tag/' + this._id, function(err, url) {
+                    Tag.findOneAndUpdate({
+                        name: tagName,
+                        user: req.user._id
+                    }, {
+                        $set: { qrcode: url }
+                    }, {
+                        new: true
+                    }).then(res.json({
+                        success: true
+                    }))
+                })
+            ).catch((e) => res.status(500).json({
                 success: false,
                 simple: "Error creating tag.",
                 details: e
@@ -341,7 +331,7 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
 }), (req, res) => {
     Comment.findOne({
         tag: req.params.id,
-        user: req.params.comment_id
+        _id: req.params.comment_id
     }).then(post => {
         // Check if the comment exists
         if (!post) {
@@ -371,6 +361,7 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
 // ROUTE: GET tag/print/
 // DESCRIPTION: prints tags as qr codes, allowing people to access them in real life
 // INPUT: an array as long as the number of tags you have, containing numbers which tell the program the number of times to print each tag, and an array of tags(in the same format as they are in getall)
+
 router.post('/print/', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
@@ -389,43 +380,6 @@ router.post('/print/', passport.authenticate('jwt', {
                 details: errors
             });
         }
-        async.forEachOf(list, function(pos, i, callback) {
-            //create data url, call insertion function
-            if (err) return callback(err);
-            try {
-                if (list[i].qrcode == undefined) {
-                    QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/tag/' + pos._id, function(err, url) {
-
-                        if (err) res.status(500).json({
-                            success: false,
-                            simple: "Error generating cache.",
-                            details: err
-                        });
-                        Tag.findOneAndUpdate({
-                            _id: pos._id
-                        }, {
-                            qrcode: url
-                        }, {
-                            new: true
-                        }).catch(err => res.status(500).json({
-                            success: false,
-                            simple: "Error generating cache.",
-                            details: err
-                        }));
-                    });
-                }
-            } catch (e) {
-                return callback(e)
-            }
-            //call callback when finished
-            callback();
-        }, err => {
-            if (err) return res.status(500).json({
-                success: false,
-                simple: "Error generating cache.",
-                details: err.message
-            });
-        })
         fs.readFile(__dirname + '/template.svg', function(err, data) {
             if (err) {
                 res.status(500).json({
@@ -466,6 +420,8 @@ router.post('/print/', passport.authenticate('jwt', {
                 doc.addPage();
                 SVGtoPDF(doc, svgbuff, 0, 0);
             }
+            // console.log(svgbuff);
+
             //finish writing to document
             doc.end();
             //redirect user to pdf page
@@ -476,6 +432,111 @@ router.post('/print/', passport.authenticate('jwt', {
         });
     });
 });
+// router.post('/print/', passport.authenticate('jwt', {
+//     session: false
+// }), (req, res) => {
+//     Tag.find({
+//         user: req.user._id
+//     }, function(err, list) {
+//         const pi = req.body.printIteration;
+//         const {
+//             errors,
+//             isValid
+//         } = isprintable(req.body, list.length);
+//         if (!isValid) {
+//             return res.status(400).json({
+//                 success: false,
+//                 simple: "Invalid post body.",
+//                 details: errors
+//             });
+//         }
+//         async.forEachOf(list, function(pos, i, callback) {
+//             //create data url, call insertion function
+//             if (err) return callback(err);
+//             try {
+//                 if (list[i].qrcode == undefined) {
+//                     QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/tag/' + pos._id, function(err, url) {
+
+//                         if (err) res.status(500).json({
+//                             success: false,
+//                             simple: "Error generating cache.",
+//                             details: err
+//                         });
+//                         Tag.findOneAndUpdate({
+//                             _id: pos._id
+//                         }, {
+//                             qrcode: url
+//                         }, {
+//                             new: true
+//                         }).catch(err => res.status(500).json({
+//                             success: false,
+//                             simple: "Error generating cache.",
+//                             details: err
+//                         }));
+//                     });
+//                 }
+//             } catch (e) {
+//                 return callback(e)
+//             }
+//             //call callback when finished
+//             callback();
+//         }, err => {
+//             if (err) return res.status(500).json({
+//                 success: false,
+//                 simple: "Error generating cache.",
+//                 details: err.message
+//             });
+//         })
+//         fs.readFile(__dirname + '/template.svg', function(err, data) {
+//             if (err) {
+//                 res.status(500).json({
+//                     success: false,
+//                     simple: "Error generating pdf.",
+//                     details: err
+//                 })
+//             }
+//             //svg template file
+//             var svgbuff = data.toString();
+//             //array of pages defined
+//             //cbuff stores page position
+//             var cbuff = 0;
+//             const doc = new PDFDocument(docsettings);
+//             const fn = randomBytes(16).toString("hex");
+
+//             doc.pipe(fs.createWriteStream(process.env.rootDir + '/temp/' + fn + '.pdf'));
+//             var b = 0;
+//             for (var g = 0; g < pi.length; g++) {
+//                 for (var i = 0; i < pi[g]; i++) {
+//                     svgbuff = svgbuff.replace(`room${((b - (cbuff * 10)))}`, list[g].name);
+//                     svgbuff = svgbuff.replace(`img${((b - (cbuff * 10)))}`, list[g].qrcode);
+//                     svgbuff = svgbuff.replace(`<!-- bimgrp${((b - (cbuff * 10)))} -->`, '');
+//                     svgbuff = svgbuff.replace(`<!-- ${((b - (cbuff * 10)))}eimgrp -->`, '');
+//                     b++;
+//                     if (b != 0 && b % 10 == 0) {
+//                         if (cbuff != 0) doc.addPage();
+//                         SVGtoPDF(doc, svgbuff, 0, 0);
+//                         svgbuff = data.toString();
+//                         cbuff++; //every tenth page, increment page position
+//                     }
+//                 }
+//             }
+//             if (svgbuff.indexOf("room9") !== -1) {
+//                 for (var r = 0; r < 10; r++) {
+//                     svgbuff = svgbuff.replace(/(bimgrp)(.*?)(eimgrp)/, "");
+//                 }
+//                 doc.addPage();
+//                 SVGtoPDF(doc, svgbuff, 0, 0);
+//             }
+//             //finish writing to document
+//             doc.end();
+//             //redirect user to pdf page
+//             res.json({
+//                 success: true,
+//                 filename: fn
+//             });
+//         });
+//     });
+// });
 
 //export module for importing into central server file
 module.exports = router;

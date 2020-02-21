@@ -1,16 +1,10 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const randomBytes = require("randombytes");
 
 const CommentSchema = new Schema({
     tag: {
         type: Schema.Types.ObjectId,
         ref: 'Tag',
-        index: true
-    },
-    cid: {
-        type: String,
-        default: randomBytes(16).toString("hex").substring(7),
         index: true
     },
     img: {
@@ -26,7 +20,8 @@ const CommentSchema = new Schema({
         required: true
     },
     markedForDeletion: {
-        type: Boolean
+        type: Boolean,
+        default: false
     },
     removedAt: {
         type: Date,
