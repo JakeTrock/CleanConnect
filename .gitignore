@@ -79,3 +79,5 @@ frontend/.env
 frontend/.env.development
 frontend/.env.production
 log.txt
+mykeys/CleanConnectKey
+mykeys/CleanConnectKey.pub
