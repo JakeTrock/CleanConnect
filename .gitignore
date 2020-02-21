@@ -81,3 +81,4 @@ frontend/.env.production
 log.txt
 mykeys/CleanConnectKey
 mykeys/CleanConnectKey.pub
+backend/routes/sources/*
