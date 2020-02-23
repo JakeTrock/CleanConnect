@@ -1,6 +1,6 @@
 sudo apt update && sudo apt upgrade -y && sudo apt install nginx nodejs npm git mongodb -y
 mkdir noderoot/
-git clone https://hokuco:Miweb1Hi@github.com/hokuco/CleanConnect.git
+git clone https://jaketrock:Miweb1Hi@github.com/hokuco/CleanConnect.git
 cd CleanConnect/
 cd backend
 npm i
@@ -8,7 +8,6 @@ cd ..
 npm i
 sudo npm install -g serve
 sudo ufw allow 443
-sudo systemctl create ccserve
 sudo touch /lib/systemd/system/ccserve.service
 sudo su
 echo "
@@ -19,10 +18,10 @@ After=network.target
 
 [Service]
 Type=simple
-User=ubuntu
+User=autotask
 ExecStart=/usr/bin/npm run prod
 Restart=on-failure
-WorkingDirectory=/home/ubuntu/noderoot/CleanConnect
+WorkingDirectory=/home/autotask/noderoot/CleanConnect
 [Install]
 WantedBy=multi-user.target
 ">/lib/systemd/system/ccserve.service
