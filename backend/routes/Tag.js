@@ -141,8 +141,15 @@ router.post('/new', passport.authenticate('jwt', {
             new Tag({
                 name: tagName,
                 user: req.user._id
-            }).save().then(
-                QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/tag/' + this._id, function(err, url) {
+            }).save((err, obj) => {
+                if (err) {
+                    return res.status(500).json({
+                        success: false,
+                        simple: "Error creating tag.",
+                        details: err
+                    })
+                }
+                QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/tag/' + obj._id, function(err, url) {
                     Tag.findOneAndUpdate({
                         name: tagName,
                         user: req.user._id
@@ -154,11 +161,7 @@ router.post('/new', passport.authenticate('jwt', {
                         success: true
                     }))
                 })
-            ).catch((e) => res.status(500).json({
-                success: false,
-                simple: "Error creating tag.",
-                details: e
-            }));
+            });
         else
             res.status(400).json({
                 success: false,
