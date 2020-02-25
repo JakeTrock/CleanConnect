@@ -262,6 +262,43 @@ router.delete('/:id', passport.authenticate('jwt', {
     }));
 });
 
+// ROUTE: POST tag/:id
+// DESCRIPTION: allows user to restore deleted tag information
+// INPUT: tag id via url bar
+
+router.post('/:id', passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
+    Tag.findOne({
+        _id: req.params.id,
+        user: req.user.id
+    }).then(post => {
+        post.markedForDeletion = false;
+        post.removedAt = null;
+        Comment.find({
+            tag: post._id
+        }).then(cmts => {
+            if (cmts) {
+                for (var n in cmts) {
+                    n.markedForDeletion = false;
+                    n.removedAt = null;
+                }
+            }
+        }).catch(err => res.status(404).json({
+            success: false,
+            simple: "No posts found.",
+            details: err
+        }));
+        post.save()
+            .then(() => res.json({
+                success: true
+            }));
+    }).catch(err => res.status(404).json({
+        success: false,
+        simple: "Tag not found",
+        details: err
+    }));
+});
 
 // ROUTE: POST tag/comment/:id
 // DESCRIPTION: allows unauthorized user to add a comment to a post
@@ -329,9 +366,7 @@ router.post('/comment/:id', (req, res) => {
 // DESCRIPTION: allows deletion of comment, most likely after it has been resolved
 // INPUT: in the url bar, this first takes the id of the post, then the id of the child comment
 
-router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
-    session: false
-}), (req, res) => {
+router.delete('/comment/:id/:comment_id', (req, res) => {
     Comment.findOne({
         tag: req.params.id,
         _id: req.params.comment_id
@@ -343,7 +378,6 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
                 simple: "Your comment doesn't exist"
             });
         }
-        // post.comments.splice(removeIndex, 1);
         post.markedForDeletion = true;
         post.removedAt = new Date();
         post.save().then(res.json({
@@ -360,6 +394,37 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', {
     }));
 });
 
+// ROUTE: POST api/posts/comment/:id/:comment
+// DESCRIPTION: allows restoration of comment, after it has been wrongfully deleted
+// INPUT: in the url bar, this first takes the id of the post, then the id of the child comment
+
+router.post('/comment/:id/:comment_id', (req, res) => {
+    Comment.findOne({
+        tag: req.params.id,
+        _id: req.params.comment_id
+    }).then(post => {
+        // Check if the comment exists
+        if (!post) {
+            return res.status(404).json({
+                success: false,
+                simple: "Your comment doesn't exist"
+            });
+        }
+        post.markedForDeletion = false;
+        post.removedAt = null;
+        post.save().then(res.json({
+            success: true
+        })).catch((e) => res.json({
+            success: false,
+            simple: "Error saving comment.",
+            details: e
+        }));
+    }).catch(err => res.status(404).json({
+        success: false,
+        simple: "Comment not found.",
+        details: err
+    }));
+});
 
 // ROUTE: GET tag/print/
 // DESCRIPTION: prints tags as qr codes, allowing people to access them in real life
