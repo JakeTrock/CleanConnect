@@ -40,7 +40,6 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * allow user to call getall with boolean and see deleted tags
 * for some reason, first tag dosen't have qrurl
 * prevent the same image/pdf from being used twice(maybe use its hash as a name, so it cant be replicated)
-* re-issue tag/comment route
 * start email server
 
 ## Issue board (Justin)
