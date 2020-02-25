@@ -581,10 +581,12 @@ router.post("/login", (req, res) => {
                 if (isMatch) {
                     //User matched
                     const payload = {
+                        tier: user.tier,
                         _id: user._id,
                         name: user.name,
+                        dashUrl: user.dashUrl,
                         email: user.email,
-                        tier: user.tier
+                        date: user.date,
                     }; // create jwt payload
                     //Sign token
                     jwt.sign(
@@ -635,7 +637,6 @@ router.get('/current', passport.authenticate('jwt', {
             });
         }
         res.json({
-            externalId: profile.externalId,
             isVerified: profile.isVerified,
             tier: profile.tier,
             _id: profile._id,
