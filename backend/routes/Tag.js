@@ -147,7 +147,7 @@ router.post('/new', passport.authenticate('jwt', {
                         success: false,
                         simple: "Error creating tag.",
                         details: err
-                    })
+                    });
                 }
                 QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/tag/' + obj._id, function(err, url) {
                     Tag.findOneAndUpdate({
