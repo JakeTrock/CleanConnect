@@ -27,39 +27,48 @@ const Comment = require('../models/Comment.js');
 router.get("/test", (req, res) => res.send("User Works"));
 
 //mail setup
-const smtpTransport = nodemailer.createTransport({
-    // sendmail: true,
-    // newline: 'unix',
-    // path: '/usr/sbin/sendmail'
-    service: 'gmail',
-    auth: {
-        user: 'hokugpn@gmail.com',
-        pass: 'Upgame11'
-    }
-});
+// const smtpTransport = nodemailer.createTransport({
+//     // sendmail: true,
+//     // newline: 'unix',
+//     // path: '/usr/sbin/sendmail'
+//     service: 'gmail',
+//     auth: {
+//         user: 'hokugpn@gmail.com',
+//         pass: 'Upgame11'
+//     }
+// });
 
-function sendMail(body, sub, to, cb) {
-    smtpTransport.sendMail({
+// function sendMail(body, sub, to, cb) {
+//     smtpTransport.sendMail({
+//         from: "no-reply@" + process.env.topLevelDomain,
+//         to: to,
+//         subject: sub,
+//         text: body
+//     }, function(err) { if (err) cb(err) });
+// }
+
+
+// smtpTransport.on("error", err => {
+//     console.log("SMTP error: ", err.message);
+// });
+
+// smtpTransport.verify(function(error) {
+//     if (error) {
+//         console.error(error);
+//     } else {
+//         console.log("mailserver online.");
+//     }
+// });
+
+function sendMail(body, sub, to, cb) { //DO NOT USE IN PRODUCTION
+    console.log({
         from: "no-reply@" + process.env.topLevelDomain,
         to: to,
         subject: sub,
         text: body
-    }, function(err) { if (err) cb(err) });
+    });
+    cb();
 }
-
-
-smtpTransport.on("error", err => {
-    console.log("SMTP error: ", err.message);
-});
-
-smtpTransport.verify(function(error) {
-    if (error) {
-        console.error(error);
-    } else {
-        console.log("mailserver online.");
-    }
-});
-
 
 // ROUTE: POST user/register
 // DESCRIPTION: sends registration email to user
