@@ -43,6 +43,7 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * start email server
 * get domain
 * make env outside of server.js, make it better
+* make comments a seperate file from tag
 
 ## Issue board (Justin)
 * Replace try/catch blocks eventually
@@ -50,7 +51,15 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * Clean up code with comments, potentially cleaning up css files
 * Add text to main page describing project, as well as creating contact page
 * Add more routes for pages such as print?
-
+* here are some instructions to fix your application after my new push changes take hold(these changes are also in the insomniafile):
+    * all comment routes will now change to be more descriptive, and have better structure
+        * new comment is /comment/new/:id
+        * delete comment is /comment/delete/:id1/:id2
+        * restore comment is /comment/restore/:id/:comment_id
+    * all tag routes will change to be more descriptive as well
+        * restore route is /tag/restore/id
+        * delete route changed to /tag/delete/id
+    * p.s. all fields in the url that have a : before them are url variables
 
 
 ### future
