@@ -10,10 +10,10 @@ const fs = require('fs');
 //model import
 const Tag = require('../models/Tag.js');
 const Comment = require('../models/Comment.js');
+const User = require("../models/User");
 
 // Validation Part for input
 const validatePostInput = require('../validation/tag.js');
-const apr = require('../validation/apr.js');
 const isprintable = require('../validation/is-printable.js');
 //configure express addons
 const router = express.Router();
@@ -29,59 +29,32 @@ router.get('/test', (req, res) => res.send("Tag Works"));
 router.post('/getall', passport.authenticate('jwt', {
     session: false
 }), async(req, res) => {
-    if (req.body.showDead) {
-        await Tag.find({
-            user: req.user._id
-        }).then(async posts => {
-            if (posts) {
-                for (var n in posts) {
-                    await Comment.find({
-                        tag: posts[n]._id
-                    }).then(cmts => {
-                        if (cmts) {
-                            var tmpcmt = [];
-                            for (var z in cmts) {
-                                tmpcmt.push(cmts[z]);
-                            }
-                            posts[n].comments = tmpcmt;
+    await Tag.find({
+        user: req.user._id,
+        markedForDeletion: req.body.showDead
+    }).then(async posts => {
+        if (posts) {
+            for (var n in posts) {
+                await Comment.find({
+                    tag: posts[n]._id,
+                    markedForDeletion: false
+                }).then(cmts => {
+                    if (cmts) {
+                        var tmpcmt = [];
+                        for (var z in cmts) {
+                            tmpcmt.push(cmts[z]);
                         }
-                    });
-                }
-                res.json(posts);
+                        posts[n].comments = tmpcmt;
+                    }
+                });
             }
-        }).catch(err => res.status(404).json({
-            success: false,
-            simple: "No posts found.",
-            details: err
-        }));
-    } else {
-        await Tag.find({
-            user: req.user._id,
-            markedForDeletion: false
-        }).then(async posts => {
-            if (posts) {
-                for (var n in posts) {
-                    await Comment.find({
-                        tag: posts[n]._id,
-                        markedForDeletion: false
-                    }).then(cmts => {
-                        if (cmts) {
-                            var tmpcmt = [];
-                            for (var z in cmts) {
-                                tmpcmt.push(cmts[z]);
-                            }
-                            posts[n].comments = tmpcmt;
-                        }
-                    });
-                }
-                res.json(posts);
-            }
-        }).catch(err => res.status(404).json({
-            success: false,
-            simple: "No posts found.",
-            details: err
-        }));
-    }
+            res.json(posts);
+        }
+    }).catch(err => res.status(404).json({
+        success: false,
+        simple: "No posts found.",
+        details: err
+    }));
 });
 
 // ROUTE: GET tag/getone/id
@@ -227,7 +200,7 @@ router.post('/edit/:id', passport.authenticate('jwt', {
 // DESCRIPTION: allows user to delete given tag information
 // INPUT: tag id via url bar
 
-router.delete('/:id', passport.authenticate('jwt', {
+router.delete('/delete/:id', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     Tag.findOne({
@@ -250,11 +223,9 @@ router.delete('/:id', passport.authenticate('jwt', {
             simple: "No posts found.",
             details: err
         }));
-        post.save()
-            //post.deleteOne()
-            .then(() => res.json({
-                success: true
-            }));
+        post.save().then(() => res.json({
+            success: true
+        }));
     }).catch(err => res.status(404).json({
         success: false,
         simple: "Tag not found",
@@ -266,7 +237,7 @@ router.delete('/:id', passport.authenticate('jwt', {
 // DESCRIPTION: allows user to restore deleted tag information
 // INPUT: tag id via url bar
 
-router.post('/:id', passport.authenticate('jwt', {
+router.post('/restore/:id', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     Tag.findOne({
@@ -289,139 +260,12 @@ router.post('/:id', passport.authenticate('jwt', {
             simple: "No posts found.",
             details: err
         }));
-        post.save()
-            .then(() => res.json({
-                success: true
-            }));
+        post.save().then(() => res.json({
+            success: true
+        }));
     }).catch(err => res.status(404).json({
         success: false,
         simple: "Tag not found",
-        details: err
-    }));
-});
-
-// ROUTE: POST tag/comment/:id
-// DESCRIPTION: allows unauthorized user to add a comment to a post
-// INPUT: severity of issue(0 to 2, being worst), description of issue, and an optional image of the issue
-
-router.post('/comment/:id', (req, res) => {
-    const {
-        errors,
-        isValid
-    } = apr(req.body);
-    if (!req.body.sev || !isValid) {
-        return res.status(400).json({
-            success: false,
-            simple: "Invalid post body.",
-            details: errors
-        });
-    }
-    Tag.findOne({
-        _id: req.params.id
-    }).then(post => {
-        var comment;
-        if (req.files) {
-            let image = req.files.img;
-            if (image.size < 5100000 && (image.mimetype == "video/mp4" || image.mimetype == "video/webm" || image.mimetype == "image/webp" || image.mimetype == "image/gif" || image.mimetype == "image/jpeg" || image.mimetype == "image/png" || image.mimetype == "image/jpg" || image.mimetype == "image/tiff")) {
-                const name = randomBytes(16).toString("hex") + "." + image.name.split(".")[1];
-                image.mv('./temp/' + name);
-                comment = {
-                    tag: req.params.id,
-                    img: name,
-                    text: req.body.text,
-                    sev: req.body.sev //severity 0 to 2, 0 being green, 2 being red
-                };
-            } else {
-                return res.status(400).json({
-                    tag: req.params.id,
-                    success: false,
-                    simple: "invalid filetype",
-                });
-            }
-        } else {
-            comment = {
-                text: req.body.text,
-                sev: req.body.sev //severity 0 to 2, 0 being green, 2 being red
-            };
-        }
-        // Add comment to the array
-        try {
-            post.dateLastAccessed = new Date();
-            new Comment(comment).save();
-            post.save();
-            res.json({
-                success: true
-            })
-        } catch (e) {
-            res.status(500).json({
-                success: false,
-                simple: "Error creating tag.",
-                details: e
-            })
-        }
-    });
-});
-
-// ROUTE: DELETE api/posts/comment/:id/:comment
-// DESCRIPTION: allows deletion of comment, most likely after it has been resolved
-// INPUT: in the url bar, this first takes the id of the post, then the id of the child comment
-
-router.delete('/comment/:id/:comment_id', (req, res) => {
-    Comment.findOne({
-        tag: req.params.id,
-        _id: req.params.comment_id
-    }).then(post => {
-        // Check if the comment exists
-        if (!post) {
-            return res.status(404).json({
-                success: false,
-                simple: "Your comment doesn't exist"
-            });
-        }
-        post.markedForDeletion = true;
-        post.removedAt = new Date();
-        post.save().then(res.json({
-            success: true
-        })).catch((e) => res.json({
-            success: false,
-            simple: "Error saving comment.",
-            details: e
-        }));
-    }).catch(err => res.status(404).json({
-        success: false,
-        simple: "Comment not found.",
-        details: err
-    }));
-});
-
-// ROUTE: POST api/posts/comment/:id/:comment
-// DESCRIPTION: allows restoration of comment, after it has been wrongfully deleted
-// INPUT: in the url bar, this first takes the id of the post, then the id of the child comment
-
-router.post('/comment/:id/:comment_id', (req, res) => {
-    Comment.findOne({
-        tag: req.params.id,
-        _id: req.params.comment_id
-    }).then(post => {
-        // Check if the comment exists
-        if (!post) {
-            return res.status(404).json({
-                success: false,
-                simple: "Your comment doesn't exist"
-            });
-        }
-        post.markedForDeletion = false;
-        post.removedAt = null;
-        post.save().then(res.json({
-            success: true
-        })).catch((e) => res.json({
-            success: false,
-            simple: "Error saving comment.",
-            details: e
-        }));
-    }).catch(err => res.status(404).json({
-        success: false,
-        simple: "Comment not found.",
         details: err
     }));
 });
@@ -434,7 +278,8 @@ router.post('/print/', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     Tag.find({
-        user: req.user._id
+        user: req.user._id,
+        markedForDeletion: false
     }, function(err, list) {
         const pi = req.body.printIteration;
         const {
@@ -468,143 +313,77 @@ router.post('/print/', passport.authenticate('jwt', {
             var b = 0;
             for (var g = 0; g < pi.length; g++) {
                 for (var i = 0; i < pi[g]; i++) {
-                    svgbuff = svgbuff.replace(`room${((b - (cbuff * 10)))}`, list[g].name);
-                    svgbuff = svgbuff.replace(`img${((b - (cbuff * 10)))}`, list[g].qrcode);
-                    svgbuff = svgbuff.replace(`<!-- bimgrp${((b - (cbuff * 10)))} -->`, '');
-                    svgbuff = svgbuff.replace(`<!-- ${((b - (cbuff * 10)))}eimgrp -->`, '');
+                    svgbuff = svgbuff.replace(`room${(b - (cbuff * 10))}`, list[g].name);
+                    svgbuff = svgbuff.replace(`img${(b - (cbuff * 10))}`, list[g].qrcode);
+                    svgbuff = svgbuff.replace(`<!-- bimgrp${(b - (cbuff * 10))} -->`, '');
+                    svgbuff = svgbuff.replace(`<!-- ${(b - (cbuff * 10))}eimgrp -->`, '');
                     b++;
-                    if (b != 0 && b % 10 == 0) {
-                        if (cbuff != 0) doc.addPage();
-                        SVGtoPDF(doc, svgbuff, 0, 0);
-                        svgbuff = data.toString();
-                        cbuff++; //every tenth page, increment page position
+                    console.log(b);
+                    if (b != 0 && (b % 10 == 0 || (g == pi.length - 1 && i == pi[g] - 1))) {
+                        if ((g == pi.length - 1 && i == pi[g] - 1)) {
+                            console.log("ffffff");
+                            if (svgbuff.indexOf("room9") !== -1) {
+                                for (var r = 0; r < 10; r++) {
+                                    svgbuff = svgbuff.replace(/(bimgrp)(.*?)(eimgrp)/, "");
+                                }
+                            }
+                            SVGtoPDF(doc, svgbuff, 0, 0);
+                            //finish writing to document
+                            doc.end();
+                            //redirect user to pdf page
+                            res.json({
+                                success: true,
+                                filename: fn
+                            });
+                        } else {
+                            SVGtoPDF(doc, svgbuff, 0, 0);
+                            doc.addPage();
+                            svgbuff = data.toString();
+                            cbuff++; //every tenth page, increment page position
+                        }
                     }
                 }
             }
-            if (svgbuff.indexOf("room9") !== -1) {
-                for (var r = 0; r < 10; r++) {
-                    svgbuff = svgbuff.replace(/(bimgrp)(.*?)(eimgrp)/, "");
-                }
-                doc.addPage();
-                SVGtoPDF(doc, svgbuff, 0, 0);
-            }
-            // console.log(svgbuff);
-
-            //finish writing to document
-            doc.end();
-            //redirect user to pdf page
-            res.json({
-                success: true,
-                filename: fn
-            });
         });
     });
 });
-// router.post('/print/', passport.authenticate('jwt', {
-//     session: false
-// }), (req, res) => {
-//     Tag.find({
-//         user: req.user._id
-//     }, function(err, list) {
-//         const pi = req.body.printIteration;
-//         const {
-//             errors,
-//             isValid
-//         } = isprintable(req.body, list.length);
-//         if (!isValid) {
-//             return res.status(400).json({
-//                 success: false,
-//                 simple: "Invalid post body.",
-//                 details: errors
-//             });
-//         }
-//         async.forEachOf(list, function(pos, i, callback) {
-//             //create data url, call insertion function
-//             if (err) return callback(err);
-//             try {
-//                 if (list[i].qrcode == undefined) {
-//                     QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/tag/' + pos._id, function(err, url) {
 
-//                         if (err) res.status(500).json({
-//                             success: false,
-//                             simple: "Error generating cache.",
-//                             details: err
-//                         });
-//                         Tag.findOneAndUpdate({
-//                             _id: pos._id
-//                         }, {
-//                             qrcode: url
-//                         }, {
-//                             new: true
-//                         }).catch(err => res.status(500).json({
-//                             success: false,
-//                             simple: "Error generating cache.",
-//                             details: err
-//                         }));
-//                     });
-//                 }
-//             } catch (e) {
-//                 return callback(e)
-//             }
-//             //call callback when finished
-//             callback();
-//         }, err => {
-//             if (err) return res.status(500).json({
-//                 success: false,
-//                 simple: "Error generating cache.",
-//                 details: err.message
-//             });
-//         })
-//         fs.readFile(__dirname + '/template.svg', function(err, data) {
-//             if (err) {
-//                 res.status(500).json({
-//                     success: false,
-//                     simple: "Error generating pdf.",
-//                     details: err
-//                 })
-//             }
-//             //svg template file
-//             var svgbuff = data.toString();
-//             //array of pages defined
-//             //cbuff stores page position
-//             var cbuff = 0;
-//             const doc = new PDFDocument(docsettings);
-//             const fn = randomBytes(16).toString("hex");
-
-//             doc.pipe(fs.createWriteStream(process.env.rootDir + '/temp/' + fn + '.pdf'));
-//             var b = 0;
-//             for (var g = 0; g < pi.length; g++) {
-//                 for (var i = 0; i < pi[g]; i++) {
-//                     svgbuff = svgbuff.replace(`room${((b - (cbuff * 10)))}`, list[g].name);
-//                     svgbuff = svgbuff.replace(`img${((b - (cbuff * 10)))}`, list[g].qrcode);
-//                     svgbuff = svgbuff.replace(`<!-- bimgrp${((b - (cbuff * 10)))} -->`, '');
-//                     svgbuff = svgbuff.replace(`<!-- ${((b - (cbuff * 10)))}eimgrp -->`, '');
-//                     b++;
-//                     if (b != 0 && b % 10 == 0) {
-//                         if (cbuff != 0) doc.addPage();
-//                         SVGtoPDF(doc, svgbuff, 0, 0);
-//                         svgbuff = data.toString();
-//                         cbuff++; //every tenth page, increment page position
-//                     }
-//                 }
-//             }
-//             if (svgbuff.indexOf("room9") !== -1) {
-//                 for (var r = 0; r < 10; r++) {
-//                     svgbuff = svgbuff.replace(/(bimgrp)(.*?)(eimgrp)/, "");
-//                 }
-//                 doc.addPage();
-//                 SVGtoPDF(doc, svgbuff, 0, 0);
-//             }
-//             //finish writing to document
-//             doc.end();
-//             //redirect user to pdf page
-//             res.json({
-//                 success: true,
-//                 filename: fn
-//             });
-//         });
-//     });
-// });
+// ROUTE: GET tag/dash/:id
+// DESCRIPTION: anonymous dashboard only accessible with secret keystring
+router.get('/dash/:id', async(req, res) => {
+    await User.findOne({
+        dashUrl: req.params.id
+    }).then(async user => {
+        await Tag.find({
+            user: user._id
+        }).then(async posts => {
+            if (posts) {
+                for (var n in posts) {
+                    await Comment.find({
+                        tag: posts[n]._id
+                    }).then(cmts => {
+                        if (cmts) {
+                            var tmpcmt = [];
+                            for (var z in cmts) {
+                                tmpcmt.push(cmts[z]);
+                            }
+                            posts[n].comments = tmpcmt;
+                        }
+                    });
+                }
+                res.json(posts);
+            }
+        }).catch(err => res.status(404).json({
+            success: false,
+            simple: "No posts found.",
+            details: err
+        }));
+    }).catch(err => res.status(404).json({
+        success: false,
+        simple: "No users found.",
+        details: err
+    }));
+});
 
 //export module for importing into central server file
 module.exports = router;

@@ -21,6 +21,7 @@ process.env.mailCreds = [process.env.mailServer || keys.mailServer, process.env.
 //imports different router/handler files
 const user = require('./routes/User.js');
 const tag = require('./routes/Tag.js');
+const comment = require('./routes/Comment.js');
 const file = require('./routes/File.js');
 
 //setup bodyparser and express
@@ -47,6 +48,7 @@ require('./config/passport')(passport);
 //map router files to respective urls
 app.use('/user', user);
 app.use('/tag', tag);
+app.use('/comment', comment);
 app.use('/file', file);
 
 //set port and listen on it 
