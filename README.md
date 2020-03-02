@@ -39,11 +39,10 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * Potentially replace blobs with images
 * allow user to call getall with boolean and see deleted tags
 * for some reason, first tag dosen't have qrurl
-* prevent the same image/pdf from being used twice(maybe use its hash as a name, so it cant be replicated)
 * start email server
 * get domain
 * make env outside of server.js, make it better
-* make comments a seperate file from tag
+* make tag deletion perm
 
 ## Issue board (Justin)
 * Replace try/catch blocks eventually

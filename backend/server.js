@@ -16,7 +16,7 @@ const keys = require('./config/keys');
 process.env.rootDir = __dirname;
 process.env.topLevelDomain = "cleanconnect.jakesandbox.com";
 process.env.domainPrefix = "https://";
-
+process.env.testing = keys.testing;
 process.env.mailCreds = [process.env.mailServer || keys.mailServer, process.env.mailPort || keys.mailPort, process.env.mailUser || keys.mailUser, process.env.mailPass || keys.mailPass];
 //imports different router/handler files
 const user = require('./routes/User.js');

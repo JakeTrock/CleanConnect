@@ -17,7 +17,6 @@ const User = require("../models/User");
 const UserIndex = require("../models/UserIndex");
 const Tag = require('../models/Tag.js');
 //declare consts
-// const creds = process.env.mailCreds;
 
 
 // ROUTE: GET user/test
@@ -26,47 +25,46 @@ const Tag = require('../models/Tag.js');
 router.get("/test", (req, res) => res.send("User Works"));
 
 //mail setup
-// const smtpTransport = nodemailer.createTransport({
-//     // sendmail: true,
-//     // newline: 'unix',
-//     // path: '/usr/sbin/sendmail'
-//     service: 'gmail',
-//     auth: {
-//         user: 'hokugpn@gmail.com',
-//         pass: 'Upgame11'
-//     }
-// });
+const smtpTransport = nodemailer.createTransport({
+    sendmail: true,
+    newline: 'unix',
+    path: '/usr/sbin/sendmail'
+        // service: 'gmail',
+        // auth: {
+        //     user: 'hokugpn@gmail.com',
+        //     pass: 'Upgame11'
+        // }
+});
 
-// function sendMail(body, sub, to, cb) {
-//     smtpTransport.sendMail({
-//         from: "no-reply@" + process.env.topLevelDomain,
-//         to: to,
-//         subject: sub,
-//         text: body
-//     }, function(err) { if (err) cb(err) });
-// }
+smtpTransport.on("error", err => {
+    console.log("SMTP error: ", err.message);
+});
 
+smtpTransport.verify(function(error) {
+    if (error) {
+        console.error(error);
+    } else {
+        console.log("mailserver online.");
+    }
+});
 
-// smtpTransport.on("error", err => {
-//     console.log("SMTP error: ", err.message);
-// });
-
-// smtpTransport.verify(function(error) {
-//     if (error) {
-//         console.error(error);
-//     } else {
-//         console.log("mailserver online.");
-//     }
-// });
-
-function sendMail(body, sub, to, cb) { //DO NOT USE IN PRODUCTION
-    console.log({
-        from: "no-reply@" + process.env.topLevelDomain,
-        to: to,
-        subject: sub,
-        text: body
-    });
-    cb();
+function sendMail(body, sub, to, cb) {
+    if (!process.env.testing) {
+        smtpTransport.sendMail({
+            from: "no-reply@" + process.env.topLevelDomain,
+            to: to,
+            subject: sub,
+            text: body
+        }, function(err) { if (err) cb(err) });
+    } else {
+        console.log({
+            from: "no-reply@" + process.env.topLevelDomain,
+            to: to,
+            subject: sub,
+            text: body
+        });
+        cb();
+    }
 }
 
 // ROUTE: POST user/register
@@ -82,7 +80,7 @@ router.post("/register", (req, res) => {
             details: errors
         });
     }
-    if (req.body.email == "fake@test.com") { //check for testing var
+    if (process.env.testing && req.body.email == "fake@test.com") { //check for testing var
         const newUser = new User({
             name: req.body.name,
             email: req.body.email,
