@@ -30,14 +30,13 @@ router.post('/getall', passport.authenticate('jwt', {
     session: false
 }), async(req, res) => {
     await Tag.find({
-        user: req.user._id,
-        markedForDeletion: req.body.showDead
+        user: req.user._id
     }).then(async posts => {
         if (posts) {
             for (var n in posts) {
                 await Comment.find({
                     tag: posts[n]._id,
-                    markedForDeletion: false
+                    markedForDeletion: req.body.showDead
                 }).then(cmts => {
                     if (cmts) {
                         var tmpcmt = [];
@@ -207,23 +206,14 @@ router.delete('/delete/:id', passport.authenticate('jwt', {
         _id: req.params.id,
         user: req.user.id
     }).then(post => {
-        post.markedForDeletion = true;
-        post.removedAt = new Date();
-        Comment.find({
+        Comment.deleteMany({
             tag: post._id
-        }).then(cmts => {
-            if (cmts) {
-                for (var n in cmts) {
-                    n.markedForDeletion = true;
-                    n.removedAt = new Date();
-                }
-            }
         }).catch(err => res.status(404).json({
             success: false,
             simple: "No posts found.",
             details: err
         }));
-        post.save().then(() => res.json({
+        post.deleteOne().then(() => res.json({
             success: true
         }));
     }).catch(err => res.status(404).json({
