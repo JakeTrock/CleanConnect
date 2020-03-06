@@ -41,8 +41,6 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * for some reason, first tag dosen't have qrurl
 * start email server
 * get domain
-* make env outside of server.js, make it better
-* make tag deletion perm
 
 ## Issue board (Justin)
 * Replace try/catch blocks eventually
