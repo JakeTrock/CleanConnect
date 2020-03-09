@@ -58,7 +58,7 @@ class Form extends Component {
       </button>
     );
   }
-  renderInput(name, label, error, type) {
+  renderInput({ name, label, error, type, dropdown }) {
     const { data } = this.state;
     return (
       <div className="form-group">
@@ -71,12 +71,20 @@ class Form extends Component {
           className="form-control"
           style={{ fontFamily: "arial" }}
           onChange={this.handleString}
+          list="list"
         />
+        {dropdown && (
+          <datalist id="list">
+            {dropdown.map(option => (
+              <option key={option} value={option} />
+            ))}
+          </datalist>
+        )}
         {this.renderError(error)}
       </div>
     );
   }
-  renderSelect(name, label, options, error) {
+  renderSelect(name, label, options, error, dropdown) {
     return (
       <div className="form-group">
         <label className="pageText">{label}</label>

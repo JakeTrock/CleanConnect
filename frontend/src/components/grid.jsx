@@ -4,7 +4,6 @@ import _ from "lodash";
 
 class Grid extends Component {
   componentDidMount() {
-    console.log(this.customBehavior);
     //this.customBehavior = this.props.customBehavior.bind(this);
     if (this.props.emptyBehavior)
       this.emptyBehavior = this.props.emptyBehavior.bind(this);

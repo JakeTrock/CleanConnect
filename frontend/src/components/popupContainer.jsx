@@ -29,12 +29,15 @@ export const ImageContainer = props => {
     </Popup>
   );
 };
-export const DeletePopupContainer = props => {
+export const CallbackPopupContainer = props => {
   //const item = data.item;
   const triggerText = props.triggerText;
   const customText = props.customText;
-  const deleteRoute = props.deleteRoute;
-  const deleteData = props.deleteData;
+  const callbackRoute = props.callbackRoute;
+  const callbackData = props.callbackData;
+  let buttonClass = "btn btn-info";
+  if (triggerText.includes("Delete") || customText.includes("Delete"))
+    buttonClass = "btn btn-danger";
   return (
     <Popup
       trigger={
@@ -53,7 +56,7 @@ export const DeletePopupContainer = props => {
             </div>
             <h1>{customText}</h1>
             <button
-              className="btn btn-danger"
+              className={buttonClass}
               style={{
                 borderRadius: "10px",
                 display: "block",
@@ -63,11 +66,10 @@ export const DeletePopupContainer = props => {
               }}
               onClick={() => {
                 close();
-                console.log(deleteData);
-                deleteRoute(deleteData);
+                callbackRoute(callbackData);
               }}
             >
-              Delete
+              Confirm
             </button>
           </div>
         </div>

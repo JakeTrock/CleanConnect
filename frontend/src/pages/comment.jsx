@@ -6,7 +6,7 @@ import Joi from "joi-browser";
 import Form from "../components/form";
 import Layout from "../components/layout";
 import * as auth from "../services/tagsAuthentication";
-
+const dropDownList = require("../lists/problems").list;
 class Comment extends Form {
   state = {
     //data stored in the form
@@ -46,8 +46,8 @@ class Comment extends Form {
       //submits to comment on tag with form info then returns to home page
       const token = this.props.match.params.token;
       const { data } = this.state;
-      data.severity = this.severityConverter(data.severity);
-      await auth.commentOnTag(token, data.text, data.severity, data.image);
+      const severity = this.severityConverter(data.severity);
+      await auth.commentOnTag(token, data.text, severity, data.image);
       this.setState({ verified: false });
     } catch (ex) {
       if (ex.response) {
@@ -76,7 +76,12 @@ class Comment extends Form {
         <form onSubmit={this.handleSubmit}>
           {this.renderImage("image", "Image (optional)", errors.image)}
           {this.renderError(errors.imageUrl)}
-          {this.renderInput("text", "Information about problem", errors.text)}
+          {this.renderInput({
+            name: "text",
+            label: "Information about problem",
+            error: errors.text,
+            dropdown: dropDownList
+          })}
           {this.renderSelect(
             "severity",
             "Rate the severity",

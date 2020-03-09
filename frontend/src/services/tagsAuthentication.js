@@ -2,8 +2,8 @@ import axios from "axios"; //Will be used for http requests
 import FormData from "form-data";
 import { apiUrl } from "../config.json"; // Url of the server
 import * as user from "./userAuthentication";
-const apiEndpoint = process.env.REACT_APP_API_URL + "/tag";
-
+const tagEndpoint = process.env.REACT_APP_API_URL + "/tag";
+const commentEndpoint = process.env.REACT_APP_API_URL + "/comment";
 export function newTag(name) {
   try {
     const headers = {
@@ -11,7 +11,7 @@ export function newTag(name) {
       Authorization: user.getCurrentUser(true)
     };
     return axios.post(
-      apiEndpoint + "/new",
+      tagEndpoint + "/new",
       { name },
       {
         headers: headers
@@ -21,28 +21,33 @@ export function newTag(name) {
     return null;
   }
 }
+/*
 export function genCache() {
   try {
     const headers = {
       "Content-Type": "application/json",
       Authorization: user.getCurrentUser(true)
     };
-    return axios.get(apiEndpoint + "/genimgs", {
+    return axios.get(tagEndpoint + "/genimgs", {
       headers: headers
     });
   } catch (ex) {
     return null;
   }
-}
-export function getTags() {
+}*/
+export function getTags(showDead) {
   try {
     const headers = {
       "Content-Type": "application/json",
       Authorization: user.getCurrentUser(true)
     };
-    return axios.get(apiEndpoint + "/getall", {
-      headers: headers
-    });
+    return axios.post(
+      tagEndpoint + "/getall",
+      { showDead },
+      {
+        headers: headers
+      }
+    );
   } catch (ex) {
     return null;
   }
@@ -52,7 +57,7 @@ export function getTag(token) {
     const headers = {
       "Content-Type": "application/json"
     };
-    return axios.get(apiEndpoint + "/getone/" + token, {
+    return axios.get(tagEndpoint + "/getone/" + token, {
       headers: headers
     });
   } catch (ex) {
@@ -62,7 +67,7 @@ export function getTag(token) {
 
 export function tagExists(token) {
   try {
-    return axios.get(apiEndpoint + "/exists/" + token);
+    return axios.get(tagEndpoint + "/exists/" + token);
   } catch (ex) {
     return null;
   }
@@ -73,7 +78,21 @@ export function deleteTag(id) {
       "Content-Type": "application/json",
       Authorization: user.getCurrentUser(true)
     };
-    return axios.delete(apiEndpoint + "/" + id, {
+    return axios.delete(tagEndpoint + "/delete/" + id, {
+      headers: headers
+    });
+  } catch (ex) {
+    return null;
+  }
+}
+export function readdTag(id) {
+  console.log(user.getCurrentUser(true));
+  try {
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: user.getCurrentUser(true)
+    };
+    return axios.post(tagEndpoint + "/restore/" + id, "", {
       headers: headers
     });
   } catch (ex) {
@@ -83,12 +102,29 @@ export function deleteTag(id) {
 export function deleteComment(postId, commentId) {
   try {
     const headers = {
-      "Content-Type": "application/json",
-      Authorization: user.getCurrentUser(true)
+      "Content-Type": "application/json"
     };
-    return axios.delete(apiEndpoint + "/comment/" + postId + "/" + commentId, {
-      headers: headers
-    });
+    return axios.delete(
+      commentEndpoint + "/delete/" + postId + "/" + commentId,
+      {
+        headers: headers
+      }
+    );
+  } catch (ex) {
+    return null;
+  }
+}
+export function readdComment(postId, commentId) {
+  try {
+    const headers = {
+      "Content-Type": "application/json"
+    };
+    return axios.post(
+      commentEndpoint + "/restore/" + postId + "/" + commentId,
+      {
+        headers: headers
+      }
+    );
   } catch (ex) {
     return null;
   }
@@ -102,7 +138,7 @@ export function commentOnTag(id, text, sev, img) {
     const headers = {
       "Content-Type": "multipart/form-data"
     };
-    return axios.post(apiEndpoint + "/comment/" + id, payload, {
+    return axios.post(commentEndpoint + "/new/" + id, payload, {
       headers: headers
     });
   } catch (ex) {
@@ -119,7 +155,19 @@ export function print(printIteration) {
     const data = { printIteration };
     console.log(data);
 
-    return axios.post(apiEndpoint + "/print", { printIteration }, { headers });
+    return axios.post(tagEndpoint + "/print", { printIteration }, { headers });
+  } catch (ex) {
+    return null;
+  }
+}
+export function anonTags(token, showDead) {
+  try {
+    const headers = {
+      "Content-Type": "application/json"
+    };
+    return axios.get(tagEndpoint + "/dash/" + token, showDead, {
+      headers: headers
+    });
   } catch (ex) {
     return null;
   }
