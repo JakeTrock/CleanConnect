@@ -9,7 +9,7 @@
     "author": "Jacob Trock",
     "license": "UNLICENSED",
     "dependencies": {
-        "acorn": "^7.1.0",
+        "acorn": "^7.1.1",
         "bcryptjs": "^2.4.3",
         "body-parser": "^1.18.3",
         "cors": "^2.8.5",
@@ -22,7 +22,7 @@
         "nodemailer": "^6.3.1",
         "passport": "^0.4.0",
         "passport-jwt": "^4.0.0",
-        "pdfkit": "^0.10.0",
+        "pdfkit": "^0.11.0",
         "qrcode": "^1.4.4",
         "randombytes": "^2.1.0",
         "svg-to-pdfkit": "^0.1.8",

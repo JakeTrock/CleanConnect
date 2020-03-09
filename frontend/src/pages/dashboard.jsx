@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import { Redirect } from "react-router-dom";
+
 import Layout from "../components/layout";
 import Grid from "../components/grid";
 import Unit from "../components/unit";
@@ -8,8 +10,9 @@ import * as auth from "../services/tagsAuthentication";
 import * as file from "../services/fileAuthentication";
 import {
   ImageContainer,
-  DeletePopupContainer
+  CallbackPopupContainer
 } from "../components/popupContainer";
+import { BooleanSelect } from "../components/select";
 import "../css/unit.css";
 
 /* Unfinished, need to add stuff in footer*/
@@ -17,19 +20,33 @@ class Dashboard extends Component {
   state = {
     tags: [],
     currentPage: 1,
-    pageSize: 6
+    pageSize: 6,
+    mounted: false
   };
-  async stateSetter() {
-    let { user } = this.props;
+  async setTags(viewDead) {
+    let { user, token } = this.state;
     let tags = "";
-    if (user) {
-      tags = await auth.getTags();
-      tags = tags.data;
-    }
-    //tags.forEach(async tag => {
-    tags = await this.imageSetter(tags);
+    let viewDeadBool = false;
+    if (viewDead === "Yes") viewDeadBool = true;
 
+    if (user && token === user.dashUrl) {
+      tags = await auth.getTags(viewDeadBool);
+      tags = tags.data;
+    } else {
+      if (token) {
+        try {
+          tags = await auth.anonTags(token, viewDeadBool);
+          tags = tags.data;
+        } catch {}
+      }
+    }
+    if (tags) {
+      tags = tags.reverse();
+      //tags.forEach(async tag => {
+      tags = await this.imageSetter(tags);
+    }
     this.setState({ tags });
+    if (token && !tags) this.setState({ redirect: "/notFound" });
   }
   async imageSetter(tags) {
     for (let i = 0; i < tags.length; i++) {
@@ -45,46 +62,52 @@ class Dashboard extends Component {
     return tags;
   }
 
-  componentDidMount() {
-    this.stateSetter();
+  async componentDidMount() {
+    await this.setState({
+      user: this.props.user,
+      token: this.props.match.params.token
+    });
+    await this.setTags(false);
   }
-  componentDidUpdate(prevProps) {
-    if (prevProps === this.props) return;
-    this.stateSetter();
-  }
+
   handlePageChange = page => {
     this.setState({ currentPage: page });
   };
   render() {
-    let { tags, currentPage, pageSize } = this.state;
+    let {
+      tags,
+      currentPage,
+      pageSize,
+      mounted,
+      user,
+      token,
+      redirect
+    } = this.state;
     if (!tags) tags = "";
     let sortedTags = paginate(tags, currentPage, pageSize);
+    let dashUrl = "";
+    if (user) dashUrl = user.dashUrl;
+    else dashUrl = token;
 
-    function DeletePopup(data) {
-      const customText =
-        "This will permanently delete the comment with info: " +
-        data.item.text +
-        ". Proceed?";
-      return (
-        <DeletePopupContainer
-          triggerText="Delete Comment"
-          customText={customText}
-          deleteRoute={deleteComment}
-          deleteData={data}
-        />
-      );
-    }
     async function deleteComment(data) {
       const props = data.props;
-      const postId = data.item.postId;
-      const commentId = data.item.cid;
+      const postId = data.item.tag;
+      const commentId = data.item._id;
       try {
         const result = await auth.deleteComment(postId, commentId);
         const { state } = props.location;
         if (result) window.location = state ? state.from.pathname : "/";
-      } catch (e) {
-        console.log(e);
-      }
+      } catch (e) {}
+    }
+    async function readdComment(data) {
+      const props = data.props;
+      const postId = data.item.tag;
+      const commentId = data.item._id;
+      try {
+        const result = await auth.readdComment(postId, commentId);
+        const { state } = props.location;
+        if (result) window.location = state ? state.from.pathname : "/";
+      } catch (e) {}
     }
     function severityColor(severity) {
       if (severity === 0) return "green";
@@ -98,56 +121,86 @@ class Dashboard extends Component {
         severity += item.comments[i].sev;
       }
       severity = severityColor(Math.round(severity / item.comments.length));
+
       return (
         <Unit key={item._id} name={item.name} dot={severity}>
-          <div className="unitCenter">
+          <div className="unitCenter" style={{ height: "39vh" }}>
             {item.comments.map(function(comment) {
               comment.postId = item._id;
+              let opacity = "1";
+              if (comment.markedForDeletion) opacity = ".7";
               return (
                 <React.Fragment key={comment._id}>
-                  <div className="mt-2 ml-2" style={{ display: "flex" }}>
-                    <h4 className="unitText">{comment.text}</h4>
-                    <span
-                      style={{
-                        backgroundColor: severityColor(comment.sev)
-                      }}
-                      className="dot rightObj"
-                    />
-                  </div>
-                  <DeletePopup props={this.props} item={comment} />
-                  <ImageContainer
-                    trigger={
-                      <img
-                        className="centerObj"
-                        style={{ cursor: "pointer" }}
-                        src={comment.img}
-                        alt=""
+                  <div style={{ opacity: opacity }}>
+                    <div className="mt-2 ml-2" style={{ display: "flex" }}>
+                      <h4 className="unitText">{comment.text}</h4>
+                      <span
+                        style={{
+                          backgroundColor: severityColor(comment.sev)
+                        }}
+                        className="dot rightObj"
                       />
-                    }
-                    imgLink={comment.img}
-                  />
-                  <div className="footer" /> {/* TEMPORARY*/}
-                  {/* Make small then big*/}
+                    </div>
+                    {!comment.markedForDeletion && (
+                      <CallbackPopupContainer
+                        triggerText="Delete Comment"
+                        customText={`This will delete the comment with info: ${comment.text}. Proceed?`}
+                        callbackRoute={deleteComment}
+                        callbackData={{ props: this.props, item: comment }}
+                      />
+                    )}
+                    {comment.markedForDeletion && user && (
+                      <CallbackPopupContainer
+                        triggerText="Restore Comment"
+                        customText={`This will restore the comment with info: ${comment.text}. Proceed?`}
+                        callbackRoute={readdComment}
+                        callbackData={{ props: this.props, item: comment }}
+                      />
+                    )}
+                    <ImageContainer
+                      trigger={
+                        <img
+                          className="centerObj"
+                          style={{ cursor: "pointer" }}
+                          src={comment.img}
+                          alt=""
+                        />
+                      }
+                      imgLink={comment.img}
+                    />
+                    {/* TEMPORARY*/}
+                    {/* Make small then big*/}
+                  </div>
                 </React.Fragment>
               );
             }, this)}
           </div>
-          <div className="footer unitFooter"></div>
           {/* Add tag to printable sheet here? */}
         </Unit>
       );
     }
     customBehavior = customBehavior.bind(this);
-
+    if (redirect)
+      return (
+        <Redirect
+          to={{
+            pathname: redirect
+          }}
+        />
+      );
     return (
       <React.Fragment>
-        <Layout name="Issue Tracker">
+        <Layout name={`Issue Tracker ${dashUrl}`}>
           {this.state.popup}
           <Pagination
             itemsCount={tags.length}
             pageSize={pageSize}
             currentPage={currentPage}
             onPageChange={this.handlePageChange}
+          />
+          <BooleanSelect
+            text="Show dead comments?"
+            callback={this.setTags.bind(this)}
           />
           <Grid
             {...this.props}
