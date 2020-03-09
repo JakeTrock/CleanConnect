@@ -14,10 +14,14 @@ const Comment = require('./models/Comment.js');
 //import keys and creds, exp envvars
 const keys = require('./config/keys');
 process.env.rootDir = __dirname;
-process.env.topLevelDomain = "cleanconnect.jakesandbox.com";
-process.env.domainPrefix = "https://";
+if (!keys.testing) {
+    process.env.topLevelDomain = "cleanconnect.us";
+    process.env.domainPrefix = "https://";
+} else {
+    process.env.topLevelDomain = "localhost:3000";
+    process.env.domainPrefix = "http://";
+}
 process.env.testing = keys.testing;
-process.env.mailCreds = [process.env.mailServer || keys.mailServer, process.env.mailPort || keys.mailPort, process.env.mailUser || keys.mailUser, process.env.mailPass || keys.mailPass];
 //imports different router/handler files
 const user = require('./routes/User.js');
 const tag = require('./routes/Tag.js');
@@ -110,35 +114,6 @@ const delExp = new CronJob("00 00 00 * * *", function() {
         removedAt: { $lt: d }
     }).then(result => console.log(result)).catch(err => console.error(`Delete failed with error: ${err}`));
     //older than 2 months block
-    d.setDate(d.getDate() - 30);
-    Tag.find({
-        markedForDeletion: true,
-        removedAt: { $lt: d }
-    }).then(tgs => {
-        if (tgs) {
-            for (var n in tgs) {
-                Comment.find({
-                    tag: n._id
-                }).then(cmts => {
-                    if (cmts) {
-                        for (var z in cmts) {
-                            if (z.img) {
-                                fs.unlinkSync(tempDir + z.img);
-                            }
-                        }
-                    }
-                });
-            }
-            Comment.deleteMany({
-                markedForDeletion: true,
-                removedAt: { $lt: d }
-            }).then(result => console.log(result)).catch(err => console.error(`Delete failed with error: ${err}`));
-        }
-    });
-    Tag.deleteMany({
-        markedForDeletion: true,
-        removedAt: { $lt: d }
-    }).then(result => console.log(result)).catch(err => console.error(`Delete failed with error: ${err}`));
 }, null, true, 'America/New_York');
 
 //start cronjob
