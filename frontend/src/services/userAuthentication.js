@@ -96,13 +96,15 @@ export function deleteInfo() {
     return null;
   }
 }
-
-export default {
-  login,
-  getCurrentUser,
-  logout,
-  changeInfo,
-  validateChange,
-  completeChange,
-  deleteInfo
-};
+export function anonTvags(token, showDead) {
+  try {
+    const headers = {
+      "Content-Type": "application/json"
+    };
+    return axios.get(apiEndpoint + "/dash/" + token, "", {
+      headers: headers
+    });
+  } catch (ex) {
+    return null;
+  }
+}
