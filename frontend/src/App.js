@@ -26,7 +26,8 @@ import "./App.css";
 
 class App extends Component {
   state = {
-    captchaValidated: false
+    captchaValidated: false,
+    user: auth.getCurrentUser()
   };
   componentDidMount() {
     const user = auth.getCurrentUser();
@@ -55,14 +56,7 @@ class App extends Component {
               path="/profile"
               render={props => <Profile {...props} user={user} />}
             />
-            {user && (
-              <ProtectedRoute
-                exact
-                path="/"
-                render={props => <Dashboard {...props} user={user} />}
-              />
-            )}
-            {!user && <Route exact path="/" component={Home} />}
+
             <ProtectedRoute
               path="/tags"
               render={props => <Tags {...props} user={user} />}
@@ -79,6 +73,25 @@ class App extends Component {
               component={Comment}
             />
             <Route path="/notFound" component={NotFound} />
+            {!user && <Route exact path="/" component={Home} />}
+            {user && (
+              <Route
+                exact
+                path="/"
+                render={props => (
+                  <Redirect
+                    to={{
+                      pathname: user.dashUrl
+                    }}
+                  />
+                )}
+              />
+            )}
+            <Route
+              exact
+              path="/:token"
+              render={props => <Dashboard {...props} user={user} />}
+            />
             <Redirect to="/notFound" />
           </Switch>
         </main>
