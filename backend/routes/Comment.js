@@ -35,7 +35,7 @@ router.post('/new/:id', (req, res) => {
         if (req.files) {
             let image = req.files.img;
             if (image.size < 5100000 && (image.mimetype == "video/mp4" || image.mimetype == "video/webm" || image.mimetype == "image/webp" || image.mimetype == "image/gif" || image.mimetype == "image/jpeg" || image.mimetype == "image/png" || image.mimetype == "image/jpg" || image.mimetype == "image/tiff")) {
-                const name = randomBytes(16).toString("hex") + "." + image.name.split(".")[image.name.length - 1];
+                const name = randomBytes(16).toString("hex") + "." + image.name.split(".")[image.name.split(".").length - 1];
                 image.mv('./temp/' + name);
                 comment = {
                     tag: req.params.id,
