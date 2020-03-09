@@ -49,20 +49,28 @@ class Register extends Form {
     return (
       <Layout name="Register">
         <form onSubmit={this.handleSubmit}>
-          {this.renderInput("name", "Name", errors.name)}
-          {this.renderInput("email", "Email", errors.email)}
-          {this.renderInput(
-            "password",
-            "Password",
-            errors.password,
-            "password"
-          )}
-          {this.renderInput(
-            "password2",
-            "Confirm Password",
-            errors.password2,
-            "password"
-          )}
+          {this.renderInput({
+            name: "name",
+            label: "Name",
+            error: errors.name
+          })}
+          {this.renderInput({
+            name: "email",
+            label: "Email",
+            error: errors.email
+          })}
+          {this.renderInput({
+            name: "password",
+            label: "Password",
+            error: errors.password,
+            type: "password"
+          })}
+          {this.renderInput({
+            name: "password2",
+            label: "Confirm Password",
+            error: errors.password2,
+            type: "password"
+          })}
           {this.renderButton("Register")}
         </form>
       </Layout>

@@ -47,13 +47,17 @@ class Login extends Form {
     return (
       <Layout name="Login">
         <form onSubmit={this.handleSubmit}>
-          {this.renderInput("email", "Email", errors.email)}
-          {this.renderInput(
-            "password",
-            "Password",
-            errors.password,
-            "password"
-          )}
+          {this.renderInput({
+            name: "email",
+            label: "Email",
+            error: errors.email
+          })}
+          {this.renderInput({
+            name: "password",
+            label: "Password",
+            error: errors.password,
+            type: "password"
+          })}
           {this.renderButton("Login")}
         </form>
       </Layout>
