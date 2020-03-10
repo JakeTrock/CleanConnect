@@ -29,11 +29,6 @@ const smtpTransport = nodemailer.createTransport({
     sendmail: true,
     newline: 'unix',
     path: '/usr/sbin/sendmail'
-        // service: 'gmail',
-        // auth: {
-        //     user: 'hokugpn@gmail.com',
-        //     pass: 'Upgame11'
-        // }
 });
 
 smtpTransport.on("error", err => {

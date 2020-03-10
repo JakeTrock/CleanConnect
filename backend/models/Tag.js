@@ -18,14 +18,6 @@ const TagSchema = new Schema({
     comments: {
         type: Array
     },
-    markedForDeletion: {
-        type: Boolean,
-        index: true,
-        default: false
-    },
-    removedAt: {
-        type: Date
-    },
     dateLastAccessed: {
         type: Date,
         default: new Date()
