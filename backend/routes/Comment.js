@@ -37,6 +37,7 @@ router.post('/new/:id', (req, res) => {
                 const name = randomBytes(16).toString("hex") + "." + image.name.split(".")[image.name.split(".").length - 1];
                 image.mv('./temp/' + name);
                 comment = {
+                    ip: req.ip,
                     tag: req.params.id,
                     img: name,
                     text: req.body.text,
@@ -45,6 +46,7 @@ router.post('/new/:id', (req, res) => {
             } else return erep(res, "", 400, "Invalid filetype(we allow png, jpg, jpeg, webp, gif, tiff, mp4 and webm uploads up to 5.1 MB)", req.params.id)
         } else {
             comment = {
+                ip: req.ip,
                 tag: req.params.id,
                 text: req.body.text,
                 sev: req.body.sev //severity 0 to 2, 0 being green, 2 being red
@@ -77,6 +79,7 @@ router.delete('/delete/:id/:comment_id', (req, res) => {
         if (!post) return erep(res, "", 404, "Invalid post body");
         post.markedForDeletion = true;
         post.removedAt = new Date();
+        post.deletedBy = req.ip;
         post.save().then(res.json({
             success: true
         })).catch((e) => erep(res, e, 400, "Error saving comment", req.params.comment_id));
