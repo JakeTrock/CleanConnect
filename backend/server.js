@@ -35,6 +35,7 @@ app.use(bodyParser.urlencoded({
     extended: false
 }));
 app.use(bodyParser.json());
+app.set('trust proxy', true);
 
 // Connect to MongoDB
 mongoose.connect(process.env.url || keys.url, { useNewUrlParser: true })

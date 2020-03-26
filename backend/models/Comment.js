@@ -26,6 +26,10 @@ const CommentSchema = new Schema({
     removedAt: {
         type: Date,
     },
+    ip: {
+        type: String,
+        required: true
+    },
     date: {
         type: Date,
         default: new Date()

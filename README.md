@@ -39,8 +39,6 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * Potentially replace blobs with images
 * allow user to call getall with boolean and see deleted tags
 * for some reason, first tag dosen't have qrurl
-* start email server
-* get domain
 
 ## Issue board (Justin)
 * Replace try/catch blocks eventually

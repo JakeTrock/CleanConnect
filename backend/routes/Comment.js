@@ -1,18 +1,23 @@
-//import all libs
 const express = require('express');
 const fileUpload = require('express-fileupload');
 const randomBytes = require("randombytes");
 //model import
 const Tag = require('../models/Tag.js');
 const Comment = require('../models/Comment.js');
+const erep = require("./erep.js");
+
 // Validation Part for input
 const apr = require('../validation/apr.js');
 //configure express addons
 const router = express.Router();
 router.use(fileUpload());
 
+// ROUTE: POST comment/test
+// DESCRIPTION: tests comment route 
+// INPUT: none
+router.get('/test', (req, res) => res.send("Tag Works"));
 
-// ROUTE: POST tag/comment/:id
+// ROUTE: POST comment/:id
 // DESCRIPTION: allows unauthorized user to add a comment to a post
 // INPUT: severity of issue(0 to 2, being worst), description of issue, and an optional image of the issue
 
@@ -21,13 +26,7 @@ router.post('/new/:id', (req, res) => {
         errors,
         isValid
     } = apr(req.body);
-    if (!req.body.sev || !isValid) {
-        return res.status(400).json({
-            success: false,
-            simple: "Invalid post body.",
-            details: errors
-        });
-    }
+    if (!req.body.sev || !isValid) erep(res, errors, 400, "Invalid comment body", req.params.id);
     Tag.findOne({
         _id: req.params.id
     }).then(post => {
@@ -43,13 +42,7 @@ router.post('/new/:id', (req, res) => {
                     text: req.body.text,
                     sev: req.body.sev //severity 0 to 2, 0 being green, 2 being red
                 };
-            } else {
-                return res.status(400).json({
-                    tag: req.params.id,
-                    success: false,
-                    simple: "invalid filetype",
-                });
-            }
+            } else return erep(res, "", 400, "Invalid filetype(we allow png, jpg, jpeg, webp, gif, tiff, mp4 and webm uploads up to 5.1 MB)", req.params.id)
         } else {
             comment = {
                 tag: req.params.id,
@@ -66,11 +59,7 @@ router.post('/new/:id', (req, res) => {
                 success: true
             })
         } catch (e) {
-            res.status(500).json({
-                success: false,
-                simple: "Error creating tag.",
-                details: e
-            })
+            erep(res, e, 500, "Error creating comment", req.params.id);
         }
     });
 });
@@ -85,26 +74,13 @@ router.delete('/delete/:id/:comment_id', (req, res) => {
         _id: req.params.comment_id
     }).then(post => {
         // Check if the comment exists
-        if (!post) {
-            return res.status(404).json({
-                success: false,
-                simple: "Your comment doesn't exist"
-            });
-        }
+        if (!post) return erep(res, "", 404, "Invalid post body");
         post.markedForDeletion = true;
         post.removedAt = new Date();
         post.save().then(res.json({
             success: true
-        })).catch((e) => res.json({
-            success: false,
-            simple: "Error saving comment.",
-            details: e
-        }));
-    }).catch(err => res.status(404).json({
-        success: false,
-        simple: "Comment not found.",
-        details: err
-    }));
+        })).catch((e) => erep(res, e, 400, "Error saving comment", req.params.comment_id));
+    }).catch(err => erep(res, err, 404, "Error finding comment", req.params.comment_id));
 });
 
 // ROUTE: POST api/posts/comment/:id/:comment
@@ -127,16 +103,8 @@ router.post('/restore/:id/:comment_id', (req, res) => {
         post.removedAt = null;
         post.save().then(res.json({
             success: true
-        })).catch((e) => res.json({
-            success: false,
-            simple: "Error saving comment.",
-            details: e
-        }));
-    }).catch(err => res.status(404).json({
-        success: false,
-        simple: "Comment not found.",
-        details: err
-    }));
+        })).catch((e) => erep(res, e, 500, "Error saving comment", req.params.comment_id));
+    }).catch(err => erep(res, err, 404, "Error finding comment", req.params.comment_id));
 });
 
 //export module for importing into central server file

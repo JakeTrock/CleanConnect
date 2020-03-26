@@ -1,6 +1,6 @@
 //load in libraries
 const express = require('express');
-
+const erep = require("./erep.js");
 //load in express modules
 const router = express.Router();
 //load in mongoose templates
@@ -13,10 +13,7 @@ router.get('/pdf/:url', (req, res) => {
     var uu = req.params.url;
     //checks if url is valid
     if (uu.split(".")[0].length == 32) res.sendFile(tempDir + uu);
-    else res.status(404).json({
-        success: false,
-        simple: "invalid url. url may be incorrectly typed, or file may no longer exist."
-    });
+    else erep(res, "", 404, "invalid url. url may be incorrectly typed, or file may no longer exist", "");
 });
 // ROUTE: GET /img/:url
 // DESCRIPTION: retrieves and returns image from temp dir
@@ -25,10 +22,7 @@ router.get('/img/:url', (req, res) => {
     var uu = req.params.url;
     //checks if url is valid
     if (uu.split(".")[0].length == 32) res.sendFile(tempDir + uu);
-    else res.status(404).json({
-        success: false,
-        simple: "invalid url. url may be incorrectly typed, or file may no longer exist."
-    });
+    else erep(res, "", 404, "invalid url. url may be incorrectly typed, or file may no longer exist", "");
 });
 //exports current script as module
 module.exports = router;
