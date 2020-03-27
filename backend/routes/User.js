@@ -527,5 +527,23 @@ router.get('/current', passport.authenticate('jwt', {
         });
     })
 });
+router.get('/getClientToken', (req, res) => {
+    gateway.clientToken.generate({}, function(err, response) {
+        res.send(response.clientToken);
+    });
+});
+router.get('/getAuthClientToken', passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
+    User.findOne({
+        email: req.body.email
+    }).then(usr => {
+        gateway.clientToken.generate({
+            customerId: usr.PayToken
+        }, function(err, response) {
+            res.send(response.clientToken);
+        })
+    });
+});
 //exports current script as module
 module.exports = router;
