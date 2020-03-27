@@ -268,8 +268,7 @@ router.post('/print/', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     Tag.find({
-        user: req.user._id,
-        markedForDeletion: false
+        user: req.user._id
     }, function(err, list) {
         const pi = req.body.printIteration;
         const {
@@ -308,10 +307,8 @@ router.post('/print/', passport.authenticate('jwt', {
                     svgbuff = svgbuff.replace(`<!-- bimgrp${(b - (cbuff * 10))} -->`, '');
                     svgbuff = svgbuff.replace(`<!-- ${(b - (cbuff * 10))}eimgrp -->`, '');
                     b++;
-                    console.log(b);
                     if (b != 0 && (b % 10 == 0 || (g == pi.length - 1 && i == pi[g] - 1))) {
                         if ((g == pi.length - 1 && i == pi[g] - 1)) {
-                            console.log("ffffff");
                             if (svgbuff.indexOf("room9") !== -1) {
                                 for (var r = 0; r < 10; r++) {
                                     svgbuff = svgbuff.replace(/(bimgrp)(.*?)(eimgrp)/, "");
