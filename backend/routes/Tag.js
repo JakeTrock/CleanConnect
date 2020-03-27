@@ -268,8 +268,7 @@ router.post('/print/', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     Tag.find({
-        user: req.user._id,
-        markedForDeletion: false
+        user: req.user._id
     }, function(err, list) {
         const pi = req.body.printIteration;
         const {

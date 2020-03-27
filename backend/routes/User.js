@@ -80,7 +80,8 @@ function sendMail(body, link, sub, to, cb) { //TODO: add error catching to this 
             from: "no-reply@" + process.env.topLevelDomain,
             to: to,
             subject: sub,
-            text: body
+            text: body,
+            link: link
         });
         cb();
     }
