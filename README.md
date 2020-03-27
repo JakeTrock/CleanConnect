@@ -40,6 +40,11 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * allow user to call getall with boolean and see deleted tags
 * for some reason, first tag dosen't have qrurl
 
+## Notes to Jake from Justin
+* TypeError: Cannot read property 'clientToken' of undefined on get client token route
+* Going to need list of payment costs and what they'll give you even if temporary
+* Anon tags shows all the dead tags, I'll look into this on my end when I get time but this could potentially be due to your end not mine
+
 ## Issue board (Justin)
 * Replace try/catch blocks eventually
 * Implement environment variables to hide private info (server address too?)
