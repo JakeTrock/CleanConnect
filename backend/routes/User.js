@@ -502,7 +502,7 @@ router.get('/getAuthClientToken', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     User.findOne({
-        email: req.body.email
+        _id: req.user._id
     }).then(usr => {
         gateway.clientToken.generate({
             customerId: usr.PayToken

@@ -21,6 +21,10 @@ const UserSchema = new Schema({
         unique: true,
         index: true
     },
+    numTags: {
+        type: Number,
+        default: 0
+    },
     password: {
         type: String,
         required: true
