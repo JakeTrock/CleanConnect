@@ -219,9 +219,9 @@ router.get("/confirmation/:token", (req, res) => {
             user.isVerified = true;
             user.save(function(err) {
                 if (err) return erep(res, err, 404, "Error saving user", token._userId);
-                res.json({
+                token.deleteOne().then(() => res.json({
                     success: true
-                });
+                })).catch(err => erep(res, err, 404, "Error deleting token", token._userId));
             });
         });
     });
@@ -281,6 +281,7 @@ router.get("/delete/:token", passport.authenticate("jwt", {
                 }
             }))
             .then(Tag.deleteMany({ user: req.user._id }))
+            .then(tk.deleteOne())
             .then(() => res.json({
                 success: true
             }))
@@ -374,7 +375,7 @@ router.post(
                                     }
                                 } else erep(res, "", 404, "Error finding profile", req.user._id);
                             })
-                            .then(UserIndex.findOneAndRemove({ _userId: tk._userId }))
+                            .then(tk.deleteOne())
                             .catch(e => erep(res, e, 400, "Error processing token", req.user._id));
                     } else erep(res, "", 403, "email token does not match current user cookie, please log into this computer to load the cookie into your memory", req.user._id);
                 });

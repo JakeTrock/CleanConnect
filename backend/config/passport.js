@@ -3,7 +3,7 @@ const ExtractJwt = require('passport-jwt').ExtractJwt;
 const mongoose = require('mongoose');
 const User = mongoose.model('User');
 const keys = require('./keys');
-const erep = require('./routes/erep.js');
+const erep = require('../routes/erep.js');
 
 const opts = {};
 //get jwt token from authorization header

@@ -26,8 +26,8 @@ process.env.testing = keys.testing;
 const user = require('./routes/User.js');
 const tag = require('./routes/Tag.js');
 const comment = require('./routes/Comment.js');
-const file = require('./routes/File.js');
 const erep = require('./routes/erep.js');
+const file = require('./routes/File.js');
 
 //setup bodyparser and express
 const app = express();
