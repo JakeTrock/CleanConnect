@@ -94,109 +94,74 @@ router.post("/register", (req, res) => {
     const { errors, isValid } = validateRegisterInput(req.body);
     //check validation
     if (!isValid) return erep(res, errors, 400, "Invalid post body", "");
-    if (process.env.testing && req.body.email == "fake@test.com") {
-        const newUser = new User({
-            name: req.body.name,
-            email: req.body.email,
-            dashUrl: randomBytes(16).toString("hex").substring(8),
-            password: req.body.password
-        });
 
-        bcrypt.genSalt(10, (err, salt) => {
-            bcrypt.hash(newUser.password, salt, (err, hash) => {
-                if (err) erep(res, err, 500, "Error generating password", "");
-                newUser.password = hash;
-                newUser.save(function(err) {
-                    if (err) return erep(res, err, 400, "Error saving user", "");
-                    // Create a verification token for this user
-                    User.findOne({
-                            email: req.body.email
-                        },
-                        "_id"
-                    ).exec(function(err, user) {
-                        if (err) return erep(res, err, 500, "Error finding user", "");
-                        const vToken = new UserIndex({
-                            _userId: user,
-                            token: randomBytes(16).toString("hex"),
-                            isCritical: true
-                        });
-                        vToken.save().then(p => res.json({
-                            success: true,
-                            email: "/user/confirmation/" + p.token
-                        }));
-                    });
-                });
-            });
-        });
-    } else {
-        User.findOne({
-                email: req.body.email
-            })
-            .then(user => {
-                if (user) {
-                    errors.email = "Email already exists";
-                    return erep(res, errors, 400, "Invalid post body", "");
-                } else {
-                    gateway.customer.create({
-                        paymentMethodNonce: req.body.payment_method_nonce
-                    }, function(err, result) {
-                        if (result.success) {
-                            var planID = keys.tierID[req.body.tier];
-                            gateway.subscription.create({
-                                paymentMethodToken: result.customer.paymentMethods[0].token,
-                                planId: planID
-                            }, function(err, result) {
-                                if (result.success) {
-                                    const newUser = new User({
-                                        name: req.body.name,
-                                        email: req.body.email,
-                                        dashUrl: randomBytes(16).toString("hex").substring(8),
-                                        password: req.body.password,
-                                        PayToken: result.subscription.id,
-                                        tier: req.body.tier
-                                    });
-                                    bcrypt.genSalt(10, (err, salt) => {
-                                        bcrypt.hash(newUser.password, salt, (err, hash) => {
-                                            if (err) erep(res, err, 500, "Failed to generate password", req.body.email);
-                                            newUser.password = hash;
-                                            newUser.save(function(err) {
-                                                if (err) return erep(res, err, 500, "Error saving user data", req.body.email);
-                                                // Create a verification token for this user
-                                                User.findOne({
-                                                    email: req.body.email
-                                                }, "_id").exec(function(err, user) {
-                                                    if (err) return erep(res, err, 500, "Failed to find user", req.body.email);
-                                                    const vToken = new UserIndex({
-                                                        _userId: user._id,
-                                                        token: randomBytes(16).toString("hex"),
-                                                        isCritical: true
-                                                    });
-                                                    vToken.save().then(p => {
-                                                        // Send the email
+    User.findOne({
+            email: req.body.email
+        })
+        .then(user => {
+            if (user) {
+                errors.email = "Email already exists";
+                return erep(res, errors, 400, "Invalid post body", "");
+            } else {
+                gateway.customer.create({
+                    paymentMethodNonce: req.body.payment_method_nonce
+                }, function(err, result) {
+                    if (result.success) {
+                        var planID = keys.tierID[req.body.tier];
+                        gateway.subscription.create({
+                            paymentMethodToken: result.customer.paymentMethods[0].token,
+                            planId: planID
+                        }, function(err, result) {
+                            if (result.success) {
+                                const newUser = new User({
+                                    name: req.body.name,
+                                    email: req.body.email,
+                                    dashUrl: randomBytes(16).toString("hex").substring(8),
+                                    password: req.body.password,
+                                    PayToken: result.subscription.id,
+                                    tier: req.body.tier
+                                });
+                                bcrypt.genSalt(10, (err, salt) => {
+                                    bcrypt.hash(newUser.password, salt, (err, hash) => {
+                                        if (err) erep(res, err, 500, "Failed to generate password", req.body.email);
+                                        newUser.password = hash;
+                                        newUser.save(function(err) {
+                                            if (err) return erep(res, err, 500, "Error saving user data", req.body.email);
+                                            // Create a verification token for this user
+                                            User.findOne({
+                                                email: req.body.email
+                                            }, "_id").exec(function(err, user) {
+                                                if (err) return erep(res, err, 500, "Failed to find user", req.body.email);
+                                                const vToken = new UserIndex({
+                                                    _userId: user._id,
+                                                    token: randomBytes(16).toString("hex"),
+                                                    isCritical: true
+                                                });
+                                                vToken.save().then(p => {
+                                                    // Send the email
 
-                                                        sendMail("Hello " + user.name + ",Please verify your account by clicking the link:",
-                                                            process.env.domainPrefix + process.env.topLevelDomain +
-                                                            "/user/confirmation/" +
-                                                            p.token, "CleanConnect Account Verification", req.body.email,
-                                                            function(err) {
-                                                                if (err) return erep(res, err, 500, "Failed to send mail", req.body.email);
-                                                            });
-                                                        res.json({
-                                                            success: true,
-                                                            status: "A verification email has been sent to " + req.body.email + "."
+                                                    sendMail("Hello " + user.name + ",Please verify your account by clicking the link:",
+                                                        process.env.domainPrefix + process.env.topLevelDomain +
+                                                        "/user/confirmation/" +
+                                                        p.token, "CleanConnect Account Verification", req.body.email,
+                                                        function(err) {
+                                                            if (err) return erep(res, err, 500, "Failed to send mail", req.body.email);
                                                         });
+                                                    res.json({
+                                                        success: true,
+                                                        status: "A verification email has been sent to " + req.body.email + "."
                                                     });
                                                 });
                                             });
                                         });
                                     });
-                                }
-                            });
-                        }
-                    });
-                }
-            }).catch(e => erep(res, e, 500, "Registration error", req.body.email));
-    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        }).catch(e => erep(res, e, 500, "Registration error", req.body.email));
 });
 
 // ROUTE: GET user/resend
