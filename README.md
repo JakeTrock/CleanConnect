@@ -44,7 +44,13 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client in confirm/verify route
 * TypeError: Cannot read property 'clientToken' of undefined on get client token route
 * Going to need list of payment costs and what they'll give you even if temporary
-* Anon tags shows all the dead tags, I'll look into this on my end when I get time but this could potentially be due to your end not mine
+    * Corporate/chain plan (2)
+        * This plan is for large businesses, and allows users to create up to 100 tags with unlimited usage
+    * Business plan (1)
+        * This plan is for medium businesses and complexes, and allows users to create up to 10 tags with unlimited usage. This plan is perfect for offices, condo complexes and gyms.
+    * Small business plan (0)
+        * This plan is for small businesses, and allows users one tag for all reporting. This tag is re-usable, but location of reports is harder to discern.
+
 
 ## Issue board (Justin)
 * Replace try/catch blocks eventually

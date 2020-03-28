@@ -104,21 +104,24 @@ router.post("/register", (req, res) => {
                 return erep(res, errors, 400, "Invalid post body", "");
             } else {
                 gateway.customer.create({
+                    email: req.body.email,
+                    company: req.body.name,
                     paymentMethodNonce: req.body.payment_method_nonce
-                }, function(err, result) {
-                    if (result.success) {
+                }, function(err, customerResult) {
+                    if (customerResult.success) {
                         var planID = keys.tierID[req.body.tier];
                         gateway.subscription.create({
-                            paymentMethodToken: result.customer.paymentMethods[0].token,
+                            paymentMethodToken: customerResult.customer.paymentMethods[0].token,
                             planId: planID
-                        }, function(err, result) {
-                            if (result.success) {
+                        }, function(err, subscriptionResult) {
+                            if (subscriptionResult.success) {
                                 const newUser = new User({
                                     name: req.body.name,
                                     email: req.body.email,
                                     dashUrl: randomBytes(16).toString("hex").substring(8),
                                     password: req.body.password,
-                                    PayToken: result.subscription.id,
+                                    PayToken: subscriptionResult.subscription.id,
+                                    custID: customerResult.customer.id,
                                     tier: req.body.tier
                                 });
                                 bcrypt.genSalt(10, (err, salt) => {
@@ -140,7 +143,7 @@ router.post("/register", (req, res) => {
                                                 vToken.save().then(p => {
                                                     // Send the email
 
-                                                    sendMail("Hello " + user.name + ",Please verify your account by clicking the link:",
+                                                    sendMail("Hello " + req.body.name + ",Please verify your account by clicking the link:",
                                                         process.env.domainPrefix + process.env.topLevelDomain +
                                                         "/user/confirmation/" +
                                                         p.token, "CleanConnect Account Verification", req.body.email,
@@ -505,11 +508,12 @@ router.get('/getAuthClientToken', passport.authenticate('jwt', {
         _id: req.user._id
     }).then(usr => {
         gateway.clientToken.generate({
-            customerId: usr.PayToken
+            customerId: usr.custID
         }, function(err, response) {
+            if (!response.success) return erep(res, response, 500, "Error getting auth client token", req.user._id);
             res.send(response.clientToken);
-        })
-    });
+        });
+    }).catch(e => erep(res, e, 500, "Error getting auth client token", req.user._id));
 });
 //exports current script as module
 module.exports = router;
