@@ -107,7 +107,7 @@ router.post("/register", (req, res) => {
                 if (err) erep(res, err, 500, "Error generating password", "");
                 newUser.password = hash;
                 newUser.save(function(err) {
-                    if (err) return erep(res, err, 404, "Error saving user", "");
+                    if (err) return erep(res, err, 400, "Error saving user", "");
                     // Create a verification token for this user
                     User.findOne({
                             email: req.body.email
