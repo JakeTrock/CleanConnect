@@ -8,7 +8,7 @@ const fs = require('fs');
 const CronJob = require("cron").CronJob;
 const User = require("./models/User");
 const UserIndex = require("./models/UserIndex.js");
-const Tag = require("./models/Tag.js");
+// const Tag = require("./models/Tag.js");
 const Comment = require('./models/Comment.js');
 
 //import keys and creds, exp envvars
@@ -27,6 +27,7 @@ const user = require('./routes/User.js');
 const tag = require('./routes/Tag.js');
 const comment = require('./routes/Comment.js');
 const file = require('./routes/File.js');
+const erep = require('./routes/erep.js');
 
 //setup bodyparser and express
 const app = express();
@@ -40,7 +41,7 @@ app.set('trust proxy', true);
 // Connect to MongoDB
 mongoose.connect(process.env.url || keys.url, { useNewUrlParser: true })
     .then(() => console.log('Mongodb Connected'))
-    .catch(err => console.log(err));
+    .catch(err => erep(undefined, err, 555, "MONGO ERROR", ""));
 //dodge deprication warnings
 mongoose.set('useNewUrlParser', true)
     .set('useFindAndModify', false)
@@ -57,8 +58,8 @@ app.use('/comment', comment);
 app.use('/file', file);
 
 //set port and listen on it 
-const port = process.env.BEPORT || 5000;
-app.listen(port, () => console.log(`Server running on port ${port}`));
+
+app.listen(5000, () => console.log("Server running on port 5000"));
 
 // ROUTE: NONE
 // DESCRIPTION: deletes unused tokens and pdfs over a week old from the server
@@ -113,7 +114,7 @@ const delExp = new CronJob("00 00 00 * * *", function() {
     Comment.deleteMany({
         markedForDeletion: true,
         removedAt: { $lt: d }
-    }).then(result => console.log(result)).catch(err => console.error(`Delete failed with error: ${err}`));
+    }).then(result => console.log(result)).catch(err => erep(undefined, err, 444, "EXPIRY DELETION ERROR", ""));
     //older than 2 months block
 }, null, true, 'America/New_York');
 

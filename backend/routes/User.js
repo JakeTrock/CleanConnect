@@ -157,7 +157,7 @@ router.post("/register", (req, res) => {
                                     });
                                     bcrypt.genSalt(10, (err, salt) => {
                                         bcrypt.hash(newUser.password, salt, (err, hash) => {
-                                            if (err) erep(res, err, 500, "Failed to generate password", req.user._id);
+                                            if (err) erep(res, err, 500, "Failed to generate password", req.body.email);
                                             newUser.password = hash;
                                             newUser.save(function(err) {
                                                 if (err) return erep(res, err, 500, "Error saving user data", req.body.email);
@@ -195,7 +195,7 @@ router.post("/register", (req, res) => {
                         }
                     });
                 }
-            }).catch(e => console.error(e));
+            }).catch(e => erep(res, e, 500, "Registration error", req.body.email));
     }
 });
 
@@ -244,7 +244,6 @@ router.post("/resend", (req, res) => {
 router.get("/confirmation/:token", (req, res) => {
     // Find a matching token
     UserIndex.findOne({ token: req.params.token }, function(err, token) {
-        console.log(token);
         if (!token) return erep(res, err, 400, "We were unable to find a valid token. Your token my have expired", "");
         // If we found a token, find a matching user
         User.findOne({ _id: token._userId }, function(err, user) {
@@ -320,7 +319,7 @@ router.get("/delete/:token", passport.authenticate("jwt", {
             .then(() => res.json({
                 success: true
             }))
-            .catch(e => console.error(e));
+            .catch(e => erep(res, e, 500, "Deletion error", req.user._id));
         else erep(res, "", 403, "email token does not match current user cookie, please log into this computer to load the cookie into your memory", req.user._id);
     });
 });
@@ -441,7 +440,7 @@ router.post(
                             success: true
                         });
                     })
-                    .catch(e => console.error(e));
+                    .catch(e => erep(res, e, 500, "Validation error", req.user._id));
             } else erep(res, "", 403, "email token does not match current user cookie, please log into this computer to load the cookie into your memory", req.user._id);
         });
     }
@@ -503,7 +502,7 @@ router.post("/login", (req, res) => {
                 }
             });
         })
-        .catch(e => console.error(e));
+        .catch(e => erep(res, e, 500, "Login error", req.body.email));
 });
 
 // ROUTE: GET user/current

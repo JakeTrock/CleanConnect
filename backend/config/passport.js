@@ -3,6 +3,7 @@ const ExtractJwt = require('passport-jwt').ExtractJwt;
 const mongoose = require('mongoose');
 const User = mongoose.model('User');
 const keys = require('./keys');
+const erep = require('./routes/erep.js');
 
 const opts = {};
 //get jwt token from authorization header
@@ -16,6 +17,6 @@ module.exports = passport => {
                     return done(null, user);
                 }
                 return done(null, false);
-            }).catch(err => console.log(err));
+            }).catch(err => erep(undefined, err, 222, "PASSPORT ERROR", ""));
     }));
 }

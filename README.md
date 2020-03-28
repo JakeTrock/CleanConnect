@@ -83,15 +83,6 @@ In production, most likely, we would store the bearer key in a cookie. The beare
     * Copyright papers are ~$90 to file
     * Patents can be searched without cruddy mainframes at https://www.google.com/?tbm=pts
 
-### Resolved (keep in mind when new code is written)
-* re-do comments to make code more legible
-* add more swears to [comment validation](/validation/apr.js)
-* make all errors this style:
-	success: false,
-	reason: "Post not found",
-	moreDetailed: err
-* add .catch with error logging to all promise functions with .catch((e)=>console.error(e));
-
 
 ### Jake-specific:
 
