@@ -11,6 +11,7 @@ const fs = require('fs');
 const Tag = require('../models/Tag.js');
 const Comment = require('../models/Comment.js');
 const User = require("../models/User");
+const erep = require("./erep.js");
 
 // Validation Part for input
 const validatePostInput = require('../validation/tag.js');
@@ -49,11 +50,7 @@ router.post('/getall', passport.authenticate('jwt', {
             }
             res.json(posts);
         }
-    }).catch(err => res.status(404).json({
-        success: false,
-        simple: "No posts found.",
-        details: err
-    }));
+    }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
 });
 
 // ROUTE: GET tag/getone/id
@@ -64,21 +61,14 @@ router.get('/getone/:id', passport.authenticate('jwt', {
     (req, res) => {
         Tag.findOne({
             _id: req.params.id
-        }).catch(err => res.status(404).json({
-            success: false,
-            simple: "No posts found.",
-            details: err
-        }));
+        }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
     });
 // ROUTE: GET tag/exists/:id
 // DESCRIPTION: sees if tag exists
 router.get('/exists/:id', (req, res) => {
     Tag.findOne({
         _id: req.params.id
-    }).then(post => res.json({ exists: (post != null) })).catch(err => res.status(404).json({
-        exists: false,
-        error: err
-    }));
+    }).then(post => res.json({ exists: (post != null) })).catch(err => erep(res, err, 404, "No posts found", req.user._id));
 });
 // ROUTE: POST tag/new
 // DESCRIPTION: creates a new tag
@@ -92,13 +82,7 @@ router.post('/new', passport.authenticate('jwt', {
         errors,
         isValid
     } = validatePostInput(req);
-    if (!isValid) {
-        return res.status(400).json({
-            success: false,
-            simple: "Invalid post body.",
-            details: errors
-        });
-    }
+    if (!isValid) return erep(res, errors, 400, "Invalid post body", req.user._id);
     var sc = true;
     Tag.find({
         user: req.user._id
@@ -114,13 +98,7 @@ router.post('/new', passport.authenticate('jwt', {
                 name: tagName,
                 user: req.user._id
             }).save((err, obj) => {
-                if (err) {
-                    return res.status(500).json({
-                        success: false,
-                        simple: "Error creating tag.",
-                        details: err
-                    });
-                }
+                if (err) return erep(res, err, 500, "Error creating tag", req.user._id);
                 QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/tag/' + obj._id, function(err, url) {
                     Tag.findOneAndUpdate({
                         name: tagName,
@@ -134,11 +112,7 @@ router.post('/new', passport.authenticate('jwt', {
                     }))
                 })
             });
-        else
-            res.status(400).json({
-                success: false,
-                simple: "Name not unique."
-            });
+        else erep(res, "", 400, "Name not unique", req.user._id);
     });
 
 });
@@ -155,13 +129,7 @@ router.post('/edit/:id', passport.authenticate('jwt', {
         errors,
         isValid
     } = validatePostInput(req);
-    if (!isValid) {
-        return res.status(400).json({
-            success: false,
-            simple: "Invalid post body.",
-            details: errors
-        });
-    }
+    if (!isValid) return erep(res, errors, 400, "Invalid post body.", req.user._id);
     var sc = true;
     Tag.find({
         user: req.user._id
@@ -181,17 +149,8 @@ router.post('/edit/:id', passport.authenticate('jwt', {
                 }, {
                     new: true
                 }).then(res.json({ success: true }))
-                .catch(e => res.json({
-                    success: false,
-                    simple: "Error updating tag",
-                    details: e
-                }));
-        } else {
-            res.status(400).json({
-                success: false,
-                simple: "Name not unique."
-            });
-        }
+                .catch(e => erep(res, e, 500, "Error updating tag", req.user._id));
+        } else erep(res, "", 400, "Name not unique", req.user._id);
     });
 });
 
@@ -208,19 +167,11 @@ router.delete('/delete/:id', passport.authenticate('jwt', {
     }).then(post => {
         Comment.deleteMany({
             tag: post._id
-        }).catch(err => res.status(404).json({
-            success: false,
-            simple: "No posts found.",
-            details: err
-        }));
+        }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
         post.deleteOne().then(() => res.json({
             success: true
         }));
-    }).catch(err => res.status(404).json({
-        success: false,
-        simple: "Tag not found",
-        details: err
-    }));
+    }).catch(err => erep(res, err, 404, "Tag not found", req.user._id));
 });
 
 // ROUTE: POST tag/:id
@@ -245,19 +196,11 @@ router.post('/restore/:id', passport.authenticate('jwt', {
                     n.removedAt = null;
                 }
             }
-        }).catch(err => res.status(404).json({
-            success: false,
-            simple: "No posts found.",
-            details: err
-        }));
+        }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
         post.save().then(() => res.json({
             success: true
         }));
-    }).catch(err => res.status(404).json({
-        success: false,
-        simple: "Tag not found",
-        details: err
-    }));
+    }).catch(err => erep(res, err, 404, "Tag not found", req.user._id));
 });
 
 // ROUTE: GET tag/print/
@@ -275,21 +218,9 @@ router.post('/print/', passport.authenticate('jwt', {
             errors,
             isValid
         } = isprintable(req.body, list.length);
-        if (!isValid) {
-            return res.status(400).json({
-                success: false,
-                simple: "Invalid post body.",
-                details: errors
-            });
-        }
+        if (!isValid) erep(res, errors, 400, "Invalid post body", req.user._id);
         fs.readFile(__dirname + '/template.svg', function(err, data) {
-            if (err) {
-                res.status(500).json({
-                    success: false,
-                    simple: "Error generating pdf.",
-                    details: err
-                })
-            }
+            if (err) erep(res, err, 500, "Error generating pdf", req.user._id);
             //svg template file
             var svgbuff = data.toString();
             //array of pages defined
@@ -360,16 +291,8 @@ router.get('/dash/:id', async(req, res) => {
                 }
                 res.json(posts);
             }
-        }).catch(err => res.status(404).json({
-            success: false,
-            simple: "No posts found.",
-            details: err
-        }));
-    }).catch(err => res.status(404).json({
-        success: false,
-        simple: "No users found.",
-        details: err
-    }));
+        }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
+    }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
 });
 
 //export module for importing into central server file

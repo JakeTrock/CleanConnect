@@ -41,7 +41,7 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * for some reason, first tag dosen't have qrurl
 
 ## Notes to Jake from Justin
-* BIG: Register route not returning anything, ocassionaly printing 'null' in terminal. Maybe has to deal with the wrong tier name?
+* Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client in confirm/verify route
 * TypeError: Cannot read property 'clientToken' of undefined on get client token route
 * Going to need list of payment costs and what they'll give you even if temporary
 * Anon tags shows all the dead tags, I'll look into this on my end when I get time but this could potentially be due to your end not mine
@@ -82,15 +82,6 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * Patent/Copyright
     * Copyright papers are ~$90 to file
     * Patents can be searched without cruddy mainframes at https://www.google.com/?tbm=pts
-
-### Resolved (keep in mind when new code is written)
-* re-do comments to make code more legible
-* add more swears to [comment validation](/validation/apr.js)
-* make all errors this style:
-	success: false,
-	reason: "Post not found",
-	moreDetailed: err
-* add .catch with error logging to all promise functions with .catch((e)=>console.error(e));
 
 
 ### Jake-specific:
