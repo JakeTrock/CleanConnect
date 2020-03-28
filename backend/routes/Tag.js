@@ -7,11 +7,13 @@ const QRCode = require('qrcode');
 const SVGtoPDF = require('svg-to-pdfkit');
 const randomBytes = require("randombytes");
 const fs = require('fs');
+const erep = require("./erep.js");
+const keys = require('../config/keys');
 //model import
 const Tag = require('../models/Tag.js');
 const Comment = require('../models/Comment.js');
 const User = require("../models/User");
-const erep = require("./erep.js");
+
 
 // Validation Part for input
 const validatePostInput = require('../validation/tag.js');
@@ -76,45 +78,53 @@ router.get('/exists/:id', (req, res) => {
 router.post('/new', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
-    //add tag node
-    var tagName = req.body.name;
-    const {
-        errors,
-        isValid
-    } = validatePostInput(req);
-    if (!isValid) return erep(res, errors, 400, "Invalid post body", req.user._id);
-    var sc = true;
-    Tag.find({
-        user: req.user._id
-    }).then(posts => {
-        for (var n in posts) {
-            var p = posts[n].name;
-            if (p == tagName) {
-                sc = false;
+    User.findOne({ _id: req.user._id }).then(usr => {
+        if (usr.numTags + 1 > keys.ceilings[usr.tier]) return erep(res, "", 400, "No more tags can be created with your current plan, please consider upgrading", req.user._id);
+        // add tag node
+        var tagName = req.body.name;
+        const {
+            errors,
+            isValid
+        } = validatePostInput(req);
+        if (!isValid) return erep(res, errors, 400, "Invalid post body", req.user._id);
+        var sc = true;
+        Tag.find({
+            user: req.user._id
+        }).then(posts => {
+            for (var n in posts) {
+                var p = posts[n].name;
+                if (p == tagName) {
+                    sc = false;
+                }
             }
-        }
-        if (sc)
-            new Tag({
-                name: tagName,
-                user: req.user._id
-            }).save((err, obj) => {
-                if (err) return erep(res, err, 500, "Error creating tag", req.user._id);
-                QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/tag/' + obj._id, function(err, url) {
-                    Tag.findOneAndUpdate({
+            if (sc)
+                User.findOneAndUpdate({
+                    _id: req.user._id
+                }, {
+                    $inc: { numTags: 1 }
+                }).then(() => {
+                    new Tag({
                         name: tagName,
                         user: req.user._id
-                    }, {
-                        $set: { qrcode: url }
-                    }, {
-                        new: true
-                    }).then(res.json({
-                        success: true
-                    }))
-                })
-            });
-        else erep(res, "", 400, "Name not unique", req.user._id);
+                    }).save((err, obj) => {
+                        if (err) return erep(res, err, 500, "Error creating tag", req.user._id);
+                        QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/tag/' + obj._id, function(err, url) {
+                            Tag.findOneAndUpdate({
+                                name: tagName,
+                                user: req.user._id
+                            }, {
+                                $set: { qrcode: url }
+                            }, {
+                                new: true
+                            }).then(res.json({
+                                success: true
+                            }));
+                        })
+                    });
+                });
+            else erep(res, "", 400, "Name not unique", req.user._id);
+        });
     });
-
 });
 
 // ROUTE: POST tag/edit/:id
@@ -168,7 +178,11 @@ router.delete('/delete/:id', passport.authenticate('jwt', {
         Comment.deleteMany({
             tag: post._id
         }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
-        post.deleteOne().then(() => res.json({
+        post.deleteOne().then(User.findOneAndUpdate({
+            _id: req.user._id
+        }, {
+            $inc: { numTags: -1 }
+        }).catch(err => erep(res, err, 404, "User not found", req.user._id))).then(() => res.json({
             success: true
         }));
     }).catch(err => erep(res, err, 404, "Tag not found", req.user._id));
@@ -178,30 +192,30 @@ router.delete('/delete/:id', passport.authenticate('jwt', {
 // DESCRIPTION: allows user to restore deleted tag information
 // INPUT: tag id via url bar
 
-router.post('/restore/:id', passport.authenticate('jwt', {
-    session: false
-}), (req, res) => {
-    Tag.findOne({
-        _id: req.params.id,
-        user: req.user.id
-    }).then(post => {
-        post.markedForDeletion = false;
-        post.removedAt = null;
-        Comment.find({
-            tag: post._id
-        }).then(cmts => {
-            if (cmts) {
-                for (var n in cmts) {
-                    n.markedForDeletion = false;
-                    n.removedAt = null;
-                }
-            }
-        }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
-        post.save().then(() => res.json({
-            success: true
-        }));
-    }).catch(err => erep(res, err, 404, "Tag not found", req.user._id));
-});
+// router.post('/restore/:id', passport.authenticate('jwt', {
+//     session: false
+// }), (req, res) => {
+//     Tag.findOne({
+//         _id: req.params.id,
+//         user: req.user.id
+//     }).then(post => {
+//         post.markedForDeletion = false;
+//         post.removedAt = null;
+//         Comment.find({
+//             tag: post._id
+//         }).then(cmts => {
+//             if (cmts) {
+//                 for (var n in cmts) {
+//                     n.markedForDeletion = false;
+//                     n.removedAt = null;
+//                 }
+//             }
+//         }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
+//         post.save().then(() => res.json({
+//             success: true
+//         }));
+//     }).catch(err => erep(res, err, 404, "Tag not found", req.user._id));
+// });
 
 // ROUTE: GET tag/print/
 // DESCRIPTION: prints tags as qr codes, allowing people to access them in real life
