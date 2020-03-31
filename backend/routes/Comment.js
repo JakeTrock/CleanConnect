@@ -26,11 +26,16 @@ router.post('/new/:id', (req, res) => {
         errors,
         isValid
     } = apr(req.body);
-    if (!req.body.sev || !isValid) erep(res, errors, 400, "Invalid comment body", req.params.id);
+    if (!req.body.sev || !isValid) return erep(res, errors, 400, "Invalid comment body", req.params.id);
     Tag.findOne({
         _id: req.params.id
     }).then(post => {
-        var comment;
+        var comment = {
+            ip: req.ip,
+            tag: req.params.id,
+            text: req.body.text,
+            sev: req.body.sev
+        };
         if (req.files) {
             let image = req.files.img;
             if (image.size < 5100000 && (image.mimetype == "video/mp4" || image.mimetype == "video/webm" || image.mimetype == "image/webp" || image.mimetype == "image/gif" || image.mimetype == "image/jpeg" || image.mimetype == "image/png" || image.mimetype == "image/jpg" || image.mimetype == "image/tiff")) {
@@ -44,13 +49,6 @@ router.post('/new/:id', (req, res) => {
                     sev: req.body.sev //severity 0 to 2, 0 being green, 2 being red
                 };
             } else return erep(res, "", 400, "Invalid filetype(we allow png, jpg, jpeg, webp, gif, tiff, mp4 and webm uploads up to 5.1 MB)", req.params.id)
-        } else {
-            comment = {
-                ip: req.ip,
-                tag: req.params.id,
-                text: req.body.text,
-                sev: req.body.sev //severity 0 to 2, 0 being green, 2 being red
-            };
         }
         // Add comment to the array
         try {
@@ -71,19 +69,18 @@ router.post('/new/:id', (req, res) => {
 // INPUT: in the url bar, this first takes the id of the post, then the id of the child comment
 
 router.delete('/delete/:id/:comment_id', (req, res) => {
-    Comment.findOne({
+    Comment.findOneAndUpdate({
         tag: req.params.id,
         _id: req.params.comment_id
-    }).then(post => {
-        // Check if the comment exists
-        if (!post) return erep(res, "", 404, "Invalid post body");
-        post.markedForDeletion = true;
-        post.removedAt = new Date();
-        post.deletedBy = req.ip;
-        post.save().then(res.json({
-            success: true
-        })).catch((e) => erep(res, e, 400, "Error saving comment", req.params.comment_id));
-    }).catch(err => erep(res, err, 404, "Error finding comment", req.params.comment_id));
+    }, {
+        $set: {
+            markedForDeletion: true,
+            removedAt: new Date(),
+            deletedBy: req.ip
+        }
+    }).then(res.json({
+        success: true
+    })).catch((e) => erep(res, e, 500, "Error saving comment", req.params.comment_id));
 });
 
 // ROUTE: POST api/posts/comment/:id/:comment
@@ -91,23 +88,17 @@ router.delete('/delete/:id/:comment_id', (req, res) => {
 // INPUT: in the url bar, this first takes the id of the post, then the id of the child comment
 
 router.post('/restore/:id/:comment_id', (req, res) => {
-    Comment.findOne({
+    Comment.findOneAndUpdate({
         tag: req.params.id,
         _id: req.params.comment_id
-    }).then(post => {
-        // Check if the comment exists
-        if (!post) {
-            return res.status(404).json({
-                success: false,
-                simple: "Your comment doesn't exist"
-            });
+    }, {
+        $set: {
+            markedForDeletion: false,
+            removedAt: null,
         }
-        post.markedForDeletion = false;
-        post.removedAt = null;
-        post.save().then(res.json({
-            success: true
-        })).catch((e) => erep(res, e, 500, "Error saving comment", req.params.comment_id));
-    }).catch(err => erep(res, err, 404, "Error finding comment", req.params.comment_id));
+    }).then(res.json({
+        success: true
+    })).catch((e) => erep(res, e, 500, "Error saving comment", req.params.comment_id));
 });
 
 //export module for importing into central server file
