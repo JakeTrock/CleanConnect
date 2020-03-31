@@ -29,20 +29,13 @@ For every server api path, in insomnia, you will have to create an account, usin
 In production, most likely, we would store the bearer key in a cookie. The bearer key is only valid to the server for 24 hours, so the cookie should be set accordingly.
 
 ## Issue board (both)
-* Add html/styling to email verification
 * Add payment with [this](https://developers.braintreepayments.com/guides/payment-methods/node)
-* Ask justin about react deployment
-* optimize https://medium.com/skyshidigital/6-tricks-to-speed-up-and-improve-your-node-js-performance-fadc06d15cbe
 * new slogan needed for qr stickers
 
 ## Issue board (Jake)
 * Potentially replace blobs with images
-* allow user to call getall with boolean and see deleted tags
-* for some reason, first tag dosen't have qrurl
 
 ## Notes to Jake from Justin
-* Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client in confirm/verify route
-* TypeError: Cannot read property 'clientToken' of undefined on get client token route
 * Going to need list of payment costs and what they'll give you even if temporary
     * Corporate/chain plan (2)
         * This plan is for large businesses, and allows users to create up to 100 tags with unlimited usage
@@ -71,10 +64,6 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 
 ### future
 * use this for pdf in future? https://github.com/kazuhikoarase/sticker-works
-* add email notifications of errors
-* OR
-* add frontend issues panel that shows errors as they happen
-* pre-cache qrcode urls
 * inventory system
 * wireframe floorplans with color status
 
@@ -88,29 +77,3 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * Patent/Copyright
     * Copyright papers are ~$90 to file
     * Patents can be searched without cruddy mainframes at https://www.google.com/?tbm=pts
-
-
-### Jake-specific:
-
-### Justin-specific:
-
-The email provider I am using dosne't actually send emails, it just intercepts them. To look at the intercepted emails go [here](https://ethereal.email/login)
-and use these credentials:
-* Username: lilian.bernhard@ethereal.email
-* Password: fCc7CKMVv1VvuvrsaR
-
-
-### setup ci
-* https://codeforgeek.com/continuous-integration-deployment-jenkins-node-js/
-* https://resources.github.com/whitepapers/practical-guide-to-CI-with-Jenkins-and-GitHub/
-* https://developer.github.com/webhooks/
-* https://github.com/hokuco/CleanConnect/settings/hooks
-* Docker
-    * Mail
-        * https://mailu.io/1.7/setup.html
-        * https://github.com/namshi/docker-smtp
-    * Docker image setup
-        * https://learndocker.online/
-        * https://www.katacoda.com/courses/docker/
-        * git run autodeploy to aws docker
-        * build with closure: https://www.npmjs.com/package/google-closure-compiler
