@@ -142,3 +142,12 @@ export function getAuthClientToken() {
     return null;
   }
 }
+
+export function confirm(token) {
+  //confirming change (edit account, delete account, etc.)
+  try {
+    return axios.get(apiEndpoint + "/confirmation/" + token);
+  } catch (ex) {
+    return null;
+  }
+}

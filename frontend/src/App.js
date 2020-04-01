@@ -15,6 +15,7 @@ import PrintSheet from "./pages/printSheet";
 import Print from "./pages/print";
 import NotFound from "./pages/notFound";
 import Comment from "./pages/comment";
+import Confirmation from "./pages/confirmation";
 
 import Navbar from "./components/navbar";
 import ProtectedRoute from "./components/protectedRoute";
@@ -51,7 +52,10 @@ class App extends Component {
             <NoTokenRoute path="/login" component={Login} />
             <NoTokenRoute path="/register" component={Register} />
             <ProtectedRoute path="/logout" component={Logout} />
-            <ProtectedRoute path="/change/:token" component={Change} />
+            <ProtectedRoute
+              path="/user/change/:token"
+              render={props => <Change {...props} user={user} />}
+            />
             <ProtectedRoute
               path="/profile"
               render={props => <Profile {...props} user={user} />}
@@ -72,13 +76,14 @@ class App extends Component {
               captchaSubmit={() => this.captchaSubmit()}
               component={Comment}
             />
+            <Route path="/user/confirmation/:token" component={Confirmation} />
             <Route path="/notFound" component={NotFound} />
             {!user && <Route exact path="/" component={Home} />}
             {user && (
               <Route
                 exact
                 path="/"
-                render={props => (
+                render={() => (
                   <Redirect
                     to={{
                       pathname: user.dashUrl
