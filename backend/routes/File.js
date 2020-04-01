@@ -13,7 +13,7 @@ router.get('/pdf/:url', (req, res) => {
     var uu = req.params.url;
     //checks if url is valid
     if (uu.split(".")[0].length == 32) res.sendFile(tempDir + uu);
-    else erep(res, "", 404, "invalid url. url may be incorrectly typed, or file may no longer exist", "");
+    else return erep(res, "", 404, "invalid url. url may be incorrectly typed, or file may no longer exist", "");
 });
 // ROUTE: GET /img/:url
 // DESCRIPTION: retrieves and returns image from temp dir
@@ -22,7 +22,7 @@ router.get('/img/:url', (req, res) => {
     var uu = req.params.url;
     //checks if url is valid
     if (uu.split(".")[0].length == 32) res.sendFile(tempDir + uu);
-    else erep(res, "", 404, "invalid url. url may be incorrectly typed, or file may no longer exist", "");
+    else return erep(res, "", 404, "invalid url. url may be incorrectly typed, or file may no longer exist", "");
 });
 //exports current script as module
 module.exports = router;

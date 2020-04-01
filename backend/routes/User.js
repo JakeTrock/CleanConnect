@@ -95,75 +95,70 @@ router.post("/register", (req, res) => {
     //check validation
     if (!isValid) return erep(res, errors, 400, "Invalid post body", "");
 
-    User.findOne({
-            email: req.body.email
-        })
+    User.findOne({ email: req.body.email })
         .then(user => {
             if (user) {
                 errors.email = "Email already exists";
                 return erep(res, errors, 400, "Invalid post body", "");
-            } else {
-                gateway.customer.create({
-                    email: req.body.email,
-                    company: req.body.name,
-                    paymentMethodNonce: req.body.payment_method_nonce
-                }, function(err, customerResult) {
-                    if (customerResult.success) {
-                        var planID = keys.tierID[req.body.tier];
-                        gateway.subscription.create({
-                            paymentMethodToken: customerResult.customer.paymentMethods[0].token,
-                            planId: planID
-                        }, function(err, subscriptionResult) {
-                            if (subscriptionResult.success) {
-                                const newUser = new User({
-                                    name: req.body.name,
-                                    email: req.body.email,
-                                    dashUrl: randomBytes(16).toString("hex").substring(8),
-                                    password: req.body.password,
-                                    PayToken: subscriptionResult.subscription.id,
-                                    custID: customerResult.customer.id,
-                                    tier: req.body.tier
-                                });
-                                bcrypt.genSalt(10, (err, salt) => {
-                                    bcrypt.hash(newUser.password, salt, (err, hash) => {
-                                        if (err) erep(res, err, 500, "Failed to generate password", req.body.email);
-                                        newUser.password = hash;
-                                        newUser.save(function(err) {
-                                            if (err) return erep(res, err, 500, "Error saving user data", req.body.email);
-                                            // Create a verification token for this user
-                                            User.findOne({
-                                                email: req.body.email
-                                            }, "_id").exec(function(err, user) {
-                                                if (err) return erep(res, err, 500, "Failed to find user", req.body.email);
-                                                const vToken = new UserIndex({
-                                                    _userId: user._id,
-                                                    token: randomBytes(16).toString("hex"),
-                                                    isCritical: true
-                                                });
-                                                vToken.save().then(p => {
-                                                    // Send the email
+            }
+            gateway.customer.create({
+                email: req.body.email,
+                company: req.body.name,
+                paymentMethodNonce: req.body.payment_method_nonce
+            }, function(err, customerResult) {
+                if (!customerResult.success) return erep(res, err, 500, "Failed to log customer", req.body.email);
+                var planID = keys.tierID[req.body.tier];
+                gateway.subscription.create({
+                    paymentMethodToken: customerResult.customer.paymentMethods[0].token,
+                    planId: planID
+                }, function(err, subscriptionResult) {
+                    if (!subscriptionResult.success) return erep(res, err, 500, "Failed to generate payplan", req.body.email);
+                    const newUser = new User({
+                        name: req.body.name,
+                        email: req.body.email,
+                        dashUrl: randomBytes(16).toString("hex").substring(8),
+                        password: req.body.password,
+                        PayToken: subscriptionResult.subscription.id,
+                        custID: customerResult.customer.id,
+                        tier: req.body.tier
+                    });
+                    bcrypt.genSalt(10, (err, salt) => {
+                        bcrypt.hash(newUser.password, salt, (err, hash) => {
+                            if (err) return erep(res, err, 500, "Failed to generate password", req.body.email);
+                            newUser.password = hash;
+                            newUser.save(function(err) {
+                                if (err) return erep(res, err, 500, "Error saving user data", req.body.email);
+                                // Create a verification token for this user
+                                User.findOne({
+                                    email: req.body.email
+                                }, "_id").exec(function(err, user) {
+                                    if (err) return erep(res, err, 500, "Failed to find user", req.body.email);
+                                    const vToken = new UserIndex({
+                                        _userId: user._id,
+                                        token: randomBytes(16).toString("hex"),
+                                        isCritical: true
+                                    });
+                                    vToken.save().then(p => {
+                                        // Send the email
 
-                                                    sendMail("Hello " + req.body.name + ",Please verify your account by clicking the link:",
-                                                        process.env.domainPrefix + process.env.topLevelDomain +
-                                                        "/user/confirmation/" +
-                                                        p.token, "CleanConnect Account Verification", req.body.email,
-                                                        function(err) {
-                                                            if (err) return erep(res, err, 500, "Failed to send mail", req.body.email);
-                                                        });
-                                                    res.json({
-                                                        success: true,
-                                                        status: "A verification email has been sent to " + req.body.email + "."
-                                                    });
-                                                });
+                                        sendMail("Hello " + req.body.name + ",Please verify your account by clicking the link:",
+                                            process.env.domainPrefix + process.env.topLevelDomain +
+                                            "/user/confirmation/" +
+                                            p.token, "CleanConnect Account Verification", req.body.email,
+                                            function(err) {
+                                                if (err) return erep(res, err, 500, "Failed to send mail", req.body.email);
                                             });
+                                        res.json({
+                                            success: true,
+                                            status: "A verification email has been sent to " + req.body.email + "."
                                         });
                                     });
                                 });
-                            }
+                            });
                         });
-                    }
+                    });
                 });
-            }
+            });
         }).catch(e => erep(res, e, 500, "Registration error", req.body.email));
 });
 
@@ -216,7 +211,7 @@ router.get("/confirmation/:token", (req, res) => {
         // If we found a token, find a matching user
         User.findOne({ _id: token._userId }, function(err, user) {
             if (!user) return erep(res, err, 400, "We were unable to find a user with this token", token._userId);
-            if (user.isVerified) erep(res, err, 400, "This user was already verified", token._userId);
+            if (user.isVerified) return erep(res, err, 400, "This user was already verified", token._userId);
 
             // Verify and save the user
             user.isVerified = true;
@@ -266,21 +261,19 @@ router.get("/delete/:token", passport.authenticate("jwt", {
     session: false
 }), (req, res) => {
     UserIndex.findOne({ token: req.params.token }).then(tk => {
-        if (tk._userId == req.user._id)
-            Tag.findOne({
-                _id: req.params.id
-            }).then(udata => gateway.subscription.cancel(udata.PayToken))
+        if (tk._userId != req.user._id) return erep(res, "", 403, "email token does not match current user cookie, please log into this computer to load the cookie into your memory", req.user._id);
+        Tag.findOne({ _id: req.params.id })
+            .then(udata => gateway.subscription.cancel(udata.PayToken))
             .then(User.findOneAndRemove({ _id: tk._userId }))
             .then(UserIndex.deleteMany({ _userId: tk._userId }))
             .then(Tag.find({
                 user: req.user._id
             }).then(async posts => {
-                if (posts) {
-                    for (var n in posts) {
-                        Comment.deleteMany({
-                            tag: posts[n]._id
-                        }).catch(err => erep(res, err, 404, "Error finding posts", req.user._id));
-                    }
+                if (!posts) return erep(res, "", 404, "Error finding posts", req.user._id);
+                for (var n in posts) {
+                    Comment.deleteMany({
+                        tag: posts[n]._id
+                    }).catch(err => erep(res, err, 404, "Error finding posts", req.user._id));
                 }
             }))
             .then(Tag.deleteMany({ user: req.user._id }))
@@ -289,7 +282,6 @@ router.get("/delete/:token", passport.authenticate("jwt", {
                 success: true
             }))
             .catch(e => erep(res, e, 500, "Deletion error", req.user._id));
-        else erep(res, "", 403, "email token does not match current user cookie, please log into this computer to load the cookie into your memory", req.user._id);
     });
 });
 
@@ -325,95 +317,72 @@ router.post("/changeinfo", passport.authenticate("jwt", {
 // ROUTE: POST user/change/:token
 // DESCRIPTION: recieves verification email to change account details
 // INPUT: new user details via json body
-router.post(
-    "/change/:token",
-    passport.authenticate("jwt", {
-        session: false
-    }),
-    (req, res) => {
-        const profileFields = {};
-        var planID;
-        profileFields.user = req.user._id;
-        if (req.body.tier) planID = keys.tierID[req.body.tier];
-        if (req.body.name) profileFields.name = req.body.name;
-        if (req.body.email) profileFields.email = req.body.email;
-        if (req.body.password) profileFields.password = req.body.password;
-        bcrypt.genSalt(10, (err, salt) => {
-            bcrypt.hash(profileFields.password, salt, (err, hash) => {
-                if (err) {
-                    return res.json({
-                        success: false,
-                        simple: "Failed to generate password.",
-                        details: err
-                    })
-                }
-                profileFields.password = hash;
-                UserIndex.findOne({ token: req.params.token }).then(tk => {
-                    if (tk._userId == req.user.id) {
-                        User.findOne({
-                                _id: req.user.id
-                            })
-                            .then(profile => {
-                                if (profile) {
-                                    //update a profile
-                                    User.findOneAndUpdate({
-                                        _id: req.user.id
-                                    }, {
-                                        $set: profileFields
-                                    }, {
-                                        new: true
-                                    }).then(res.json({
-                                        success: true
-                                    })).catch(e => res.json({
-                                        success: false,
-                                        simple: "Error updating profile.",
-                                        details: e
-                                    }));
-                                    if (req.body.tier) {
-                                        gateway.subscription.update(profile.PayToken, {
-                                            planId: planID,
-                                        }, function(err) {
-                                            if (err) return erep(res, err, 404, "Failed to upgrade payment plan", req.user._id);
-                                        });
-                                    }
-                                } else erep(res, "", 404, "Error finding profile", req.user._id);
-                            })
-                            .then(tk.deleteOne())
-                            .catch(e => erep(res, e, 400, "Error processing token", req.user._id));
-                    } else erep(res, "", 403, "email token does not match current user cookie, please log into this computer to load the cookie into your memory", req.user._id);
+router.post("/change/:token", passport.authenticate("jwt", {
+    session: false
+}), (req, res) => {
+    const profileFields = {};
+    var planID;
+    profileFields.user = req.user._id;
+    if (req.body.tier) planID = keys.tierID[req.body.tier];
+    if (req.body.name) profileFields.name = req.body.name;
+    if (req.body.email) {
+        User.findOne({
+            email: req.body.email
+        }).then(usr => {
+            if (usr) return erep(res, req.body.email, 400, "User with this email already exists", req.user._id);
+            else profileFields.email = req.body.email;
+        });
+    }
+    if (req.body.password) profileFields.password = req.body.password;
+    bcrypt.genSalt(10, (err, salt) => {
+        bcrypt.hash(profileFields.password, salt, (err, hash) => {
+            if (err) return erep(res, err, 500, "Failed to generate password.", req.user._id);
+            profileFields.password = hash;
+            UserIndex.findOne({ token: req.params.token }).then(tk => {
+                if (tk._userId != req.user.id) return erep(res, "", 403, "email token does not match current user cookie, please log into this computer to load the cookie into your memory", req.user._id);
+                User.findOne({
+                    _id: req.user.id
+                }).then(profile => {
+                    if (!profile) return erep(res, "", 404, "Error finding profile", req.user._id)
+                        //possibly upgrade payment if specified
+                    if (req.body.tier) {
+                        gateway.subscription.update(profile.PayToken, {
+                            planId: planID,
+                        }, function(err) {
+                            if (err) return erep(res, err, 404, "Failed to upgrade payment plan", req.user._id);
+                        });
+                    }
+                    //update a profile
+                    User.findOneAndUpdate({ _id: req.user.id }, { $set: profileFields }, { new: true })
+                        .then(tk.deleteOne())
+                        .then(res.json({ success: true }))
+                        .catch(e => erep(res, e, 400, "Error updating profile/Error processing token", req.user._id)); //TODO: there is an error here maybe
                 });
             });
         });
-    }
-);
+    });
+});
 
 // ROUTE: POST user/isValid/:token
 // DESCRIPTION: checks if token is still valid
 // INPUT: token value via url bar
-router.post(
-    "/isValid/:token",
-    passport.authenticate("jwt", {
-        session: false
-    }),
-    (req, res) => {
-        UserIndex.findOne({ token: req.params.token }).then(tk => {
-            if (!tk) erep(res, "", 400, "Token does not exist, or is invalid", req.user._id);
-            if (String(tk._userId) == String(req.user._id)) {
-                User.findOne({
-                        _id: req.user._id
-                    })
-                    .then(profile => {
-                        if (!profile) erep(res, "", 404, "Error finding profile", req.user._id);
-                        if (!profile.isVerified) return erep(res, "", 401, "Your account has not been verified yet", req.user._id);
-                        res.status(200).json({
-                            success: true
-                        });
-                    })
-                    .catch(e => erep(res, e, 500, "Validation error", req.user._id));
-            } else erep(res, "", 403, "email token does not match current user cookie, please log into this computer to load the cookie into your memory", req.user._id);
-        });
-    }
-);
+router.post("/isValid/:token", passport.authenticate("jwt", {
+    session: false
+}), (req, res) => {
+    UserIndex.findOne({ token: req.params.token }).then(tk => {
+        if (!tk) return erep(res, "", 400, "Token does not exist, or is invalid", req.user._id);
+        if (String(tk._userId) != String(req.user._id)) return erep(res, "", 403, "email token does not match current user cookie, please log into this computer to load the cookie into your memory", req.user._id);
+        User.findOne({ _id: req.user._id })
+            .then(profile => {
+                if (!profile) return erep(res, "", 404, "Error finding profile", req.user._id);
+                if (!profile.isVerified) return erep(res, "", 401, "Your account has not been verified yet", req.user._id);
+                res.status(200).json({
+                    success: true
+                });
+            })
+            .catch(e => erep(res, e, 500, "Validation error", req.user._id));
+    });
+});
 
 // ROUTE: POST user/login
 // DESCRIPTION: generates token based on user properties submitted
@@ -457,7 +426,7 @@ router.post("/login", (req, res) => {
                             expiresIn: "1d"
                         },
                         (err, token) => {
-                            if (err) erep(res, err, 500, "Unable to generate authentication", user._id);
+                            if (err) return erep(res, err, 500, "Unable to generate authentication", user._id);
                             else
                                 res.json({
                                     success: true,
@@ -484,7 +453,7 @@ router.get('/current', passport.authenticate('jwt', {
         _id: req.user._id,
         email: req.user.email
     }).then(profile => {
-        if (!profile) erep(res, "", 404, "Error finding profile", req.user._id);
+        if (!profile) return erep(res, "", 404, "Error finding profile", req.user._id);
         res.json({
             isVerified: profile.isVerified,
             tier: profile.tier,
@@ -498,6 +467,7 @@ router.get('/current', passport.authenticate('jwt', {
 });
 router.get('/getClientToken', (req, res) => {
     gateway.clientToken.generate({}, function(err, response) {
+        if (!response.success) return erep(res, response, 500, "Error Generating exchange token", "");
         res.send(response.clientToken);
     });
 });

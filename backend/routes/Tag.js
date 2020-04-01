@@ -41,13 +41,8 @@ router.post('/getall', passport.authenticate('jwt', {
                     tag: posts[n]._id,
                     markedForDeletion: req.body.showDead
                 }).then(cmts => {
-                    if (cmts) {
-                        var tmpcmt = [];
-                        for (var z in cmts) {
-                            tmpcmt.push(cmts[z]);
-                        }
-                        posts[n].comments = tmpcmt;
-                    }
+                    if (cmts)
+                        for (var z in cmts) posts[n].comments.push(cmts[z]);
                 });
             }
             res.json(posts);
@@ -58,13 +53,12 @@ router.post('/getall', passport.authenticate('jwt', {
 // ROUTE: GET tag/getone/id
 // DESCRIPTION: gets the metadata of a single tag based on its id, can also be used to confirm if a tag exists
 router.get('/getone/:id', passport.authenticate('jwt', {
-        session: false
-    }),
-    (req, res) => {
-        Tag.findOne({
-            _id: req.params.id
-        }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
-    });
+    session: false
+}), (req, res) => {
+    Tag.findOne({
+        _id: req.params.id
+    }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
+});
 // ROUTE: GET tag/exists/:id
 // DESCRIPTION: sees if tag exists
 router.get('/exists/:id', (req, res) => {
@@ -91,38 +85,33 @@ router.post('/new', passport.authenticate('jwt', {
         Tag.find({
             user: req.user._id
         }).then(posts => {
-            for (var n in posts) {
-                var p = posts[n].name;
-                if (p == tagName) {
-                    sc = false;
-                }
-            }
-            if (sc)
-                User.findOneAndUpdate({
-                    _id: req.user._id
-                }, {
-                    $inc: { numTags: 1 }
-                }).then(() => {
-                    new Tag({
-                        name: tagName,
-                        user: req.user._id
-                    }).save((err, obj) => {
-                        if (err) return erep(res, err, 500, "Error creating tag", req.user._id);
-                        QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/tag/' + obj._id, function(err, url) {
-                            Tag.findOneAndUpdate({
-                                name: tagName,
-                                user: req.user._id
-                            }, {
-                                $set: { qrcode: url }
-                            }, {
-                                new: true
-                            }).then(res.json({
-                                success: true
-                            }));
-                        })
-                    });
+            for (var n in posts)
+                if (posts[n].name == tagName) sc = false;
+            if (!sc) return erep(res, "", 400, "Name not unique", req.user._id);
+            User.findOneAndUpdate({
+                _id: req.user._id
+            }, {
+                $inc: { numTags: 1 }
+            }).then(() => {
+                new Tag({
+                    name: tagName,
+                    user: req.user._id
+                }).save((err, obj) => {
+                    if (err) return erep(res, err, 500, "Error creating tag", req.user._id);
+                    QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/tag/' + obj._id, function(err, url) {
+                        Tag.findOneAndUpdate({
+                            name: tagName,
+                            user: req.user._id
+                        }, {
+                            $set: { qrcode: url }
+                        }, {
+                            new: true
+                        }).then(res.json({
+                            success: true
+                        }));
+                    })
                 });
-            else erep(res, "", 400, "Name not unique", req.user._id);
+            });
         });
     });
 });
@@ -144,23 +133,18 @@ router.post('/edit/:id', passport.authenticate('jwt', {
     Tag.find({
         user: req.user._id
     }).then(posts => {
-        for (var n in posts) {
-            var p = posts[n].name;
-            if (p == tagName) {
-                sc = false;
-            }
-        }
-        if (sc) {
-            Tag.findOneAndUpdate({
-                    _id: req.params.id,
-                    user: req.user._id.toString()
-                }, {
-                    $set: { name: tagName }
-                }, {
-                    new: true
-                }).then(res.json({ success: true }))
-                .catch(e => erep(res, e, 500, "Error updating tag", req.user._id));
-        } else erep(res, "", 400, "Name not unique", req.user._id);
+        for (var n in posts)
+            if (posts[n].name == tagName) sc = false;
+        if (!sc) return erep(res, "", 400, "Name not unique", req.user._id);
+        Tag.findOneAndUpdate({
+                _id: req.params.id,
+                user: req.user._id.toString()
+            }, {
+                $set: { name: tagName }
+            }, {
+                new: true
+            }).then(res.json({ success: true }))
+            .catch(e => erep(res, e, 500, "Error updating tag", req.user._id));
     });
 });
 
@@ -177,45 +161,16 @@ router.delete('/delete/:id', passport.authenticate('jwt', {
     }).then(post => {
         Comment.deleteMany({
             tag: post._id
-        }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
-        post.deleteOne().then(User.findOneAndUpdate({
-            _id: req.user._id
-        }, {
-            $inc: { numTags: -1 }
-        }).catch(err => erep(res, err, 404, "User not found", req.user._id))).then(() => res.json({
+        }).then(
+            post.deleteOne().then(User.findOneAndUpdate({
+                _id: req.user._id
+            }, {
+                $inc: { numTags: -1 }
+            })).catch(err => erep(res, err, 404, "User not found", req.user._id))).then(() => res.json({
             success: true
         }));
     }).catch(err => erep(res, err, 404, "Tag not found", req.user._id));
 });
-
-// ROUTE: POST tag/:id
-// DESCRIPTION: allows user to restore deleted tag information
-// INPUT: tag id via url bar
-
-// router.post('/restore/:id', passport.authenticate('jwt', {
-//     session: false
-// }), (req, res) => {
-//     Tag.findOne({
-//         _id: req.params.id,
-//         user: req.user.id
-//     }).then(post => {
-//         post.markedForDeletion = false;
-//         post.removedAt = null;
-//         Comment.find({
-//             tag: post._id
-//         }).then(cmts => {
-//             if (cmts) {
-//                 for (var n in cmts) {
-//                     n.markedForDeletion = false;
-//                     n.removedAt = null;
-//                 }
-//             }
-//         }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
-//         post.save().then(() => res.json({
-//             success: true
-//         }));
-//     }).catch(err => erep(res, err, 404, "Tag not found", req.user._id));
-// });
 
 // ROUTE: GET tag/print/
 // DESCRIPTION: prints tags as qr codes, allowing people to access them in real life
@@ -232,9 +187,9 @@ router.post('/print/', passport.authenticate('jwt', {
             errors,
             isValid
         } = isprintable(req.body, list.length);
-        if (!isValid) erep(res, errors, 400, "Invalid post body", req.user._id);
+        if (!isValid) return erep(res, errors, 400, "Invalid post body", req.user._id);
         fs.readFile(__dirname + '/template.svg', function(err, data) {
-            if (err) erep(res, err, 500, "Error generating pdf", req.user._id);
+            if (err) return erep(res, err, 500, "Error generating pdf", req.user._id);
             //svg template file
             var svgbuff = data.toString();
             //array of pages defined
@@ -289,22 +244,16 @@ router.get('/dash/:id', async(req, res) => {
         await Tag.find({
             user: user._id
         }).then(async posts => {
-            if (posts) {
-                for (var n in posts) {
-                    await Comment.find({
-                        tag: posts[n]._id
-                    }).then(cmts => {
-                        if (cmts) {
-                            var tmpcmt = [];
-                            for (var z in cmts) {
-                                tmpcmt.push(cmts[z]);
-                            }
-                            posts[n].comments = tmpcmt;
-                        }
-                    });
-                }
-                res.json(posts);
+            if (!posts) erep(res, "", 404, "No posts found", req.user._id);
+            for (var n in posts) {
+                await Comment.find({
+                    tag: posts[n]._id
+                }).then(cmts => {
+                    if (cmts)
+                        for (var z in cmts) posts[n].comments.push(cmts[z]);
+                });
             }
+            res.json(posts);
         }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
     }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
 });
