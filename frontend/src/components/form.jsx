@@ -41,16 +41,20 @@ class Form extends Component {
     data[name] = value;
     await this.setState({ data, errors });
   };
+  handleComponent = (name, val) => {
+    this.handleChange(name, val);
+  };
+  handleImage = async ({ currentTarget: input }) => {
+    await this.handleChange(input.name, input.files[0]);
+    this.handleChange("imageUrl", input.value);
+  };
   handleString = ({ currentTarget: input }) => {
     this.handleChange(input.name, input.value);
   };
   handleSelect = ({ currentTarget: select }) => {
     this.handleChange(select.name, select.value);
   };
-  handleImage = async ({ currentTarget: input }) => {
-    await this.handleChange(input.name, input.files[0]);
-    this.handleChange("imageUrl", input.value);
-  };
+
   renderButton(label) {
     return (
       <button disabled={this.validate()} className="btn btn-primary">
@@ -84,7 +88,8 @@ class Form extends Component {
       </div>
     );
   }
-  renderSelect(name, label, options, error, dropdown) {
+  renderSelect({ name, label, options, error }) {
+    const { data } = this.state;
     return (
       <div className="form-group">
         <label className="pageText">{label}</label>
@@ -92,6 +97,7 @@ class Form extends Component {
           name={name}
           id={name}
           onChange={this.handleSelect}
+          value={data[name]}
           className="form-control"
         >
           <option value="" />
@@ -118,6 +124,14 @@ class Form extends Component {
           onChange={this.handleImage}
         />
         {this.renderError(error)}
+      </div>
+    );
+  }
+  renderComponent({ name, Component, props, error }) {
+    return (
+      <div>
+        <Component name={name} props={props} onChange={this.handleComponent} />
+        {error && <div className="alert alert-danger">{error}</div>}
       </div>
     );
   }
