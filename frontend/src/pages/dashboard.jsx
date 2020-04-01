@@ -20,8 +20,7 @@ class Dashboard extends Component {
   state = {
     tags: [],
     currentPage: 1,
-    pageSize: 6,
-    mounted: false
+    pageSize: 6
   };
   async setTags(viewDead) {
     let { user, token } = this.state;
@@ -35,8 +34,9 @@ class Dashboard extends Component {
     } else {
       if (token) {
         try {
-          tags = await auth.anonTags(token, viewDeadBool);
+          tags = await auth.anonTags(token, viewDeadBool); //NOTE: Deal with problem in future, you can see all dead tags
           tags = tags.data;
+          console.log(tags);
         } catch {}
       }
     }
@@ -74,15 +74,7 @@ class Dashboard extends Component {
     this.setState({ currentPage: page });
   };
   render() {
-    let {
-      tags,
-      currentPage,
-      pageSize,
-      mounted,
-      user,
-      token,
-      redirect
-    } = this.state;
+    let { tags, currentPage, pageSize, user, token, redirect } = this.state;
     if (!tags) tags = "";
     let sortedTags = paginate(tags, currentPage, pageSize);
     let dashUrl = "";

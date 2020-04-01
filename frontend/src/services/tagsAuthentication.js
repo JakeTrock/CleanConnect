@@ -1,6 +1,5 @@
 import axios from "axios"; //Will be used for http requests
 import FormData from "form-data";
-import { apiUrl } from "../config.json"; // Url of the server
 import * as user from "./userAuthentication";
 const tagEndpoint = process.env.REACT_APP_API_URL + "/tag";
 const commentEndpoint = process.env.REACT_APP_API_URL + "/comment";

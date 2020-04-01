@@ -57,7 +57,7 @@ class Tags extends Component {
   render() {
     let { tags, limit, currentPage, pageSize } = this.state;
     if (!tags) tags = "";
-    if (tags != "" && tags.length < limit) tags.splice(0, 0, "");
+    if (tags !== "" && tags.length < limit) tags.splice(0, 0, "");
     let sortedTags = paginate(tags, currentPage, pageSize);
 
     async function deleteTag(data) {
