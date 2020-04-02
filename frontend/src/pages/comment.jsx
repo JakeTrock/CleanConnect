@@ -82,12 +82,12 @@ class Comment extends Form {
             error: errors.text,
             dropdown: dropDownList
           })}
-          {this.renderSelect(
-            "severity",
-            "Rate the severity",
-            severityOptions,
-            errors.severity
-          )}
+          {this.renderSelect({
+            name: "severity",
+            label: "Rate the severity",
+            options: severityOptions,
+            error: errors.severity
+            })}
           {this.renderButton("Submit")}
         </form>
       </Layout>

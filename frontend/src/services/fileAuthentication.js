@@ -1,5 +1,4 @@
 import axios from "axios"; //Will be used for http requests
-import { apiUrl } from "../config.json"; // Url of the server
 const apiEndpoint = process.env.REACT_APP_API_URL + "/file"; //hide later
 
 export function getImage(token) {

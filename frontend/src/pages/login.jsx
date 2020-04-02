@@ -13,7 +13,6 @@ class Login extends Form {
     errors: {}
   };
   schema = {
-    //using Joi for form creation and errors (change?)
     email: Joi.string()
       .required()
       .label("Email"),

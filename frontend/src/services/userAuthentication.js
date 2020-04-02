@@ -1,7 +1,6 @@
 import jwtDecode from "jwt-decode";
 import axios from "axios"; //Will be used for http requests
 
-import { apiUrl } from "../config.json"; // Url of the server
 import "./interceptor";
 
 const apiEndpoint = process.env.REACT_APP_API_URL + "/user";
@@ -15,12 +14,21 @@ export async function login(email, password) {
   localStorage.setItem(tokenKey, jwt.token); //get expiration date
 }
 
-export async function register(name, email, password, password2) {
+export async function register(
+  name,
+  email,
+  password,
+  password2,
+  tier,
+  payment_method_nonce
+) {
   await axios.post(apiEndpoint + "/register", {
     name,
     email,
     password,
-    password2
+    password2,
+    tier,
+    payment_method_nonce
   });
 }
 
@@ -29,7 +37,7 @@ export function logout() {
 }
 
 export function getCurrentUser(noDecode) {
-  //Session is stored in localhost
+  //Session is stored in localhost, getting session off of that
   try {
     const jwt = localStorage.getItem(tokenKey); //searches local storage for jwt key
     if (jwtDecode(jwt).exp * 1000 < Date.now()) {
@@ -45,6 +53,7 @@ export function getCurrentUser(noDecode) {
 }
 
 export function changeInfo() {
+  //confirming user wants to change account
   const headers = {
     "Content-Type": "application/json",
     Authorization: getCurrentUser(true)
@@ -55,6 +64,7 @@ export function changeInfo() {
 }
 
 export async function validateChange(token) {
+  //validating change form
   const headers = {
     "Content-Type": "application/json",
     Authorization: getCurrentUser(true)
@@ -65,6 +75,7 @@ export async function validateChange(token) {
 }
 
 export async function completeChange(token, name, email, password, password2) {
+  //submitting change form
   const headers = {
     "Content-Type": "application/json",
     Authorization: getCurrentUser(true)
@@ -84,6 +95,7 @@ export async function completeChange(token, name, email, password, password2) {
 }
 
 export function deleteInfo() {
+  //initial step of deleting account
   try {
     const headers = {
       "Content-Type": "application/json",
@@ -96,7 +108,8 @@ export function deleteInfo() {
     return null;
   }
 }
-export function anonTvags(token, showDead) {
+export function anonTags(token) {
+  //showDead
   try {
     const headers = {
       "Content-Type": "application/json"
@@ -104,6 +117,36 @@ export function anonTvags(token, showDead) {
     return axios.get(apiEndpoint + "/dash/" + token, "", {
       headers: headers
     });
+  } catch (ex) {
+    return null;
+  }
+}
+export function getClientToken() {
+  //getting token for payment system
+  try {
+    return axios.get(apiEndpoint + "/getClientToken/");
+  } catch (ex) {
+    return null;
+  }
+}
+export function getAuthClientToken() {
+  try {
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: getCurrentUser(true)
+    };
+    return axios.get(apiEndpoint + "/getAuthClientToken/", {
+      headers: headers
+    });
+  } catch (ex) {
+    return null;
+  }
+}
+
+export function confirm(token) {
+  //confirming change (edit account, delete account, etc.)
+  try {
+    return axios.get(apiEndpoint + "/confirmation/" + token);
   } catch (ex) {
     return null;
   }
