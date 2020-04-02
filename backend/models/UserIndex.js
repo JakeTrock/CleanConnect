@@ -7,6 +7,9 @@ const UserIndexSchema = new Schema({
         required: true,
         ref: 'User'
     },
+    email: {
+        type: String
+    },
     token: {
         type: String,
         required: true,

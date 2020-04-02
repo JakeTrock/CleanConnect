@@ -291,7 +291,7 @@ router.get("/delete/:token", passport.authenticate("jwt", {
 // INPUT: email
 router.post("/resetPass", (req, res) => {
     const vToken = new UserIndex({
-        _userId: req.body.email,
+        email: req.body.email,
         token: randomBytes(16).toString("hex"),
         isCritical: false
     });
