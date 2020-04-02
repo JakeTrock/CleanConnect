@@ -403,7 +403,7 @@ router.post("/change/:token", passport.authenticate("jwt", {
                 if (req.body.email) nfo.company = req.body.name;
                 if (req.body.payNonce) nfo.paymentMethodNonce = req.body.payment_method_nonce;
                 gateway.customer.update(profile.custID, nfo, function(err, result) {
-                    if (err | !result.success) return erep(res, err + "|" + result, 500, "Error updating pay info", req.user._id);
+                    if (err || !result.success) return erep(res, err + "|" + result, 500, "Error updating pay info", req.user._id);
                 });
             }
             if (req.body.tier) {
