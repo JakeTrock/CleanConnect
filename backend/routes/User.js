@@ -390,14 +390,6 @@ router.post("/change/:token", passport.authenticate("jwt", {
             else profileFields.email = req.body.email;
         });
     }
-    // if (req.body.password1 || req.body.password2) {
-    //     if (req.body.password1 != req.body.password2) return erep(res, "", 400, "Your passwords must match", req.user._id);
-    //     profileFields.password = req.body.password1;
-    // }
-    // bcrypt.genSalt(10, (err, salt) => {
-    //     bcrypt.hash(profileFields.password, salt, (err, hash) => {
-    //         if (err) return erep(res, err, 500, "Failed to generate password.", req.user._id);
-    //         profileFields.password = hash;
     UserIndex.findOne({ token: req.params.token }).then(tk => {
         if (tk._userId != req.user.id) return erep(res, "", 403, "email token does not match current user cookie, please log into this computer to load the cookie into your memory", req.user._id);
         User.findOne({
@@ -405,6 +397,15 @@ router.post("/change/:token", passport.authenticate("jwt", {
         }).then(profile => {
             if (!profile) return erep(res, "", 404, "Error finding profile", req.user._id)
                 //possibly upgrade payment if specified
+            if (req.body.name || req.body.email || req.body.payNonce) {
+                var nfo = {};
+                if (req.body.name) nfo.email = req.body.email;
+                if (req.body.email) nfo.company = req.body.name;
+                if (req.body.payNonce) nfo.paymentMethodNonce = req.body.payment_method_nonce;
+                gateway.customer.update(profile.custID, nfo, function(err, result) {
+                    if (err | !result.success) return erep(res, err + "|" + result, 500, "Error updating pay info", req.user._id);
+                });
+            }
             if (req.body.tier) {
                 gateway.subscription.update(profile.PayToken, {
                     planId: planID,
@@ -418,8 +419,6 @@ router.post("/change/:token", passport.authenticate("jwt", {
                 .then(res.json({ success: true }))
                 .catch(e => erep(res, e, 400, "Error updating profile/Error processing token", req.user._id)); //TODO: there is an error here maybe
         });
-        //     });
-        // });
     });
 });
 
