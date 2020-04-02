@@ -285,6 +285,63 @@ router.get("/delete/:token", passport.authenticate("jwt", {
     });
 });
 
+
+// ROUTE: POST user/resetPass
+// DESCRIPTION: sends verification email to change account passwd
+// INPUT: email
+router.post("/resetPass", (req, res) => {
+    const vToken = new UserIndex({
+        _userId: req.body.email,
+        token: randomBytes(16).toString("hex"),
+        isCritical: false
+    });
+    vToken
+        .save()
+        .then(p => {
+            // Send the email
+            sendMail("To proceed with changing your password, please click the link below:",
+                process.env.domainPrefix + process.env.topLevelDomain +
+                "/user/resetPass/" +
+                p.token, "CleanConnect Password Change Confirmation", req.body.email,
+                function(err) {
+                    if (err) return erep(res, err, 500, "Failed to send mail", req.body.email);
+                });
+            res.json({
+                success: true,
+                status: "A password email has been sent to " + req.body.email + "."
+            });
+        });
+});
+
+// ROUTE: POST user/resetPass
+// DESCRIPTION: recieves verification email to change password
+// INPUT: email and new password twice
+router.post("/resetPass/:token", (req, res) => {
+    const profileFields = {};
+    profileFields.email = req.body.email;
+    if (req.body.password1 == req.body.password2) profileFields.password = req.body.password;
+    bcrypt.genSalt(10, (err, salt) => {
+        bcrypt.hash(profileFields.password, salt, (err, hash) => {
+            if (err) return erep(res, err, 500, "Failed to generate password.", req.user._id);
+            profileFields.password = hash;
+            UserIndex.findOne({ token: req.params.token }).then(tk => {
+                if (tk._userId != req.body.email) return erep(res, "", 403, "email token does not match the email you entered, please log into this computer to load the cookie into your memory, or retype email", req.body.email);
+                User.findOne({
+                    email: req.body.email
+                }).then(profile => {
+                    if (!profile) return erep(res, "", 404, "Error finding profile", req.body.email)
+                        //possibly upgrade payment if specified
+                        //update a profile
+                    User.findOneAndUpdate({ email: req.body.email }, { $set: profileFields }, { new: true })
+                        .then(tk.deleteOne())
+                        .then(res.json({ success: true }))
+                        .catch(e => erep(res, e, 400, "Error updating profile/Error processing token", req.body.email));
+                });
+            });
+        });
+    });
+});
+
 // ROUTE: POST user/changeinfo
 // DESCRIPTION: sends verification email to change account details
 // INPUT: user id from jwt header
@@ -303,7 +360,7 @@ router.post("/changeinfo", passport.authenticate("jwt", {
             sendMail("To proceed with altering details of your account, please click the link below:",
                 process.env.domainPrefix + process.env.topLevelDomain +
                 "/user/change/" +
-                p.token, "CleanConnect Account Changes Confirmation", req.body.email,
+                p.token, "CleanConnect Account Changes Confirmation", req.user.email,
                 function(err) {
                     if (err) return erep(res, err, 500, "Failed to send mail", req.user._id);
                 });
@@ -322,7 +379,7 @@ router.post("/change/:token", passport.authenticate("jwt", {
 }), (req, res) => {
     const profileFields = {};
     var planID;
-    profileFields.user = req.user._id;
+    // profileFields.user = req.user._id;
     if (req.body.tier) planID = keys.tierID[req.body.tier];
     if (req.body.name) profileFields.name = req.body.name;
     if (req.body.email) {
@@ -333,33 +390,36 @@ router.post("/change/:token", passport.authenticate("jwt", {
             else profileFields.email = req.body.email;
         });
     }
-    if (req.body.password) profileFields.password = req.body.password;
-    bcrypt.genSalt(10, (err, salt) => {
-        bcrypt.hash(profileFields.password, salt, (err, hash) => {
-            if (err) return erep(res, err, 500, "Failed to generate password.", req.user._id);
-            profileFields.password = hash;
-            UserIndex.findOne({ token: req.params.token }).then(tk => {
-                if (tk._userId != req.user.id) return erep(res, "", 403, "email token does not match current user cookie, please log into this computer to load the cookie into your memory", req.user._id);
-                User.findOne({
-                    _id: req.user.id
-                }).then(profile => {
-                    if (!profile) return erep(res, "", 404, "Error finding profile", req.user._id)
-                        //possibly upgrade payment if specified
-                    if (req.body.tier) {
-                        gateway.subscription.update(profile.PayToken, {
-                            planId: planID,
-                        }, function(err) {
-                            if (err) return erep(res, err, 404, "Failed to upgrade payment plan", req.user._id);
-                        });
-                    }
-                    //update a profile
-                    User.findOneAndUpdate({ _id: req.user.id }, { $set: profileFields }, { new: true })
-                        .then(tk.deleteOne())
-                        .then(res.json({ success: true }))
-                        .catch(e => erep(res, e, 400, "Error updating profile/Error processing token", req.user._id)); //TODO: there is an error here maybe
+    // if (req.body.password1 || req.body.password2) {
+    //     if (req.body.password1 != req.body.password2) return erep(res, "", 400, "Your passwords must match", req.user._id);
+    //     profileFields.password = req.body.password1;
+    // }
+    // bcrypt.genSalt(10, (err, salt) => {
+    //     bcrypt.hash(profileFields.password, salt, (err, hash) => {
+    //         if (err) return erep(res, err, 500, "Failed to generate password.", req.user._id);
+    //         profileFields.password = hash;
+    UserIndex.findOne({ token: req.params.token }).then(tk => {
+        if (tk._userId != req.user.id) return erep(res, "", 403, "email token does not match current user cookie, please log into this computer to load the cookie into your memory", req.user._id);
+        User.findOne({
+            _id: req.user.id
+        }).then(profile => {
+            if (!profile) return erep(res, "", 404, "Error finding profile", req.user._id)
+                //possibly upgrade payment if specified
+            if (req.body.tier) {
+                gateway.subscription.update(profile.PayToken, {
+                    planId: planID,
+                }, function(err) {
+                    if (err) return erep(res, err, 404, "Failed to upgrade payment plan", req.user._id);
                 });
-            });
+            }
+            //update a profile
+            User.findOneAndUpdate({ _id: req.user.id }, { $set: profileFields }, { new: true })
+                .then(tk.deleteOne())
+                .then(res.json({ success: true }))
+                .catch(e => erep(res, e, 400, "Error updating profile/Error processing token", req.user._id)); //TODO: there is an error here maybe
         });
+        //     });
+        // });
     });
 });
 

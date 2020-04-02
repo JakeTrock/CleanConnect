@@ -3,7 +3,7 @@ const isEmpty = require('./is-empty');
 
 module.exports = function validatePostInput(data, pil) {
     let errors = {};
-    if (data.printIteration.length < 1) {
+    if (!data.printIteration || data.printIteration.length < 1) {
         errors.text = 'Missing print iteration header';
     }
     if (data.printIteration.length != pil) {
