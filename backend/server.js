@@ -76,7 +76,6 @@ const delExp = new CronJob("00 00 00 * * *", function() {
         }, function(err, list) {
             for (var i = 0, len = list.length; i < len; i++) {
                 if (err) erep(undefined, err, 111, "CRON ERROR", "");
-                console.log(list[i]);
                 User.findOneAndRemove({
                     isVerified: false,
                     _id: list[i]._userId
