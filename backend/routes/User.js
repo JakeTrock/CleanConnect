@@ -298,7 +298,7 @@ router.post("/resetPass", (req, res) => {
 // INPUT: email and new password twice
 router.post("/resetPass/:token", (req, res) => {
     var profileFields = { email: req.body.email };
-    if (!req.body.token) return erep(res, "", 400, "No token provided.", req.body.email);
+    if (!req.params.token) return erep(res, "", 400, "No token provided.", req.body.email);
     if (req.body.password1 == req.body.password2) profileFields.password = req.body.password1;
     bcrypt.genSalt(10, (err, salt) => {
         bcrypt.hash(profileFields.password, salt, (err, hash) => {
@@ -427,8 +427,8 @@ router.post("/isValid/:token", passport.authenticate("jwt", {
 // INPUT: token value via url bar
 router.post("/anonIsValid/:token", (req, res) => {
     UserIndex.findOne({ token: req.params.token }).then(tk => {
-        if (!tk) return erep(res, "", 400, "Token does not exist, or is invalid", tk.email);
-        if (!tk.email) return erep(res, "", 400, "This is not an anonymous token", tk.email);
+        if (!tk) return erep(res, "", 400, "Token does not exist, or is invalid", "");
+        if (!tk.email) return erep(res, "", 400, "This is not an anonymous token", "");
         User.findOne({ email: tk.email })
             .then(profile => {
                 if (!profile) return erep(res, "", 404, "Error finding profile", profile._id);
@@ -517,7 +517,10 @@ router.get('/current', passport.authenticate('jwt', {
 router.get('/getClientToken', (req, res) => {
     gateway.clientToken.generate({}, function(err, response) {
         if (!response.success || err) return erep(res, response + "|" + err, 500, "Error Generating exchange token", "");
-        res.send(response.clientToken);
+        res.json({
+            success: true,
+            cliToken: response.clientToken
+        });
     });
 });
 router.get('/getAuthClientToken', passport.authenticate('jwt', {
@@ -530,7 +533,10 @@ router.get('/getAuthClientToken', passport.authenticate('jwt', {
             customerId: usr.custID
         }, function(err, response) {
             if (!response.success || err) return erep(res, response + "|" + err, 500, "Error getting auth client token", req.user._id);
-            res.send(response.clientToken);
+            res.json({
+                success: true,
+                cliToken: response.clientToken
+            });
         });
     }).catch(e => erep(res, e, 500, "Error getting auth client token", req.user._id));
 });
