@@ -104,6 +104,7 @@ router.post("/register", (req, res) => {
             gateway.customer.create({
                 email: req.body.email,
                 company: req.body.name,
+                phone: req.body.phoneNum,
                 paymentMethodNonce: req.body.payment_method_nonce
             }, function(err, customerResult) {
                 if (!customerResult.success) return erep(res, err, 500, "Failed to log customer", req.body.email);
@@ -116,6 +117,7 @@ router.post("/register", (req, res) => {
                     const newUser = new User({
                         name: req.body.name,
                         email: req.body.email,
+                        phone: req.body.phoneNum,
                         dashUrl: randomBytes(16).toString("hex").substring(8),
                         password: req.body.password,
                         PayToken: subscriptionResult.subscription.id,
@@ -397,8 +399,9 @@ router.post("/change/:token", passport.authenticate("jwt", {
         }).then(profile => {
             if (!profile) return erep(res, "", 404, "Error finding profile", req.user._id)
                 //possibly upgrade payment if specified
-            if (req.body.name || req.body.email || req.body.payNonce) {
+            if (req.body.name || req.body.email || req.body.phoneNum || req.body.payNonce) {
                 var nfo = {};
+                if (req.body.phoneNum) nfo.phoneNum = req.body.phoneNum;
                 if (req.body.name) nfo.email = req.body.email;
                 if (req.body.email) nfo.company = req.body.name;
                 if (req.body.payNonce) nfo.paymentMethodNonce = req.body.payment_method_nonce;

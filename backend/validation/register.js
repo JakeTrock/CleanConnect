@@ -22,6 +22,14 @@ module.exports = function validateRegisterInput(data) {
         errors.name = 'Name field is required';
     }
 
+    if (Validator.isEmpty(data.phoneNum)) {
+        errors.phoneNum = 'Phone number is required';
+    }
+
+    if (!(data.phoneNum.value.match(/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/))) {
+        errors.phoneNum = 'Phone number is incorrectly typed';
+    }
+
     if (Validator.isEmpty(data.email)) {
         errors.email = 'Email field is required';
     }
@@ -48,7 +56,6 @@ module.exports = function validateRegisterInput(data) {
     if (!Validator.equals(data.password, data.password2)) {
         errors.password2 = "The passwords don't match please type again.";
     }
-
 
     return {
         errors,
