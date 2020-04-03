@@ -325,7 +325,7 @@ router.post("/resetPass/:token", (req, res) => {
             if (err) return erep(res, err, 500, "Failed to generate password.", req.body.email);
             profileFields.password = hash;
             UserIndex.findOne({ token: req.params.token }).then(tk => {
-                if (tk.email != req.body.email) return erep(res, "", 403, "email token does not match the email you entered, please log into this computer to load the cookie into your memory, or retype email", req.body.email);
+                if (tk._userId != req.body.email) return erep(res, "", 403, "email token does not match the email you entered, please log into this computer to load the cookie into your memory, or retype email", req.body.email);
                 User.findOne({
                     email: req.body.email
                 }).then(profile => {
