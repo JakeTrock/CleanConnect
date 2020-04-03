@@ -56,7 +56,6 @@ function sendMail(body, link, sub, to, cb) { //TODO: add error catching to this 
             <style>
             a {
                 background-color: #4caf50;
-                /* Green */
                 border: none;
                 color: white;
                 padding: 15px 32px;
@@ -98,12 +97,13 @@ router.post("/register", (req, res) => {
     User.findOne({ email: req.body.email })
         .then(user => {
             if (user) {
-                errors.email = "Email already exists";
+                errors.user = "User already exists";
                 return erep(res, errors, 400, "Invalid post body", "");
             }
             gateway.customer.create({
                 email: req.body.email,
                 company: req.body.name,
+                phone: req.body.phoneNum,
                 paymentMethodNonce: req.body.payment_method_nonce
             }, function(err, customerResult) {
                 if (!customerResult.success) return erep(res, err, 500, "Failed to log customer", req.body.email);
@@ -112,35 +112,32 @@ router.post("/register", (req, res) => {
                     paymentMethodToken: customerResult.customer.paymentMethods[0].token,
                     planId: planID
                 }, function(err, subscriptionResult) {
-                    if (!subscriptionResult.success) return erep(res, err, 500, "Failed to generate payplan", req.body.email);
-                    const newUser = new User({
-                        name: req.body.name,
-                        email: req.body.email,
-                        dashUrl: randomBytes(16).toString("hex").substring(8),
-                        password: req.body.password,
-                        PayToken: subscriptionResult.subscription.id,
-                        custID: customerResult.customer.id,
-                        tier: req.body.tier
-                    });
+                    if (!subscriptionResult.success) return erep(res, err, 500, "Failed to generate payment plan", req.body.email);
                     bcrypt.genSalt(10, (err, salt) => {
-                        bcrypt.hash(newUser.password, salt, (err, hash) => {
+                        bcrypt.hash(req.body.password, salt, (err, hash) => {
                             if (err) return erep(res, err, 500, "Failed to generate password", req.body.email);
-                            newUser.password = hash;
-                            newUser.save(function(err) {
+                            new User({
+                                name: req.body.name,
+                                email: req.body.email,
+                                password: hash,
+                                phone: req.body.phoneNum,
+                                dashUrl: randomBytes(16).toString("hex").substring(8),
+                                PayToken: subscriptionResult.subscription.id,
+                                custID: customerResult.customer.id,
+                                tier: req.body.tier
+                            }).save(function(err) {
                                 if (err) return erep(res, err, 500, "Error saving user data", req.body.email);
                                 // Create a verification token for this user
                                 User.findOne({
                                     email: req.body.email
                                 }, "_id").exec(function(err, user) {
                                     if (err) return erep(res, err, 500, "Failed to find user", req.body.email);
-                                    const vToken = new UserIndex({
+                                    new UserIndex({
                                         _userId: user._id,
                                         token: randomBytes(16).toString("hex"),
                                         isCritical: true
-                                    });
-                                    vToken.save().then(p => {
+                                    }).save().then(p => {
                                         // Send the email
-
                                         sendMail("Hello " + req.body.name + ",Please verify your account by clicking the link:",
                                             process.env.domainPrefix + process.env.topLevelDomain +
                                             "/user/confirmation/" +
@@ -166,38 +163,27 @@ router.post("/register", (req, res) => {
 // DESCRIPTION: resends verification email to user
 // INPUT: email as string via json body
 router.post("/resend", (req, res) => {
-    // req.assert('email', 'Email is not valid').isEmail();
-    // req.assert('email', 'Email cannot be blank').notEmpty();
-    // req.sanitize('email').normalizeEmail({ remove_dots: false });
-
-    // // Check for validation errors
-    // var errors = req.validationErrors();
-    // if (errors) return res.status(400).send(errors);
-
     User.findOne({ email: req.body.email }, function(err, user) {
         if (!user) return erep(res, err, 404, "Unable to find user with this email", user._id);
         if (user.isVerified) return erep(res, err, 400, "This user is already verified", user._id);
-        const vToken = new UserIndex({
+        new UserIndex({
             _userId: user._id,
             token: randomBytes(16).toString("hex"),
             isCritical: true
-        });
-        vToken
-            .save()
-            .then(p => {
-                // Send the email
-                sendMail("Hello " + user.name + ",Please verify your account by clicking the link:",
-                    process.env.domainPrefix + process.env.topLevelDomain +
-                    "/user/confirmation/" +
-                    p.token, "CleanConnect Account Verification", req.body.email,
-                    function(err) {
-                        if (err) return erep(res, err, 500, "Failed to send mail", user._id);
-                    });
-                res.json({
-                    success: true,
-                    status: "A verification email has been sent to " + req.body.email + "."
+        }).save().then(p => {
+            // Send the email
+            sendMail("Hello " + user.name + ",Please verify your account by clicking the link:",
+                process.env.domainPrefix + process.env.topLevelDomain +
+                "/user/confirmation/" +
+                p.token, "CleanConnect Account Verification", req.body.email,
+                function(err) {
+                    if (err) return erep(res, err, 500, "Failed to send mail", user._id);
                 });
+            res.json({
+                success: true,
+                status: "A verification email has been sent to " + req.body.email + "."
             });
+        });
     });
 });
 
@@ -231,27 +217,24 @@ router.get("/confirmation/:token", (req, res) => {
 router.delete("/deleteinfo", passport.authenticate("jwt", {
     session: false
 }), (req, res) => {
-    const vToken = new UserIndex({
+    new UserIndex({
         _userId: req.user.id,
         token: randomBytes(16).toString("hex"),
         isCritical: false
-    });
-    vToken
-        .save()
-        .then(p => {
-            // Send the email
-            sendMail("Sorry to see you go, but if you must, click the link below to permanently delete your account:",
-                process.env.domainPrefix + process.env.topLevelDomain +
-                "/user/delete/" +
-                p.token, "CleanConnect Account Deletion", req.body.email,
-                function(err) {
-                    if (err) return erep(res, err, 500, "Failed to send mail", req.user._id);
-                });
-            res.json({
-                success: false,
-                status: "A deletion email has been sent to " + req.user.email + "."
+    }).save().then(p => {
+        // Send the email
+        sendMail("Sorry to see you go, but if you must, click the link below to permanently delete your account:",
+            process.env.domainPrefix + process.env.topLevelDomain +
+            "/user/delete/" +
+            p.token, "CleanConnect Account Deletion", req.body.email,
+            function(err) {
+                if (err) return erep(res, err, 500, "Failed to send mail", req.user._id);
             });
+        res.json({
+            success: true,
+            status: "A deletion email has been sent to " + req.user.email + "."
         });
+    });
 });
 
 // ROUTE: GET user/delete/:token
@@ -270,7 +253,7 @@ router.get("/delete/:token", passport.authenticate("jwt", {
                 user: req.user._id
             }).then(async posts => {
                 if (!posts) return erep(res, "", 404, "Error finding posts", req.user._id);
-                for (var n in posts) {
+                for (var n = 0, len = posts.length; n < len; n++) {
                     Comment.deleteMany({
                         tag: posts[n]._id
                     }).catch(err => erep(res, err, 404, "Error finding posts", req.user._id));
@@ -278,7 +261,7 @@ router.get("/delete/:token", passport.authenticate("jwt", {
             }))
             .then(Tag.deleteMany({ user: req.user._id }))
             .then(tk.deleteOne())
-            .then(() => res.json({
+            .then(res.json({
                 success: true
             }))
             .catch(e => erep(res, e, 500, "Deletion error", req.user._id));
@@ -290,35 +273,32 @@ router.get("/delete/:token", passport.authenticate("jwt", {
 // DESCRIPTION: sends verification email to change account passwd
 // INPUT: email
 router.post("/resetPass", (req, res) => {
-    const vToken = new UserIndex({
+    new UserIndex({
         email: req.body.email,
         token: randomBytes(16).toString("hex"),
         isCritical: false
-    });
-    vToken
-        .save()
-        .then(p => {
-            // Send the email
-            sendMail("To proceed with changing your password, please click the link below:",
-                process.env.domainPrefix + process.env.topLevelDomain +
-                "/user/resetPass/" +
-                p.token, "CleanConnect Password Change Confirmation", req.body.email,
-                function(err) {
-                    if (err) return erep(res, err, 500, "Failed to send mail", req.body.email);
-                });
-            res.json({
-                success: true,
-                status: "A password email has been sent to " + req.body.email + "."
+    }).save().then(p => {
+        // Send the email
+        sendMail("To proceed with changing your password, please click the link below:",
+            process.env.domainPrefix + process.env.topLevelDomain +
+            "/user/resetPass/" +
+            p.token, "CleanConnect Password Change Confirmation", req.body.email,
+            function(err) {
+                if (err) return erep(res, err, 500, "Failed to send mail", req.body.email);
             });
+        res.json({
+            success: true,
+            status: "A password email has been sent to " + req.body.email + "."
         });
+    });
 });
 
 // ROUTE: POST user/resetPass
 // DESCRIPTION: recieves verification email to change password
 // INPUT: email and new password twice
 router.post("/resetPass/:token", (req, res) => {
-    const profileFields = {};
-    profileFields.email = req.body.email;
+    var profileFields = { email: req.body.email };
+    if (!req.body.token) return erep(res, "", 400, "No token provided.", req.body.email);
     if (req.body.password1 == req.body.password2) profileFields.password = req.body.password1;
     bcrypt.genSalt(10, (err, salt) => {
         bcrypt.hash(profileFields.password, salt, (err, hash) => {
@@ -329,13 +309,14 @@ router.post("/resetPass/:token", (req, res) => {
                 User.findOne({
                     email: req.body.email
                 }).then(profile => {
-                    if (!profile) return erep(res, "", 404, "Error finding profile", req.body.email)
-                        //possibly upgrade payment if specified
-                        //update a profile
+                    if (!profile) return erep(res, "", 404, "Error finding profile", profile._id);
+                    if (!req.body.phoneNum || profile.phoneNum != req.body.phoneNum) return erep(res, "", 400, "Invalid/no phone number has been provided", profile._id);
+                    //possibly upgrade payment if specified
+                    //update a profile
                     User.findOneAndUpdate({ email: req.body.email }, { $set: profileFields }, { new: true })
                         .then(tk.deleteOne())
                         .then(res.json({ success: true }))
-                        .catch(e => erep(res, e, 400, "Error updating profile/Error processing token", req.body.email));
+                        .catch(e => erep(res, e, 400, "Error updating profile/Error processing token", profile._id));
                 });
             });
         });
@@ -348,27 +329,24 @@ router.post("/resetPass/:token", (req, res) => {
 router.post("/changeinfo", passport.authenticate("jwt", {
     session: false
 }), (req, res) => {
-    const vToken = new UserIndex({
+    new UserIndex({
         _userId: req.user.id,
         token: randomBytes(16).toString("hex"),
         isCritical: false
-    });
-    vToken
-        .save()
-        .then(p => {
-            // Send the email
-            sendMail("To proceed with altering details of your account, please click the link below:",
-                process.env.domainPrefix + process.env.topLevelDomain +
-                "/user/change/" +
-                p.token, "CleanConnect Account Changes Confirmation", req.user.email,
-                function(err) {
-                    if (err) return erep(res, err, 500, "Failed to send mail", req.user._id);
-                });
-            res.json({
-                success: true,
-                status: "A settings email has been sent to " + req.user.email + "."
+    }).save().then(p => {
+        // Send the email
+        sendMail("To proceed with altering details of your account, please click the link below:",
+            process.env.domainPrefix + process.env.topLevelDomain +
+            "/user/change/" +
+            p.token, "CleanConnect Account Changes Confirmation", req.user.email,
+            function(err) {
+                if (err) return erep(res, err, 500, "Failed to send mail", req.user._id);
             });
+        res.json({
+            success: true,
+            status: "A settings email has been sent to " + req.user.email + "."
         });
+    });
 });
 
 // ROUTE: POST user/change/:token
@@ -377,7 +355,7 @@ router.post("/changeinfo", passport.authenticate("jwt", {
 router.post("/change/:token", passport.authenticate("jwt", {
     session: false
 }), (req, res) => {
-    const profileFields = {};
+    var profileFields = {};
     var planID;
     // profileFields.user = req.user._id;
     if (req.body.tier) planID = keys.tierID[req.body.tier];
@@ -397,8 +375,9 @@ router.post("/change/:token", passport.authenticate("jwt", {
         }).then(profile => {
             if (!profile) return erep(res, "", 404, "Error finding profile", req.user._id)
                 //possibly upgrade payment if specified
-            if (req.body.name || req.body.email || req.body.payNonce) {
+            if (req.body.name || req.body.email || req.body.phoneNum || req.body.payNonce) {
                 var nfo = {};
+                if (req.body.phoneNum) nfo.phoneNum = req.body.phoneNum;
                 if (req.body.name) nfo.email = req.body.email;
                 if (req.body.email) nfo.company = req.body.name;
                 if (req.body.payNonce) nfo.paymentMethodNonce = req.body.payment_method_nonce;
@@ -443,7 +422,7 @@ router.post("/isValid/:token", passport.authenticate("jwt", {
     });
 });
 
-// ROUTE: POST user/isValid/:token
+// ROUTE: POST user/anonIsValid/:token
 // DESCRIPTION: checks if anon token is still valid
 // INPUT: token value via url bar
 router.post("/anonIsValid/:token", (req, res) => {
@@ -456,8 +435,7 @@ router.post("/anonIsValid/:token", (req, res) => {
                 res.status(200).json({
                     success: true
                 });
-            })
-            .catch(e => erep(res, e, 500, "Validation error", tk.email));
+            }).catch(e => erep(res, e, 500, "Validation error", tk.email));
     });
 });
 
@@ -475,8 +453,7 @@ router.post("/login", (req, res) => {
 
     User.findOne({
             email: req.body.email
-        })
-        .then(user => {
+        }).then(user => {
             errors.email = "User not found.";
             // Check for user
             if (!user) return erep(res, errors, 400, "Invalid user information", req.body.email);
@@ -487,34 +464,29 @@ router.post("/login", (req, res) => {
             //Check password
             bcrypt.compare(password, user.password).then(isMatch => {
                 if (isMatch) {
-                    //User matched
-                    const payload = {
-                        tier: user.tier,
-                        _id: user._id,
-                        name: user.name,
-                        dashUrl: user.dashUrl,
-                        email: user.email,
-                        date: user.date,
-                    }; // create jwt payload
-                    //Sign token
-                    jwt.sign(
-                        payload,
-                        keys.secretOrKey, {
-                            expiresIn: "1d"
-                        },
-                        (err, token) => {
-                            if (err) return erep(res, err, 500, "Unable to generate authentication", user._id);
-                            else
-                                res.json({
-                                    success: true,
-                                    token: "Bearer " + token
-                                });
-                        }
-                    );
-                } else {
                     errors.password = "Password Incorrect.";
                     return erep(res, errors, 400, "Invalid post body", user._id);
                 }
+                //User matched
+                const payload = {
+                    tier: user.tier,
+                    _id: user._id,
+                    name: user.name,
+                    dashUrl: user.dashUrl,
+                    email: user.email,
+                    date: user.date,
+                }; // create jwt payload
+                //Sign token
+                jwt.sign(payload, keys.secretOrKey, { expiresIn: "1d" },
+                    (err, token) => {
+                        if (err) return erep(res, err, 500, "Unable to generate authentication", user._id);
+                        else
+                            res.json({
+                                success: true,
+                                token: "Bearer " + token
+                            });
+                    }
+                );
             });
         })
         .catch(e => erep(res, e, 500, "Login error", req.body.email));
@@ -544,7 +516,7 @@ router.get('/current', passport.authenticate('jwt', {
 });
 router.get('/getClientToken', (req, res) => {
     gateway.clientToken.generate({}, function(err, response) {
-        if (!response.success) return erep(res, response, 500, "Error Generating exchange token", "");
+        if (!response.success || err) return erep(res, response + "|" + err, 500, "Error Generating exchange token", "");
         res.send(response.clientToken);
     });
 });
@@ -557,7 +529,7 @@ router.get('/getAuthClientToken', passport.authenticate('jwt', {
         gateway.clientToken.generate({
             customerId: usr.custID
         }, function(err, response) {
-            if (!response.success) return erep(res, response, 500, "Error getting auth client token", req.user._id);
+            if (!response.success || err) return erep(res, response + "|" + err, 500, "Error getting auth client token", req.user._id);
             res.send(response.clientToken);
         });
     }).catch(e => erep(res, e, 500, "Error getting auth client token", req.user._id));

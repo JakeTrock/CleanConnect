@@ -66,57 +66,57 @@ app.listen(5000, () => console.log("Server running on port 5000"));
 // INPUT: NONE
 const tempDir = __dirname + '/temp/';
 const delExp = new CronJob("00 00 00 * * *", function() {
-    console.log("Goodnight, time to delete some stuff! (-_-)ᶻᶻᶻᶻ");
-    //older than one week block
-    var d = new Date();
-    d.setDate(d.getDate() - 7);
-    UserIndex.find({
-        isCritical: true,
-        createdAt: { $lt: d }
-    }, function(err, list) {
-        for (var i = 0; i < list.length; i++) {
-            if (err) console.log(err);
-            console.log(list[i]);
-            User.findOneAndRemove({
-                isVerified: false,
-                _id: list[i]._userId
-            });
-            UserIndex.findOneAndRemove({
-                isCritical: true,
-                createdAt: { $lt: d },
-                _id: list[i]._userId
-            });
-        }
-    });
-    fs.readdir(tempDir, function(err, files) {
-        files.forEach(function(file) {
-            if (fs.statSync(tempDir + file).birthtime < d && file.split(".")[1] == "pdf") {
-                fs.unlinkSync(tempDir + file);
+        console.log("Goodnight, time to delete some stuff! (-_-)ᶻᶻᶻᶻ");
+        //older than one week block
+        var d = new Date();
+        d.setDate(d.getDate() - 7);
+        UserIndex.find({
+            isCritical: true,
+            createdAt: { $lt: d }
+        }, function(err, list) {
+            for (var i = 0, len = list.length; i < len; i++) {
+                if (err) erep(undefined, err, 111, "CRON ERROR", "");
+                User.findOneAndRemove({
+                    isVerified: false,
+                    _id: list[i]._userId
+                });
+                UserIndex.findOneAndRemove({
+                    isCritical: true,
+                    createdAt: { $lt: d },
+                    _id: list[i]._userId
+                });
             }
         });
-    });
-    //older than one month block
-    d.setDate(d.getDate() - 23);
-    //remove images connected to stale comments
-    Comment.find({
-        markedForDeletion: true,
-        removedAt: { $lt: d }
-    }).then(cmts => {
-        if (cmts) {
-            for (var n in cmts) {
-                if (n.img) {
-                    fs.unlinkSync(tempDir + n.img);
+        fs.readdir(tempDir, function(err, files) {
+            files.forEach(function(file) {
+                if (fs.statSync(tempDir + file).birthtime < d && file.split(".")[1] == "pdf") {
+                    fs.unlinkSync(tempDir + file);
+                }
+            });
+        });
+        //older than one month block
+        d.setDate(d.getDate() - 23);
+        //remove images connected to stale comments
+        Comment.find({
+            markedForDeletion: true,
+            removedAt: { $lt: d }
+        }).then(cmts => {
+            if (cmts) {
+                for (var n = 0, len = cmts.length; n < len; n++) {
+                    if (n.img) {
+                        fs.unlinkSync(tempDir + n.img);
+                    }
                 }
             }
-        }
-    });
-    //remove comments
-    Comment.deleteMany({
-        markedForDeletion: true,
-        removedAt: { $lt: d }
-    }).then(result => console.log(result)).catch(err => erep(undefined, err, 444, "EXPIRY DELETION ERROR", ""));
-    //older than 2 months block
-}, null, true, 'America/New_York');
+        });
+        //remove comments
+        Comment.deleteMany({
+            markedForDeletion: true,
+            removedAt: { $lt: d }
+        }).then(result => console.log(result)).catch(err => erep(undefined, err, 444, "EXPIRY DELETION ERROR", ""));
+        //older than 2 months block
+    },
+    null, true, 'America/New_York');
 
 //start cronjob
 delExp.start();

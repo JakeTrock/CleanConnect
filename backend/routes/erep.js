@@ -6,9 +6,10 @@ module.exports = function erep(res, err, scode, msg, repID) {
         errorcode: scode,
         user: JSON.stringify(err)
     }).save((err) => { if (err) console.error(err) });
-    return res.status(scode).json({
-        success: false,
-        simple: msg,
-        details: err
-    });
+    if (res != undefined)
+        return res.status(scode).json({
+            success: false,
+            simple: msg,
+            details: err
+        });
 }

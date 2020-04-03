@@ -36,13 +36,14 @@ router.post('/getall', passport.authenticate('jwt', {
         user: req.user._id
     }).then(async posts => {
         if (posts) {
-            for (var n in posts) {
+            for (var n = 0, len = posts.length; n < len; n++) {
                 await Comment.find({
                     tag: posts[n]._id,
                     markedForDeletion: req.body.showDead
                 }).then(cmts => {
                     if (cmts)
-                        for (var z in cmts) posts[n].comments.push(cmts[z]);
+                        for (var z = 0, ln = cmts.length; z < ln; z++)
+                            posts[n].comments.push(cmts[z]);
                 });
             }
             res.json(posts);
@@ -85,7 +86,7 @@ router.post('/new', passport.authenticate('jwt', {
         Tag.find({
             user: req.user._id
         }).then(posts => {
-            for (var n in posts)
+            for (var n = 0, len = posts.length; n < len; n++)
                 if (posts[n].name == tagName) sc = false;
             if (!sc) return erep(res, "", 400, "Name not unique", req.user._id);
             User.findOneAndUpdate({
@@ -133,7 +134,7 @@ router.post('/edit/:id', passport.authenticate('jwt', {
     Tag.find({
         user: req.user._id
     }).then(posts => {
-        for (var n in posts)
+        for (var n = 0, len = posts.length; n < len; n++)
             if (posts[n].name == tagName) sc = false;
         if (!sc) return erep(res, "", 400, "Name not unique", req.user._id);
         Tag.findOneAndUpdate({
@@ -313,17 +314,17 @@ router.post('/print/', passport.authenticate('jwt', {
 
             doc.pipe(fs.createWriteStream(process.env.rootDir + '/temp/' + fn + '.pdf'));
             var b = 0;
-            for (var g = 0; g < pi.length; g++) {
-                for (var i = 0; i < pi[g]; i++) {
+            for (var g = 0, len = pi.length; g < len; g++) {
+                for (var i = 0, ivl = pi[g]; i < ivl; i++) {
                     svgbuff = svgbuff.replace(`room${(b - (cbuff * 10))}`, list[g].name);
                     svgbuff = svgbuff.replace(`img${(b - (cbuff * 10))}`, list[g].qrcode);
                     svgbuff = svgbuff.replace(`<!-- bimgrp${(b - (cbuff * 10))} -->`, '');
                     svgbuff = svgbuff.replace(`<!-- ${(b - (cbuff * 10))}eimgrp -->`, '');
                     b++;
-                    if (b != 0 && (b % 10 == 0 || (g == pi.length - 1 && i == pi[g] - 1))) {
-                        if ((g == pi.length - 1 && i == pi[g] - 1)) {
+                    if (b != 0 && (b % 10 == 0 || (g == len - 1 && i == ivl - 1))) {
+                        if ((g == len - 1 && i == ivl - 1)) {
                             if (svgbuff.indexOf("room9") !== -1) {
-                                for (var r = 0; r < 10; r++) {
+                                for (var r = 0, tm = 10; r < tm; r++) {
                                     svgbuff = svgbuff.replace(/(bimgrp)(.*?)(eimgrp)/, "");
                                 }
                             }
