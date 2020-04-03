@@ -319,7 +319,7 @@ router.post("/resetPass", (req, res) => {
 router.post("/resetPass/:token", (req, res) => {
     const profileFields = {};
     profileFields.email = req.body.email;
-    if (req.body.password1 == req.body.password2) profileFields.password = req.body.password;
+    if (req.body.password1 == req.body.password2) profileFields.password = req.body.password1;
     bcrypt.genSalt(10, (err, salt) => {
         bcrypt.hash(profileFields.password1, salt, (err, hash) => {
             if (err) return erep(res, err, 500, "Failed to generate password.", req.body.email);
