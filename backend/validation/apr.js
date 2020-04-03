@@ -9,8 +9,8 @@ module.exports = function validatePostInput(data) {
     if (Validator.isEmpty(data.text)) {
         errors.text = 'problem is required';
     }
-    for (var b in instr)
-        if (cuss[instr[b]] == 2)
+    for (var n = 0, len = instr.length; n < len; n++)
+        if (cuss[instr[n]] == 2)
             errors.text = "You'll have to clean up your language before we clean up this room.";
     return {
         errors,
