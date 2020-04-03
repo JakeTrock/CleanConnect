@@ -321,7 +321,7 @@ router.post("/resetPass/:token", (req, res) => {
     profileFields.email = req.body.email;
     if (req.body.password1 == req.body.password2) profileFields.password = req.body.password;
     bcrypt.genSalt(10, (err, salt) => {
-        bcrypt.hash(profileFields.password, salt, (err, hash) => {
+        bcrypt.hash(profileFields.password1, salt, (err, hash) => {
             if (err) return erep(res, err, 500, "Failed to generate password.", req.body.email);
             profileFields.password = hash;
             UserIndex.findOne({ token: req.params.token }).then(tk => {
