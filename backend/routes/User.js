@@ -322,7 +322,7 @@ router.post("/resetPass/:token", (req, res) => {
     if (req.body.password1 == req.body.password2) profileFields.password = req.body.password;
     bcrypt.genSalt(10, (err, salt) => {
         bcrypt.hash(profileFields.password, salt, (err, hash) => {
-            if (err) return erep(res, err, 500, "Failed to generate password.", req.user._id);
+            if (err) return erep(res, err, 500, "Failed to generate password.", req.body.email);
             profileFields.password = hash;
             UserIndex.findOne({ token: req.params.token }).then(tk => {
                 if (tk._userId != req.body.email) return erep(res, "", 403, "email token does not match the email you entered, please log into this computer to load the cookie into your memory, or retype email", req.body.email);
@@ -448,16 +448,16 @@ router.post("/isValid/:token", passport.authenticate("jwt", {
 // INPUT: token value via url bar
 router.post("/anonIsValid/:token", (req, res) => {
     UserIndex.findOne({ token: req.params.token }).then(tk => {
-        if (!tk) return erep(res, "", 400, "Token does not exist, or is invalid", req.user._id);
-        if (!tk.email) return erep(res, "", 400, "This is not an anonymous token", req.user._id);
+        if (!tk) return erep(res, "", 400, "Token does not exist, or is invalid", tk.email);
+        if (!tk.email) return erep(res, "", 400, "This is not an anonymous token", tk.email);
         User.findOne({ email: tk.email })
             .then(profile => {
-                if (!profile) return erep(res, "", 404, "Error finding profile", req.user._id);
+                if (!profile) return erep(res, "", 404, "Error finding profile", profile._id);
                 res.status(200).json({
                     success: true
                 });
             })
-            .catch(e => erep(res, e, 500, "Validation error", req.user._id));
+            .catch(e => erep(res, e, 500, "Validation error", tk.email));
     });
 });
 
