@@ -56,7 +56,6 @@ function sendMail(body, link, sub, to, cb) { //TODO: add error catching to this 
             <style>
             a {
                 background-color: #4caf50;
-                /* Green */
                 border: none;
                 color: white;
                 padding: 15px 32px;
@@ -98,7 +97,7 @@ router.post("/register", (req, res) => {
     User.findOne({ email: req.body.email })
         .then(user => {
             if (user) {
-                errors.email = "Email already exists";
+                errors.user = "User already exists";
                 return erep(res, errors, 400, "Invalid post body", "");
             }
             gateway.customer.create({
@@ -113,36 +112,32 @@ router.post("/register", (req, res) => {
                     paymentMethodToken: customerResult.customer.paymentMethods[0].token,
                     planId: planID
                 }, function(err, subscriptionResult) {
-                    if (!subscriptionResult.success) return erep(res, err, 500, "Failed to generate payplan", req.body.email);
-                    const newUser = new User({
-                        name: req.body.name,
-                        email: req.body.email,
-                        phone: req.body.phoneNum,
-                        dashUrl: randomBytes(16).toString("hex").substring(8),
-                        password: req.body.password,
-                        PayToken: subscriptionResult.subscription.id,
-                        custID: customerResult.customer.id,
-                        tier: req.body.tier
-                    });
+                    if (!subscriptionResult.success) return erep(res, err, 500, "Failed to generate payment plan", req.body.email);
                     bcrypt.genSalt(10, (err, salt) => {
-                        bcrypt.hash(newUser.password, salt, (err, hash) => {
+                        bcrypt.hash(req.body.password, salt, (err, hash) => {
                             if (err) return erep(res, err, 500, "Failed to generate password", req.body.email);
-                            newUser.password = hash;
-                            newUser.save(function(err) {
+                            new User({
+                                name: req.body.name,
+                                email: req.body.email,
+                                password: hash,
+                                phone: req.body.phoneNum,
+                                dashUrl: randomBytes(16).toString("hex").substring(8),
+                                PayToken: subscriptionResult.subscription.id,
+                                custID: customerResult.customer.id,
+                                tier: req.body.tier
+                            }).save(function(err) {
                                 if (err) return erep(res, err, 500, "Error saving user data", req.body.email);
                                 // Create a verification token for this user
                                 User.findOne({
                                     email: req.body.email
                                 }, "_id").exec(function(err, user) {
                                     if (err) return erep(res, err, 500, "Failed to find user", req.body.email);
-                                    const vToken = new UserIndex({
+                                    new UserIndex({
                                         _userId: user._id,
                                         token: randomBytes(16).toString("hex"),
                                         isCritical: true
-                                    });
-                                    vToken.save().then(p => {
+                                    }).save().then(p => {
                                         // Send the email
-
                                         sendMail("Hello " + req.body.name + ",Please verify your account by clicking the link:",
                                             process.env.domainPrefix + process.env.topLevelDomain +
                                             "/user/confirmation/" +
@@ -168,38 +163,27 @@ router.post("/register", (req, res) => {
 // DESCRIPTION: resends verification email to user
 // INPUT: email as string via json body
 router.post("/resend", (req, res) => {
-    // req.assert('email', 'Email is not valid').isEmail();
-    // req.assert('email', 'Email cannot be blank').notEmpty();
-    // req.sanitize('email').normalizeEmail({ remove_dots: false });
-
-    // // Check for validation errors
-    // var errors = req.validationErrors();
-    // if (errors) return res.status(400).send(errors);
-
     User.findOne({ email: req.body.email }, function(err, user) {
         if (!user) return erep(res, err, 404, "Unable to find user with this email", user._id);
         if (user.isVerified) return erep(res, err, 400, "This user is already verified", user._id);
-        const vToken = new UserIndex({
+        new UserIndex({
             _userId: user._id,
             token: randomBytes(16).toString("hex"),
             isCritical: true
-        });
-        vToken
-            .save()
-            .then(p => {
-                // Send the email
-                sendMail("Hello " + user.name + ",Please verify your account by clicking the link:",
-                    process.env.domainPrefix + process.env.topLevelDomain +
-                    "/user/confirmation/" +
-                    p.token, "CleanConnect Account Verification", req.body.email,
-                    function(err) {
-                        if (err) return erep(res, err, 500, "Failed to send mail", user._id);
-                    });
-                res.json({
-                    success: true,
-                    status: "A verification email has been sent to " + req.body.email + "."
+        }).save().then(p => {
+            // Send the email
+            sendMail("Hello " + user.name + ",Please verify your account by clicking the link:",
+                process.env.domainPrefix + process.env.topLevelDomain +
+                "/user/confirmation/" +
+                p.token, "CleanConnect Account Verification", req.body.email,
+                function(err) {
+                    if (err) return erep(res, err, 500, "Failed to send mail", user._id);
                 });
+            res.json({
+                success: true,
+                status: "A verification email has been sent to " + req.body.email + "."
             });
+        });
     });
 });
 
@@ -233,27 +217,24 @@ router.get("/confirmation/:token", (req, res) => {
 router.delete("/deleteinfo", passport.authenticate("jwt", {
     session: false
 }), (req, res) => {
-    const vToken = new UserIndex({
+    new UserIndex({
         _userId: req.user.id,
         token: randomBytes(16).toString("hex"),
         isCritical: false
-    });
-    vToken
-        .save()
-        .then(p => {
-            // Send the email
-            sendMail("Sorry to see you go, but if you must, click the link below to permanently delete your account:",
-                process.env.domainPrefix + process.env.topLevelDomain +
-                "/user/delete/" +
-                p.token, "CleanConnect Account Deletion", req.body.email,
-                function(err) {
-                    if (err) return erep(res, err, 500, "Failed to send mail", req.user._id);
-                });
-            res.json({
-                success: false,
-                status: "A deletion email has been sent to " + req.user.email + "."
+    }).save().then(p => {
+        // Send the email
+        sendMail("Sorry to see you go, but if you must, click the link below to permanently delete your account:",
+            process.env.domainPrefix + process.env.topLevelDomain +
+            "/user/delete/" +
+            p.token, "CleanConnect Account Deletion", req.body.email,
+            function(err) {
+                if (err) return erep(res, err, 500, "Failed to send mail", req.user._id);
             });
+        res.json({
+            success: true,
+            status: "A deletion email has been sent to " + req.user.email + "."
         });
+    });
 });
 
 // ROUTE: GET user/delete/:token
@@ -280,7 +261,7 @@ router.get("/delete/:token", passport.authenticate("jwt", {
             }))
             .then(Tag.deleteMany({ user: req.user._id }))
             .then(tk.deleteOne())
-            .then(() => res.json({
+            .then(res.json({
                 success: true
             }))
             .catch(e => erep(res, e, 500, "Deletion error", req.user._id));
@@ -316,8 +297,7 @@ router.post("/resetPass", (req, res) => {
 // DESCRIPTION: recieves verification email to change password
 // INPUT: email and new password twice
 router.post("/resetPass/:token", (req, res) => {
-    const profileFields = {};
-    profileFields.email = req.body.email;
+    var profileFields = { email: req.body.email };
     if (!req.body.token) return erep(res, "", 400, "No token provided.", req.body.email);
     if (req.body.password1 == req.body.password2) profileFields.password = req.body.password1;
     bcrypt.genSalt(10, (err, salt) => {
@@ -375,7 +355,7 @@ router.post("/changeinfo", passport.authenticate("jwt", {
 router.post("/change/:token", passport.authenticate("jwt", {
     session: false
 }), (req, res) => {
-    const profileFields = {};
+    var profileFields = {};
     var planID;
     // profileFields.user = req.user._id;
     if (req.body.tier) planID = keys.tierID[req.body.tier];
