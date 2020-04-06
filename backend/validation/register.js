@@ -25,8 +25,8 @@ module.exports = function validateRegisterInput(data) {
     if (Validator.isEmpty(data.phoneNum)) {
         errors.phoneNum = 'Phone number is required';
     }
-
-    if (!(data.phoneNum.value.match(/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/))) {
+    console.log(data.phoneNum);
+    if (!(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im.test(data.phoneNum))) {
         errors.phoneNum = 'Phone number is incorrectly typed';
     }
 
