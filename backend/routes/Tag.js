@@ -58,7 +58,7 @@ router.get('/getone/:id', passport.authenticate('jwt', {
 }), (req, res) => {
     Tag.findOne({
         _id: req.params.id
-    }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
+    }).then(post => res.json(post)).catch(err => erep(res, err, 404, "No posts found", req.user._id));
 });
 // ROUTE: GET tag/exists/:id
 // DESCRIPTION: sees if tag exists
@@ -74,34 +74,31 @@ router.post('/new', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     User.findOne({ _id: req.user._id }).then(usr => {
-        if (usr.numTags + 1 > keys.ceilings[usr.tier]) return erep(res, "", 400, "No more tags can be created with your current plan, please consider upgrading", req.user._id);
+        if (usr.numTags + 1 > keys.tagCeilings[usr.tier]) return erep(res, "", 400, "No more tags can be created with your current plan, please consider upgrading", req.user._id);
         // add tag node
-        var tagName = req.body.name;
         const {
             errors,
             isValid
         } = validatePostInput(req);
         if (!isValid) return erep(res, errors, 400, "Invalid post body", req.user._id);
-        var sc = true;
         Tag.find({
-            user: req.user._id
+            user: req.user._id,
+            name: req.body.name
         }).then(posts => {
-            for (var n = 0, len = posts.length; n < len; n++)
-                if (posts[n].name == tagName) sc = false;
-            if (!sc) return erep(res, "", 400, "Name not unique", req.user._id);
+            if (posts) return erep(res, "", 400, "Name not unique", req.user._id);
             User.findOneAndUpdate({
                 _id: req.user._id
             }, {
                 $inc: { numTags: 1 }
             }).then(() => {
                 new Tag({
-                    name: tagName,
+                    name: req.body.name,
                     user: req.user._id
                 }).save((err, obj) => {
                     if (err) return erep(res, err, 500, "Error creating tag", req.user._id);
                     QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/tag/' + obj._id, function(err, url) {
                         Tag.findOneAndUpdate({
-                            name: tagName,
+                            name: req.body.name,
                             user: req.user._id
                         }, {
                             $set: { qrcode: url }

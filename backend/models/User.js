@@ -33,6 +33,10 @@ const UserSchema = new Schema({
         type: Number,
         default: 0
     },
+    numInv: {
+        type: Number,
+        default: 0
+    },
     password: {
         type: String,
         required: true
