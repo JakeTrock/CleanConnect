@@ -120,7 +120,7 @@ router.post("/register", (req, res) => {
                                 name: req.body.name,
                                 email: req.body.email,
                                 password: hash,
-                                phone: req.body.phoneNum,
+                                phoneNum: req.body.phoneNum,
                                 dashUrl: randomBytes(16).toString("hex").substring(8),
                                 PayToken: subscriptionResult.subscription.id,
                                 custID: customerResult.customer.id,
@@ -463,7 +463,7 @@ router.post("/login", (req, res) => {
             }
             //Check password
             bcrypt.compare(password, user.password).then(isMatch => {
-                if (isMatch) {
+                if (!isMatch) {
                     errors.password = "Password Incorrect.";
                     return erep(res, errors, 400, "Invalid post body", user._id);
                 }
