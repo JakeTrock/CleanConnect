@@ -26,8 +26,10 @@ process.env.testing = keys.testing;
 const user = require('./routes/User.js');
 const tag = require('./routes/Tag.js');
 const comment = require('./routes/Comment.js');
-const erep = require('./routes/erep.js');
+const dash = require('./routes/Dash.js');
 const file = require('./routes/File.js');
+const inventory = require('./routes/Inventory.js');
+const erep = require('./routes/erep.js');
 
 //setup bodyparser and express
 const app = express();
@@ -55,7 +57,9 @@ require('./config/passport')(passport);
 app.use('/user', user);
 app.use('/tag', tag);
 app.use('/comment', comment);
+app.use('/dash', dash);
 app.use('/file', file);
+app.use('/inventory', inventory);
 
 //set port and listen on it 
 

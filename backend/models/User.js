@@ -9,7 +9,7 @@ const UserSchema = new Schema({
     },
     dashUrl: {
         type: String,
-        required: true
+        default: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKQAAACkAQMAAAAjexcCAAAAA1BMVEX///+nxBvIAAAAGUlEQVRIx+3BAQEAAACCoP6vbojAAAAASDsOGAABLvCKGQAAAABJRU5ErkJggg=="
     },
     PayToken: {
         type: String,
@@ -30,6 +30,10 @@ const UserSchema = new Schema({
         index: true
     },
     numTags: {
+        type: Number,
+        default: 0
+    },
+    numInv: {
         type: Number,
         default: 0
     },

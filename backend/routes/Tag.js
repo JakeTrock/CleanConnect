@@ -58,7 +58,7 @@ router.get('/getone/:id', passport.authenticate('jwt', {
 }), (req, res) => {
     Tag.findOne({
         _id: req.params.id
-    }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
+    }).then(post => res.json(post)).catch(err => erep(res, err, 404, "No posts found", req.user._id));
 });
 // ROUTE: GET tag/exists/:id
 // DESCRIPTION: sees if tag exists
@@ -74,34 +74,31 @@ router.post('/new', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     User.findOne({ _id: req.user._id }).then(usr => {
-        if (usr.numTags + 1 > keys.ceilings[usr.tier]) return erep(res, "", 400, "No more tags can be created with your current plan, please consider upgrading", req.user._id);
+        if (usr.numTags + 1 > keys.tagCeilings[usr.tier]) return erep(res, "", 400, "No more tags can be created with your current plan, please consider upgrading", req.user._id);
         // add tag node
-        var tagName = req.body.name;
         const {
             errors,
             isValid
         } = validatePostInput(req);
         if (!isValid) return erep(res, errors, 400, "Invalid post body", req.user._id);
-        var sc = true;
         Tag.find({
-            user: req.user._id
+            user: req.user._id,
+            name: req.body.name
         }).then(posts => {
-            for (var n = 0, len = posts.length; n < len; n++)
-                if (posts[n].name == tagName) sc = false;
-            if (!sc) return erep(res, "", 400, "Name not unique", req.user._id);
+            if (posts[0]) return erep(res, "", 400, "Name not unique", req.user._id);
             User.findOneAndUpdate({
                 _id: req.user._id
             }, {
                 $inc: { numTags: 1 }
             }).then(() => {
                 new Tag({
-                    name: tagName,
+                    name: req.body.name,
                     user: req.user._id
                 }).save((err, obj) => {
                     if (err) return erep(res, err, 500, "Error creating tag", req.user._id);
                     QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/tag/' + obj._id, function(err, url) {
                         Tag.findOneAndUpdate({
-                            name: tagName,
+                            name: req.body.name,
                             user: req.user._id
                         }, {
                             $set: { qrcode: url }
@@ -172,124 +169,10 @@ router.delete('/delete/:id', passport.authenticate('jwt', {
         }));
     }).catch(err => erep(res, err, 404, "Tag not found", req.user._id));
 });
-//https://www.npmjs.com/package/wkhtmltopdf
-//https://github.com/Hopding/pdf-lib
-//==============================================================
-// var util = require('util');
-// const logger = (className, doc) => {
-//     return new Proxy(new className(doc), {
-//         get: function(target, name, receiver) {
-//             if (!target.hasOwnProperty(name)) {
-//                 if ((name != "resume" && name != "listenerCount" && name != "on" && name != "once" && name != "addContent") && typeof target[name] === "function" && name.split("")[0] != "_") {
-//                     // if (name == "save" || name == "pipe")
-//                     console.log(name);
-//                     // else
-//                     // console.log(name + "\n" + util.inspect(target[name](...arguments)));
-//                 }
-//                 // return new Proxy(target[name], this);
-//             }
-//             return Reflect.get(target, name, receiver);
-//         }
-//     });
-// };
 
-
-/////////////////////////////////////////////////////////////////
-// var util = require('util');
-// var file = fs.createWriteStream('array.txt');
-
-// function getAllFuncs(toCheck) {
-//     var props = [];
-//     var obj = toCheck;
-//     do {
-//         props = props.concat(Object.getOwnPropertyNames(obj));
-//     } while (obj = Object.getPrototypeOf(obj));
-
-//     return props.sort().filter(function(e, i, arr) {
-//         if (e != arr[i + 1] && typeof toCheck[e] == 'function') return true;
-//     });
-// }
-
-// function logArgsAndFunction(clas) {
-//     const funcs = getAllFuncs(clas);
-//     funcs.forEach(name => {
-//         if ((name != "resume" && name != "listenerCount" && name != "on" && name != "once" && name != "pipe") && name.split("")[0] != "_") {
-//             clas[name] = (function() {
-//                 file.write(" \n\n " + name + " \n\n "); //+ util.inspect(arguments)
-//                 return clas[name](...arguments);
-//             }).bind(clas)
-//         }
-//     });
-// }
-
-// router.post('/print/', passport.authenticate('jwt', {
-//     session: false
-// }), (req, res) => {
-//     Tag.find({
-//         user: req.user._id
-//     }, function(err, list) {
-//         const pi = req.body.printIteration;
-//         const {
-//             errors,
-//             isValid
-//         } = isprintable(req.body, list.length);
-//         if (!isValid) return erep(res, errors, 400, "Invalid post body", req.user._id);
-//         fs.readFile(__dirname + '/template.svg', function(err, data) {
-//             if (err) return erep(res, err, 500, "Error generating pdf", req.user._id);
-//             //svg template file
-//             var svgbuff = data.toString();
-//             //array of pages defined
-//             //cbuff stores page position
-//             var cbuff = 0;
-//             const fn = randomBytes(16).toString("hex");
-//             // const doc = new PDFDocument(docsettings);
-//             const doc = logger(PDFDocument, docsettings);
-//             //---------
-//             // logArgsAndFunction(doc);
-//             //---------
-//             doc.pipe(fs.createWriteStream(process.env.rootDir + '/temp/' + fn + '.pdf'));
-//             var b = 0;
-//             for (var g = 0; g < pi.length; g++) {
-//                 for (var i = 0; i < pi[g]; i++) {
-//                     svgbuff = svgbuff.replace(`room${(b - (cbuff * 10))}`, list[g].name);
-//                     svgbuff = svgbuff.replace(`img${(b - (cbuff * 10))}`, list[g].qrcode);
-//                     svgbuff = svgbuff.replace(`<!-- bimgrp${(b - (cbuff * 10))} -->`, '');
-//                     svgbuff = svgbuff.replace(`<!-- ${(b - (cbuff * 10))}eimgrp -->`, '');
-//                     b++;
-//                     if (b != 0 && (b % 10 == 0 || (g == pi.length - 1 && i == pi[g] - 1))) {
-//                         if ((g == pi.length - 1 && i == pi[g] - 1)) {
-//                             if (svgbuff.indexOf("room9") !== -1) {
-//                                 for (var r = 0; r < 10; r++) {
-//                                     svgbuff = svgbuff.replace(/(bimgrp)(.*?)(eimgrp)/, "");
-//                                 }
-//                             }
-//                             SVGtoPDF(doc, svgbuff, 0, 0);
-//                             //finish writing to document
-//                             doc.end();
-//                             //redirect user to pdf page
-//                             res.json({
-//                                 success: true,
-//                                 filename: fn
-//                             });
-//                         } else {
-//                             SVGtoPDF(doc, svgbuff, 0, 0);
-//                             doc.addPage();
-//                             svgbuff = data.toString();
-//                             cbuff++; //every tenth page, increment page position
-//                         }
-//                     }
-//                 }
-//             }
-//         });
-//     });
-// });
-
-//==============================================================
-
-
-//ROUTE: GET tag / print /
-//DESCRIPTION: prints tags as qr codes, allowing people to access them in real life
-//INPUT: an array as long as the number of tags you have, containing numbers which tell the program the number of times to print each tag, and an array of tags( in the same format as they are in getall)
+// ROUTE: GET tag /print/
+// DESCRIPTION: prints tags as qr codes, allowing people to access them in real life
+// INPUT: an array as long as the number of tags you have, containing numbers which tell the program the number of times to print each tag, and an array of tags( in the same format as they are in getall)
 router.post('/print/', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
@@ -349,28 +232,6 @@ router.post('/print/', passport.authenticate('jwt', {
     });
 });
 
-// ROUTE: GET tag/dash/:id
-// DESCRIPTION: anonymous dashboard only accessible with secret keystring
-router.get('/dash/:id', async(req, res) => {
-    await User.findOne({
-        dashUrl: req.params.id
-    }).then(async user => {
-        await Tag.find({
-            user: user._id
-        }).then(async posts => {
-            if (!posts) erep(res, "", 404, "No posts found", req.user._id);
-            for (var n in posts) {
-                await Comment.find({
-                    tag: posts[n]._id
-                }).then(cmts => {
-                    if (cmts)
-                        for (var z in cmts) posts[n].comments.push(cmts[z]);
-                });
-            }
-            res.json(posts);
-        }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
-    }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
-});
 
 //export module for importing into central server file
 module.exports = router;

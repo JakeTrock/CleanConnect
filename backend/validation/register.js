@@ -4,9 +4,10 @@ const isEmpty = require('./is-empty');
 
 module.exports = function validateRegisterInput(data) {
     let errors = {};
-    //important about empty string.
+
     data.name = !isEmpty(data.name) ? data.name : '';
     data.email = !isEmpty(data.email) ? data.email : '';
+    data.phoneNum = !isEmpty(data.phoneNum) ? data.phoneNum : '';
     data.password = !isEmpty(data.password) ? data.password : '';
     data.password2 = !isEmpty(data.password2) ? data.password2 : '';
 
@@ -26,7 +27,7 @@ module.exports = function validateRegisterInput(data) {
         errors.phoneNum = 'Phone number is required';
     }
 
-    if (!(data.phoneNum.value.match(/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/))) {
+    if (!(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im.test(data.phoneNum))) {
         errors.phoneNum = 'Phone number is incorrectly typed';
     }
 
