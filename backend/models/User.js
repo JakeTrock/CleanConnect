@@ -11,6 +11,9 @@ const UserSchema = new Schema({
         type: String,
         default: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKQAAACkAQMAAAAjexcCAAAAA1BMVEX///+nxBvIAAAAGUlEQVRIx+3BAQEAAACCoP6vbojAAAAASDsOGAABLvCKGQAAAABJRU5ErkJggg=="
     },
+    dashCode: {
+        type: String
+    },
     PayToken: {
         type: String,
         required: true

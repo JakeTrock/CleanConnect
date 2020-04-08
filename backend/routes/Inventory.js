@@ -67,7 +67,7 @@ router.post('/new', passport.authenticate('jwt', {
             user: req.user._id,
             name: req.body.name
         }).then(posts => {
-            if (posts) return erep(res, "", 400, "Name not unique", req.user._id);
+            if (posts[0] != null) return erep(res, "", 400, "Name not unique", req.user._id);
             User.findOneAndUpdate({
                 _id: req.user._id
             }, {
@@ -112,7 +112,7 @@ router.post('/edit/:id', passport.authenticate('jwt', {
         user: req.user._id,
         name: req.body.name
     }).then(posts => {
-        if (posts) return erep(res, "", 400, "Name not unique", req.user._id);
+        if (posts[0] != null) return erep(res, "", 400, "Name not unique", req.user._id);
         Inventory.findOneAndUpdate({
                 _id: req.params.id,
                 user: req.user._id.toString()
@@ -148,91 +148,73 @@ router.delete('/delete/:id', passport.authenticate('jwt', {
 
 
 router.post('/newItem/:id', (req, res) => {
-    Inventory.findOne({
-        _id: req.params.id
-    }).then(inv => {
-        if (inv.comments.filter(item => item.itemCode.toString() === req.params.item_id).length !== 0)
-            return erep(res, "", 400, "Item already exists", req.ip)
-                // Add item to the array
-        inv.items.unshift({
-            name: req.body.name,
-            itemCode: randomBytes(16).toString("hex"),
-            maxQuant: req.body.maxQuant || undefined,
-            minQuant: req.body.minQuant || 0,
-            curQuant: req.body.curQuant || 0,
-            ip: req.ip
+    Inventory.find({ _id: req.params.id, 'items.name': req.body.name }).then(inv => {
+        if (inv[0] != null) return erep(res, "", 400, "Item already exists", req.ip)
+        Inventory.findOneAndUpdate({ _id: req.params.id }, {
+            $set: { date: new Date() },
+            $push: {
+                items: {
+                    name: req.body.name,
+                    itemCode: randomBytes(16).toString("hex"),
+                    maxQuant: req.body.maxQuant || undefined,
+                    minQuant: req.body.minQuant || 0,
+                    curQuant: req.body.curQuant || 0,
+                    ip: req.ip
+                }
+            }
+        }).exec(function(e, doc) {
+            if (e)
+                erep(res, e, 500, "Unable to add item", req.ip);
+            else
+                res.json({ success: true })
         });
-
-        inv.date = Date.now;
-        //save
-        inv.save().then(() => res.json({ success: true })).catch(e => erep(res, e, 500, "Unable to add item", req.ip));
-    }).catch(err => erep(res, err, 500, "Unable to add item", req.ip));
+    });
 });
 
 router.delete('/delItem/:id/:item_id', (req, res) => {
-    Inventory.findOne({
-        _id: req.params.id
-    }).then(inv => {
-        // Add item to the array
-        if (inv.comments.filter(item => item.itemCode.toString() === req.params.item_id).length === 0)
-            return erep(res, "", 404, "Unable to find item", req.ip)
-                // Get remove index
-
-        const removeIndex = inv.comments
-            .map(item => item.itemCode.toString())
-            .indexOf(req.params.item_id);
-
-        // Splice comment out of the array
-        inv.comments.splice(removeIndex, 1);
-
-        inv.date = Date.now;
-        //save
-        inv.save().then(() => res.json({ success: true })).catch(e => erep(res, e, 500, "Unable to remove item", req.ip));
-    }).catch(err => erep(res, err, 500, "Unable to remove item", req.ip));
+    Inventory.updateOne({ _id: req.params.id }, { $pull: { items: { _id: req.params.item_id } } }).exec(function(e, doc) {
+        if (e || !doc)
+            erep(res, e || "couldn't find document", 500, "Unable to remove item", req.ip);
+        else
+            res.json({ success: true })
+    });
 });
 
 router.post('/updItemQuant/:id/:item_id', (req, res) => {
-    Inventory.findOne({
-        _id: req.params.id
-    }).then(inv => {
-        // Add item to the array
-        if (inv.comments.filter(item => item.itemCode.toString() === req.params.item_id).length === 0)
-            return erep(res, "", 404, "Unable to find item", req.ip)
-                // Get remove index
-
-        // Splice comment out of the array
-        inv.update({ 'items.itemCode': req.params.item_id }, {
+    Inventory.find({ _id: req.params.id, 'items.name': req.body.name }).then(inv => {
+        if (inv[0] != null) return erep(res, "", 400, "Item already exists", req.ip)
+        Inventory.findOneAndUpdate({ _id: req.params.id, "items._id": req.params.item_id }, {
             $set: {
-                'items.$.curQuant': req.body.newVal,
+                date: new Date(),
+                "items.$.curQuant": req.body.newVal
             }
+        }).exec(function(e, doc) {
+            if (e || !doc)
+                erep(res, e || "couldn't find document", 500, "Unable to add item", req.ip);
+            else
+                res.json({ success: true })
         });
-
-        inv.date = Date.now;
-        //save
-        inv.save().then(() => res.json({ success: true })).catch(e => erep(res, e, 500, "Unable to change item quantity", req.ip));
-    }).catch(err => erep(res, err, 500, "Unable to change item quantity", req.ip));
+    });
 });
-router.post('/changeItem/:id/:item_id', (req, res) => {
-    Inventory.findOne({
-        _id: req.params.id
-    }).then(inv => {
-        // Add item to the array
-        if (inv.comments.filter(item => item.itemCode.toString() === req.params.item_id).length === 0)
-            return erep(res, "", 404, "Unable to find item", req.ip)
-                // Get remove index
-        var fields = {};
-        if (req.body.name) fields['items.$.name'] = req.body.name;
-        if (req.body.maxQuant) fields['items.$.maxQuant'] = req.body.maxQuant;
-        if (req.body.minQuant) fields['items.$.minQuant'] = req.body.minQuant;
-        // Splice comment out of the array
-        inv.update({ 'items.itemCode': req.params.item_id }, {
-            $set: fields
-        });
 
-        inv.date = Date.now;
-        //save
-        inv.save().then(() => res.json({ success: true })).catch(e => erep(res, e, 500, "Unable to change item quantity", req.ip));
-    }).catch(err => erep(res, err, 500, "Unable to change item quantity", req.ip));
+
+
+router.post('/changeItem/:id/:item_id', (req, res) => {
+    var fields = { date: new Date() };
+    if (req.body.name) fields['items.$.name'] = req.body.name;
+    if (req.body.maxQuant) fields['items.$.maxQuant'] = req.body.maxQuant;
+    if (req.body.minQuant) fields['items.$.minQuant'] = req.body.minQuant;
+    Inventory.find({ _id: req.params.id, 'items.name': req.body.name }).then(inv => {
+        if (inv[0] == null) return erep(res, "", 404, "Item not found", req.ip)
+        Inventory.findOneAndUpdate({ _id: req.params.id, "items._id": req.params.item_id }, {
+            $set: fields
+        }).exec(function(e, doc) {
+            if (e || !doc)
+                erep(res, e || "couldn't find document", 500, "Unable to add item", req.ip);
+            else
+                res.json({ success: true })
+        });
+    });
 });
 //export module for importing into central server file
 module.exports = router;

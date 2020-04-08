@@ -88,6 +88,7 @@ function sendMail(body, link, sub, to, cb) { //TODO: add error catching to this 
 // INPUT: user name, email and password(all as strings), via json body
 router.post("/register", (req, res) => {
     const { errors, isValid } = validateRegisterInput(req.body);
+    const dsh = randomBytes(16).toString("hex").substring(8);
     //check validation
     if (!isValid) return erep(res, errors, 400, "Invalid post body", "");
 
@@ -113,7 +114,7 @@ router.post("/register", (req, res) => {
                     bcrypt.genSalt(10, (err, salt) => {
                         bcrypt.hash(req.body.password, salt, (err, hash) => {
                             if (err) return erep(res, err, 500, "Failed to generate password", req.body.email);
-                            QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/dash/' + randomBytes(16).toString("hex").substring(8), function(err, url) {
+                            QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + '/dash/' + dsh, function(err, url) {
                                 if (err) return erep(res, err, 500, "Error generating dashcode", req.body.email);
                                 new User({
                                     name: req.body.name,
@@ -121,6 +122,7 @@ router.post("/register", (req, res) => {
                                     password: hash,
                                     phoneNum: req.body.phoneNum,
                                     dashUrl: url,
+                                    dashCode: dsh,
                                     PayToken: subscriptionResult.subscription.id,
                                     custID: customerResult.customer.id,
                                     tier: req.body.tier
@@ -472,7 +474,6 @@ router.post("/login", (req, res) => {
                     tier: user.tier,
                     _id: user._id,
                     name: user.name,
-                    dashUrl: user.dashUrl,
                     email: user.email,
                     date: user.date,
                 }; // create jwt payload
@@ -507,6 +508,8 @@ router.get('/current', passport.authenticate('jwt', {
             isVerified: profile.isVerified,
             tier: profile.tier,
             _id: profile._id,
+            dash: profile.dashUrl,
+            dashCode: profile.dashCode,
             name: profile.name,
             email: profile.email,
             date: profile.date,

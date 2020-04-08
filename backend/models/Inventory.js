@@ -22,7 +22,7 @@ const Inventory = new Schema({
     items: [{
         name: {
             type: String,
-            required: true
+            required: true,
         },
         itemCode: {
             type: String,
@@ -48,10 +48,6 @@ const Inventory = new Schema({
             default: Date.now
         }
     }],
-    ip: {
-        type: String,
-        required: true
-    },
     date: {
         type: Date,
         default: new Date()
