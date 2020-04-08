@@ -475,6 +475,7 @@ router.post("/login", (req, res) => {
                     _id: user._id,
                     name: user.name,
                     email: user.email,
+                    dash: user.dashCode,
                     date: user.date,
                 }; // create jwt payload
                 //Sign token
