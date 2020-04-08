@@ -25,7 +25,7 @@ router.get('/:id', async(req, res) => {
         await Tag.find({
             user: user._id
         }).then(async posts => {
-            if (!posts) erep(res, "", 404, "No posts found", req.user._id);
+            if (!posts) erep(res, "", 404, "No Inventory found", req.ip);
             for (var n in posts) {
                 await Comment.find({
                     tag: posts[n]._id,
@@ -38,13 +38,13 @@ router.get('/:id', async(req, res) => {
             Inventory.find({
                 user: user._id
             }).then(inv => {
-                if (!inv) erep(undefined, "", 404, "No Inventory found", req.user._id);
+                if (!inv) erep(undefined, "", 404, "No Inventory found", req.ip);
                 else outnode.inventory = inv;
                 outnode.tags = posts;
                 res.json(outnode);
-            }).catch(err => erep(res, err, 404, "No Inventory found", req.user._id));
-        }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
-    }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
+            }).catch(err => erep(res, err, 404, "No Inventory found", req.ip));
+        }).catch(err => erep(res, err, 404, "No Inventory found", req.ip));
+    }).catch(err => erep(res, err, 404, "No Inventory found", req.ip));
 });
 
 // ROUTE: GET mgmt/print
