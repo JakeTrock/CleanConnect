@@ -1,5 +1,5 @@
 module.exports = {
-    testing: process.env.DEVELOPMENT,
+    testing: true,
     url: "mongodb://localhost/CleanConnectDev",
     mid: "m2jfqj6kzbv9fjn3",
     pbk: "vvn3gp9tctxntj3w",

@@ -20,6 +20,7 @@ if (!keys.testing) {
 } else {
     process.env.topLevelDomain = "localhost:3000";
     process.env.domainPrefix = "http://";
+    console.log("THIS IS THE DEVELOPMENT BUILD");
 }
 process.env.testing = keys.testing;
 //imports different router/handler files

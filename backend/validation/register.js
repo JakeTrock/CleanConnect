@@ -27,8 +27,8 @@ module.exports = function validateRegisterInput(data) {
         errors.phoneNum = 'Phone number is required';
     }
 
-    if (!(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im.test(data.phoneNum))) {
-        errors.phoneNum = 'Phone number is incorrectly typed';
+    if (!(/^[\+]?[(]?[0-9]{3}[)]?[.]?[0-9]{3}[.]?[0-9]{4,6}$/im.test(data.phoneNum))) {
+        errors.phoneNum = 'Phone number is incorrectly typed(you might want to use a period as a separator)';
     }
 
     if (Validator.isEmpty(data.email)) {

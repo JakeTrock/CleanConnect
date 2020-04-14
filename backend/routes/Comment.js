@@ -15,7 +15,7 @@ router.use(fileUpload());
 // ROUTE: POST comment/test
 // DESCRIPTION: tests comment route 
 // INPUT: none
-router.get('/test', (req, res) => res.send("Tag Works"));
+router.get('/test', (req, res) => res.send("Comments Works"));
 
 // ROUTE: POST comment/:id
 // DESCRIPTION: allows unauthorized user to add a comment to a post

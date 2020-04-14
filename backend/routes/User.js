@@ -34,7 +34,7 @@ router.get("/test", (req, res) => res.send("User Works"));
 
 
 
-function sendMail(body, link, sub, to, cb) { //TODO: add error catching to this func
+function sendMail(body, link, sub, to, cb, res) { //TODO: add error catching to this func
     if (!process.env.testing) {
         var ml = shell(`
         (
@@ -72,14 +72,14 @@ function sendMail(body, link, sub, to, cb) { //TODO: add error catching to this 
         `);
         if (ml.stderr != '') cb(ml.stderr);
     } else {
-        console.log({
+        res.json({
+            success: true,
             from: "no-reply@" + process.env.topLevelDomain,
             to: to,
             subject: sub,
             text: body,
             link: link
         });
-        cb();
     }
 }
 
@@ -145,11 +145,13 @@ router.post("/register", (req, res) => {
                                                 p.token, "CleanConnect Account Verification", req.body.email,
                                                 function(err) {
                                                     if (err) return erep(res, err, 500, "Failed to send mail", req.body.email);
+                                                }, res);
+                                            if (!process.env.testing) {
+                                                res.json({
+                                                    success: true,
+                                                    status: "A verification email has been sent to " + req.body.email + "."
                                                 });
-                                            res.json({
-                                                success: true,
-                                                status: "A verification email has been sent to " + req.body.email + "."
-                                            });
+                                            }
                                         });
                                     });
                                 });
@@ -180,11 +182,14 @@ router.post("/resend", (req, res) => {
                 p.token, "CleanConnect Account Verification", req.body.email,
                 function(err) {
                     if (err) return erep(res, err, 500, "Failed to send mail", user._id);
+                }, res);
+            if (!process.env.testing) {
+
+                res.json({
+                    success: true,
+                    status: "A verification email has been sent to " + req.body.email + "."
                 });
-            res.json({
-                success: true,
-                status: "A verification email has been sent to " + req.body.email + "."
-            });
+            }
         });
     });
 });
@@ -231,11 +236,13 @@ router.delete("/deleteinfo", passport.authenticate("jwt", {
             p.token, "CleanConnect Account Deletion", req.body.email,
             function(err) {
                 if (err) return erep(res, err, 500, "Failed to send mail", req.user._id);
+            }, res);
+        if (!process.env.testing) {
+            res.json({
+                success: true,
+                status: "A deletion email has been sent to " + req.user.email + "."
             });
-        res.json({
-            success: true,
-            status: "A deletion email has been sent to " + req.user.email + "."
-        });
+        }
     });
 });
 
@@ -246,7 +253,7 @@ router.get("/delete/:token", passport.authenticate("jwt", {
     session: false
 }), (req, res) => {
     UserIndex.findOne({ token: req.params.token }).then(tk => {
-        if (tk._userId != req.user._id) return erep(res, "", 403, "email token does not match current user cookie, please log into this computer to load the cookie into your memory", req.user._id);
+        if (tk._userId.toString() != req.user._id.toString()) return erep(res, "", 403, "email token does not match current user cookie, please log into this computer to load the cookie into your memory", req.user._id);
         Tag.findOne({ _id: req.params.id })
             .then(udata => gateway.subscription.cancel(udata.PayToken))
             .then(User.findOneAndRemove({ _id: tk._userId }))
@@ -287,11 +294,13 @@ router.post("/resetPass", (req, res) => {
             p.token, "CleanConnect Password Change Confirmation", req.body.email,
             function(err) {
                 if (err) return erep(res, err, 500, "Failed to send mail", req.body.email);
+            }, res);
+        if (!process.env.testing) {
+            res.json({
+                success: true,
+                status: "A password email has been sent to " + req.body.email + "."
             });
-        res.json({
-            success: true,
-            status: "A password email has been sent to " + req.body.email + "."
-        });
+        }
     });
 });
 
@@ -343,11 +352,13 @@ router.post("/changeinfo", passport.authenticate("jwt", {
             p.token, "CleanConnect Account Changes Confirmation", req.user.email,
             function(err) {
                 if (err) return erep(res, err, 500, "Failed to send mail", req.user._id);
+            }, res);
+        if (!process.env.testing) {
+            res.json({
+                success: true,
+                status: "A settings email has been sent to " + req.user.email + "."
             });
-        res.json({
-            success: true,
-            status: "A settings email has been sent to " + req.user.email + "."
-        });
+        }
     });
 });
 
@@ -358,10 +369,9 @@ router.post("/change/:token", passport.authenticate("jwt", {
     session: false
 }), (req, res) => {
     var profileFields = {};
-    var planID;
     // profileFields.user = req.user._id;
-    if (req.body.tier) planID = keys.tierID[req.body.tier];
     if (req.body.name) profileFields.name = req.body.name;
+    if (req.body.phoneNum) profileFields.phoneNum = req.body.phoneNum;
     if (req.body.email) {
         User.findOne({
             email: req.body.email
@@ -371,25 +381,21 @@ router.post("/change/:token", passport.authenticate("jwt", {
         });
     }
     UserIndex.findOne({ token: req.params.token }).then(tk => {
-        if (tk._userId != req.user.id) return erep(res, "", 403, "email token does not match current user cookie, please log into this computer to load the cookie into your memory", req.user._id);
+        if (tk._userId.toString() != req.user.id.toString()) return erep(res, "", 403, "email token does not match current user cookie, please log into this computer to load the cookie into your memory", req.user._id);
         User.findOne({
             _id: req.user.id
         }).then(profile => {
             if (!profile) return erep(res, "", 404, "Error finding profile", req.user._id)
                 //possibly upgrade payment if specified
             if (req.body.name || req.body.email || req.body.phoneNum || req.body.payNonce) {
-                var nfo = {};
-                if (req.body.phoneNum) nfo.phoneNum = req.body.phoneNum;
-                if (req.body.name) nfo.email = req.body.email;
-                if (req.body.email) nfo.company = req.body.name;
-                if (req.body.payNonce) nfo.paymentMethodNonce = req.body.payment_method_nonce;
-                gateway.customer.update(profile.custID, nfo, function(err, result) {
+                gateway.customer.update(profile.custID, profileFields.paymentMethodNonce = req.body.payment_method_nonce, function(err, result) {
                     if (err || !result.success) return erep(res, err + "|" + result, 500, "Error updating pay info", req.user._id);
                 });
             }
+            if (req.body.tier) profileFields.tier = req.body.tier;
             if (req.body.tier) {
                 gateway.subscription.update(profile.PayToken, {
-                    planId: planID,
+                    planId: keys.tierID[req.body.tier],
                 }, function(err) {
                     if (err) return erep(res, err, 404, "Failed to upgrade payment plan", req.user._id);
                 });
@@ -397,8 +403,12 @@ router.post("/change/:token", passport.authenticate("jwt", {
             //update a profile
             User.findOneAndUpdate({ _id: req.user.id }, { $set: profileFields }, { new: true })
                 .then(tk.deleteOne())
-                .then(res.json({ success: true }))
-                .catch(e => erep(res, e, 400, "Error updating profile/Error processing token", req.user._id)); //TODO: there is an error here maybe
+                .exec(function(e) {
+                    if (e)
+                        erep(res, e, 400, "Error updating profile/Error processing token", req.user._id)
+                    else
+                        res.json({ success: true })
+                });
         });
     });
 });
@@ -522,7 +532,7 @@ router.get('/getClientToken', (req, res) => {
         if (!response.success || err) return erep(res, response + "|" + err, 500, "Error Generating exchange token", "");
         res.json({
             success: true,
-            cliToken: response.clientToken
+            clientToken: response.clientToken
         });
     });
 });
@@ -538,7 +548,7 @@ router.get('/getAuthClientToken', passport.authenticate('jwt', {
             if (!response.success || err) return erep(res, response + "|" + err, 500, "Error getting auth client token", req.user._id);
             res.json({
                 success: true,
-                cliToken: response.clientToken
+                clientToken: response.clientToken
             });
         });
     }).catch(e => erep(res, e, 500, "Error getting auth client token", req.user._id));
