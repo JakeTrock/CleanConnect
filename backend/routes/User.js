@@ -311,6 +311,7 @@ router.post("/resetPass/:token", (req, res) => {
     var profileFields = { email: req.body.email };
     if (!req.params.token) return erep(res, "", 400, "No token provided.", req.body.email);
     if (req.body.password1 == req.body.password2) profileFields.password = req.body.password1;
+    else return erep(res, "", 400, "Passwords do not match.", req.body.email);
     bcrypt.genSalt(10, (err, salt) => {
         bcrypt.hash(profileFields.password, salt, (err, hash) => {
             if (err) return erep(res, err, 500, "Failed to generate password.", req.body.email);
