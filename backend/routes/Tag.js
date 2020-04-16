@@ -105,7 +105,8 @@ router.post('/new', passport.authenticate('jwt', {
                         }, {
                             new: true
                         }).then(res.json({
-                            success: true
+                            success: true,
+                            simple: "Successfully edited!"
                         }));
                     })
                 });
