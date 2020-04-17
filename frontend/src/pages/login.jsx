@@ -10,16 +10,11 @@ class Login extends Form {
   state = {
     //data stored in the form
     data: { email: "", password: "" },
-    errors: {}
+    errors: {},
   };
   schema = {
-    email: Joi.string()
-      .required()
-      .label("Email"),
-    password: Joi.string()
-      .required()
-      .label("Password")
-      .min(6)
+    email: Joi.string().required().label("Email"),
+    password: Joi.string().required().label("Password").min(6),
   };
   doSubmit = async () => {
     try {
@@ -42,22 +37,30 @@ class Login extends Form {
     }
   };
   render() {
-    const errors = this.state.errors;
+    const { errors, data } = this.state;
+    const email = data.email;
     return (
       <Layout name="Login">
         <form onSubmit={this.handleSubmit}>
           {this.renderInput({
             name: "email",
             label: "Email",
-            error: errors.email
+            error: errors.email,
           })}
           {this.renderInput({
             name: "password",
             label: "Password",
             error: errors.password,
-            type: "password"
+            type: "password",
           })}
           {this.renderButton("Login")}
+          {email &&
+            this.renderPopup({
+              parameters: { email: email },
+              triggerText: "Forgot password?",
+              customText: `This will send a verification email to ${email}. Proceed?`,
+              callback: auth.forgotPassword,
+            })}
         </form>
       </Layout>
     );

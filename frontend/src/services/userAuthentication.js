@@ -5,11 +5,14 @@ import "./interceptor";
 
 const apiEndpoint = process.env.REACT_APP_API_URL + "/user";
 const tokenKey = "token";
-
+const headers = {
+  "Content-Type": "application/json",
+  Authorization: getCurrentUser(true),
+};
 export async function login(email, password) {
   const { data: jwt } = await axios.post(apiEndpoint + "/login", {
     email,
-    password
+    password,
   });
   localStorage.setItem(tokenKey, jwt.token); //get expiration date
 }
@@ -20,7 +23,8 @@ export async function register(
   password,
   password2,
   tier,
-  payment_method_nonce
+  payment_method_nonce,
+  phoneNum
 ) {
   await axios.post(apiEndpoint + "/register", {
     name,
@@ -28,12 +32,14 @@ export async function register(
     password,
     password2,
     tier,
-    payment_method_nonce
+    payment_method_nonce,
+    phoneNum,
   });
 }
 
 export function logout() {
   localStorage.removeItem(tokenKey);
+  window.location.reload(true);
 }
 
 export function getCurrentUser(noDecode) {
@@ -54,12 +60,8 @@ export function getCurrentUser(noDecode) {
 
 export function changeInfo() {
   //confirming user wants to change account
-  const headers = {
-    "Content-Type": "application/json",
-    Authorization: getCurrentUser(true)
-  };
   return axios.post(apiEndpoint + "/changeinfo", "", {
-    headers: headers
+    headers: headers,
   });
 }
 
@@ -67,29 +69,36 @@ export async function validateChange(token) {
   //validating change form
   const headers = {
     "Content-Type": "application/json",
-    Authorization: getCurrentUser(true)
+    Authorization: getCurrentUser(true),
   };
   return axios.post(apiEndpoint + "/isValid/" + token, "", {
-    headers: headers
+    headers: headers,
   });
 }
+export async function anonIsValid(token) {
+  return axios.post(apiEndpoint + "/anonIsValid/" + token);
+}
 
-export async function completeChange(token, name, email, password, password2) {
+export async function completeChange(
+  token,
+  name,
+  email,
+  phoneNum,
+  tier,
+  payNonce
+) {
   //submitting change form
-  const headers = {
-    "Content-Type": "application/json",
-    Authorization: getCurrentUser(true)
-  };
   return axios.post(
     apiEndpoint + "/change/" + token,
     {
       name,
       email,
-      password,
-      password2
+      phoneNum,
+      payNonce,
+      tier,
     },
     {
-      headers: headers
+      headers: headers,
     }
   );
 }
@@ -97,30 +106,26 @@ export async function completeChange(token, name, email, password, password2) {
 export function deleteInfo() {
   //initial step of deleting account
   try {
-    const headers = {
-      "Content-Type": "application/json",
-      Authorization: getCurrentUser(true)
-    };
     return axios.delete(apiEndpoint + "/deleteinfo", {
-      headers: headers
+      headers: headers,
     });
   } catch (ex) {
     return null;
   }
 }
-export function anonTags(token) {
+/*export function anonTags(token) {
   //showDead
   try {
     const headers = {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     };
     return axios.get(apiEndpoint + "/dash/" + token, "", {
-      headers: headers
+      headers: headers,
     });
   } catch (ex) {
     return null;
   }
-}
+}*/
 export function getClientToken() {
   //getting token for payment system
   try {
@@ -131,12 +136,8 @@ export function getClientToken() {
 }
 export function getAuthClientToken() {
   try {
-    const headers = {
-      "Content-Type": "application/json",
-      Authorization: getCurrentUser(true)
-    };
     return axios.get(apiEndpoint + "/getAuthClientToken/", {
-      headers: headers
+      headers: headers,
     });
   } catch (ex) {
     return null;
@@ -149,5 +150,21 @@ export function confirm(token) {
     return axios.get(apiEndpoint + "/confirmation/" + token);
   } catch (ex) {
     return null;
+  }
+}
+
+export function forgotPassword(parameters, token) {
+  const email = parameters.email;
+  if (token) {
+    const password1 = parameters.password;
+    const { phoneNum, password2 } = parameters;
+    return axios.post(apiEndpoint + "/resetPass/" + token, {
+      email,
+      phoneNum,
+      password1,
+      password2,
+    });
+  } else {
+    return axios.post(apiEndpoint + "/resetPass/", { email });
   }
 }
