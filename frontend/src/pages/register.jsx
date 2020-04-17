@@ -7,7 +7,7 @@ import Form from "../components/form"; //allows you to render Input, initalizing
 import Layout from "../components/layout";
 import Payment from "../components/payment";
 import * as auth from "../services/userAuthentication";
-
+import { phoneConverter, tierConverter } from "../converters/account";
 class Register extends Form {
   state = {
     //data stored in the form
@@ -17,54 +17,57 @@ class Register extends Form {
       password: "",
       password2: "",
       tier: "",
-      payment_method_nonce: ""
+      payment_method_nonce: "",
+      phoneNum: "",
     },
     errors: {},
-    formCompleted: false
+    formCompleted: false,
   };
   schema = {
-    //using Joi for form creation and errors (change?)
     name: Joi.string().required(),
-    email: Joi.string()
-      .email()
-      .required(),
-    password: Joi.string()
-      .required()
-      .min(6),
-    password2: Joi.string()
-      .required()
-      .min(6),
+    email: Joi.string().email().required(),
+    password: Joi.string().required().min(6),
+    password2: Joi.string().required().min(6),
     tier: Joi.string().required(),
-    payment_method_nonce: Joi.string().required()
+    payment_method_nonce: Joi.string().required(),
+    phoneNum: Joi.string()
+      .length(10)
+      .regex(/^\d+$/)
+      .error(() => {
+        return {
+          message:
+            "Needs to be a valid phone number 10 digits long. (Just the numbers)",
+        };
+      }),
   };
-  tierConverter(tier) {
-    if (tier.includes("0:")) return "0";
-    if (tier.includes("1:")) return 1;
-    else return 2;
-  }
+
   doSubmit = async () => {
     try {
       const { data } = this.state;
-      const tier = this.tierConverter(data.tier);
+      const tier = tierConverter(data.tier);
+      const phoneNum = phoneConverter(data.phoneNum);
       await auth.register(
         data.name,
         data.email,
         data.password,
         data.password2,
         tier,
-        data.payment_method_nonce
+        data.payment_method_nonce,
+        phoneNum
       );
       this.setState({ formCompleted: true }); //const { state } = this.props.location; //window.location = state ? state.from.pathname : "/login";
     } catch (ex) {
       if (ex.response && ex.response.status === 400) {
         const errors = { ...this.state.errors };
         errors.name = ex.response.data.details.name;
-        errors.email = ex.response.data.details.email;
+        if (ex.response.data.details)
+          errors.email = ex.response.data.details.user;
         errors.password = ex.response.data.details.password;
         errors.password2 = ex.response.data.details.password2;
         errors.tier = ex.response.data.details.tier;
         errors.payment_method_nonce =
           ex.response.data.details.payment_method_nonce;
+        errors.phoneNum = ex.response.data.details.phoneNum;
         this.setState({ errors });
       }
     }
@@ -78,24 +81,29 @@ class Register extends Form {
           {this.renderInput({
             name: "name",
             label: "Name",
-            error: errors.name
+            error: errors.name,
           })}
           {this.renderInput({
             name: "email",
             label: "Email",
-            error: errors.email
+            error: errors.email,
+          })}
+          {this.renderInput({
+            name: "phoneNum",
+            label: "Phone Number",
+            error: errors.phoneNum,
           })}
           {this.renderInput({
             name: "password",
             label: "Password",
             error: errors.password,
-            type: "password"
+            type: "password",
           })}
           {this.renderInput({
             name: "password2",
             label: "Confirm Password",
             error: errors.password2,
-            type: "password"
+            type: "password",
           })}
           {this.renderSelect({
             name: "tier",
@@ -103,14 +111,14 @@ class Register extends Form {
             options: [
               "Tier 0: (INSERT DESCRIPTION)",
               "Tier 1: (INSERT DESCRIPTION)",
-              "Tier 2: (INSERT DESCRIPTION)"
+              "Tier 2: (INSERT DESCRIPTION)",
             ],
-            error: errors.tier
+            error: errors.tier,
           })}
           {this.renderComponent({
             name: "payment_method_nonce",
             Component: Payment,
-            error: errors.payment_method_nonce
+            error: errors.payment_method_nonce,
           })}
           {this.renderButton("Register")}
         </form>

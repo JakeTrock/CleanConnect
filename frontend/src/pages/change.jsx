@@ -7,6 +7,12 @@ import Form from "../components/form";
 import Layout from "../components/layout";
 import Payment from "../components/payment";
 import * as auth from "../services/userAuthentication";
+import {
+  phoneConverter,
+  reversePhoneConverter,
+  tierConverter,
+  reverseTierConverter,
+} from "../converters/account";
 
 class Change extends Form {
   state = {
@@ -14,39 +20,29 @@ class Change extends Form {
     data: {
       email: "",
       name: "",
-      password: "",
-      password2: "",
+      phoneNum: "",
       tier: "",
-      payment_method_nonce: ""
+      payment_method_nonce: "",
     },
     errors: {},
-    verified: true
+    verified: true,
   };
   schema = {
-    //using Joi for form creation and errors (change?)
     name: Joi.string().required(),
-    email: Joi.string()
-      .email()
-      .required(),
-    password: Joi.string()
-      .required()
-      .min(6),
-    password2: Joi.string()
-      .required()
-      .min(6),
+    email: Joi.string().email().required(),
+    phoneNum: Joi.string()
+      .length(10)
+      .regex(/^\d+$/)
+      .error(() => {
+        return {
+          message:
+            "Needs to be a valid phone number 10 digits long. (Just the numbers)",
+        };
+      }),
     tier: Joi.string().required(),
-    payment_method_nonce: Joi.string().required()
+    payment_method_nonce: Joi.string().required(),
   };
-  tierConverter(tier) {
-    if (tier.includes("0:")) return 0;
-    if (tier.includes("1:")) return 1;
-    else return 2;
-  }
-  reverseTierConverter(tier) {
-    if (tier === 0) return "Tier 0: (INSERT DESCRIPTION)";
-    if (tier === 1) return "Tier 1: (INSERT DESCRIPTION)";
-    if (tier === 2) return "Tier 2: (INSERT DESCRIPTION)";
-  }
+
   async componentDidMount() {
     const token = this.props.match.params.token;
     try {
@@ -56,10 +52,12 @@ class Change extends Form {
     }
     const user = this.props.user;
     this.setState({ user });
+    console.log(user);
     let data = this.state.data;
     data["name"] = user.name;
     data["email"] = user.email;
-    data["tier"] = this.reverseTierConverter(user.tier);
+    //data["phoneNum"] = reversePhoneConverter(user.phoneNum);
+    data["tier"] = reverseTierConverter(user.tier);
     this.setState({ data });
     // /isValid/token
     // /change/token
@@ -69,13 +67,13 @@ class Change extends Form {
     try {
       const token = this.props.match.params.token;
       const { data } = this.state;
-      const tier = this.tierConverter(data.tier);
+      const tier = tierConverter(data.tier);
+      const phoneNum = phoneConverter(data.phoneNum);
       await auth.completeChange(
         token,
         data.name,
         data.email,
-        data.password,
-        data.password2,
+        phoneNum,
         tier,
         data.payment_method_nonce
       );
@@ -87,8 +85,7 @@ class Change extends Form {
         if (ex.response.status === 400) {
           errors.email = ex.response.data.email;
           errors.name = ex.response.data.name;
-          errors.password = ex.response.data.password;
-          errors.password2 = ex.response.data.password2;
+          errors.phoneNum = ex.response.data.phoneNum;
           errors.tier = ex.response.data.details.tier;
           errors.payment_method_nonce =
             ex.response.data.details.payment_method_nonce;
@@ -107,24 +104,17 @@ class Change extends Form {
           {this.renderInput({
             name: "name",
             label: "Name",
-            error: errors.name
+            error: errors.name,
           })}
           {this.renderInput({
             name: "email",
             label: "Email",
-            error: errors.email
+            error: errors.email,
           })}
           {this.renderInput({
-            name: "password",
-            label: "Password",
-            error: errors.password,
-            type: "password"
-          })}
-          {this.renderInput({
-            name: "password2",
-            label: "Confirm Password",
-            error: errors.password2,
-            type: "password"
+            name: "phoneNum",
+            label: "Phone Number",
+            error: errors.phoneNum,
           })}
           {this.renderSelect({
             name: "tier",
@@ -132,15 +122,15 @@ class Change extends Form {
             options: [
               "Tier 0: (INSERT DESCRIPTION)",
               "Tier 1: (INSERT DESCRIPTION)",
-              "Tier 2: (INSERT DESCRIPTION)"
+              "Tier 2: (INSERT DESCRIPTION)",
             ],
-            error: errors.tier
+            error: errors.tier,
           })}
           {this.renderComponent({
             name: "payment_method_nonce",
             Component: Payment,
             props: user,
-            error: errors.payment_method_nonce
+            error: errors.payment_method_nonce,
           })}
           {this.renderButton("Submit")}
         </form>
