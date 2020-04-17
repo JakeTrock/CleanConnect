@@ -63,7 +63,7 @@ class PrintSheet extends Component {
   }*/
   render() {
     let { tags, mounted, url } = this.state;
-    function customBehavior(item) {
+    let customBehavior = item => {
       //css for customBehavior are in unit.css
       return (
         <Unit key={item._id} name={item.name}>
@@ -96,7 +96,7 @@ class PrintSheet extends Component {
           </div>
         </Unit>
       );
-    }
+    };
     customBehavior = customBehavior.bind(this);
     if (tags.length === 0 && mounted)
       return (
@@ -107,7 +107,6 @@ class PrintSheet extends Component {
         />
       ); //tags = "";
     if (url) {
-      console.log(url);
       return (
         <Redirect
           to={{

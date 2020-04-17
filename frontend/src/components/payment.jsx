@@ -6,7 +6,7 @@ class Payment extends Component {
   instance;
 
   state = {
-    clientToken: null
+    clientToken: null,
   };
 
   async componentDidMount() {
@@ -16,7 +16,7 @@ class Payment extends Component {
       data = await auth.getAuthClientToken();
       console.log(data);
     } else data = await auth.getClientToken();
-    const clientToken = data.data;
+    const clientToken = data.data.clientToken;
     this.setState({ clientToken });
   }
 
@@ -42,9 +42,9 @@ class Payment extends Component {
         <div style={{ marginBottom: "6vh" }}>
           <DropIn
             options={{
-              authorization: clientToken
+              authorization: clientToken,
             }}
-            onInstance={instance => (this.instance = instance)}
+            onInstance={(instance) => (this.instance = instance)}
           />
           <div>
             <button className="btn btn-info " onClick={this.buy.bind(this)}>

@@ -11,12 +11,13 @@ class Grid extends Component {
   render() {
     let { items, idLocation, customBehavior, emptyBehavior } = this.props;
     items = _.chunk(items, 2);
+
     return (
       <React.Fragment>
-        {items.map(function(list, i) {
+        {items.map(function (list, i) {
           return (
             <div className="row" key={i}>
-              {list.map(function(item) {
+              {list.map(function (item) {
                 if (item.name)
                   return (
                     <React.Fragment key={item[idLocation]}>

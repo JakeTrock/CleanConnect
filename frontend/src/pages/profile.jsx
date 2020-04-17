@@ -22,7 +22,8 @@ class Profile extends Component {
         )}
         {user && (
           <h1 className="label mb-3">
-            You are currently a tier {user.tier} member, you have (# of tags){" "}
+            You are currently a tier {user.tier} member, you have up to (# of
+            tags){" "}
           </h1>
         )}
         <button
