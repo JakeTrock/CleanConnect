@@ -101,7 +101,7 @@ router.post("/register", (req, res) => {
             gateway.customer.create({
                 email: req.body.email,
                 company: req.body.name,
-                phone: req.body.phoneNum,
+                phone: req.body.phone,
                 paymentMethodNonce: req.body.payment_method_nonce
             }, function(err, customerResult) {
                 if (!customerResult.success) return erep(res, err, 500, "Failed to log customer", req.body.email);
@@ -120,7 +120,7 @@ router.post("/register", (req, res) => {
                                     name: req.body.name,
                                     email: req.body.email,
                                     password: hash,
-                                    phoneNum: req.body.phoneNum,
+                                    phone: req.body.phone,
                                     dashUrl: url,
                                     dashCode: dsh,
                                     PayToken: subscriptionResult.subscription.id,
@@ -322,7 +322,7 @@ router.post("/resetPass/:token", (req, res) => {
                     email: req.body.email
                 }).then(profile => {
                     if (!profile) return erep(res, "", 404, "Error finding profile", profile._id);
-                    if (!req.body.phoneNum || profile.phoneNum != req.body.phoneNum) return erep(res, "", 400, "Invalid/no phone number has been provided", profile._id);
+                    if (!req.body.phone || profile.phone != req.body.phone) return erep(res, "", 400, "Invalid/no phone number has been provided", profile._id);
                     //possibly upgrade payment if specified
                     //update a profile
                     User.findOneAndUpdate({ email: req.body.email }, { $set: profileFields }, { new: true })
@@ -371,8 +371,7 @@ router.post("/change/:token", passport.authenticate("jwt", {
 }), (req, res) => {
     var profileFields = {};
     // profileFields.user = req.user._id;
-    if (req.body.name) profileFields.name = req.body.name;
-    if (req.body.phoneNum) profileFields.phoneNum = req.body.phoneNum;
+    if (req.body.phone) profileFields.phone = req.body.phone;
     if (req.body.email) {
         User.findOne({
             email: req.body.email
@@ -388,11 +387,15 @@ router.post("/change/:token", passport.authenticate("jwt", {
         }).then(profile => {
             if (!profile) return erep(res, "", 404, "Error finding profile", req.user._id)
                 //possibly upgrade payment if specified
-            if (req.body.name || req.body.email || req.body.phoneNum || req.body.payNonce) {
-                gateway.customer.update(profile.custID, profileFields.paymentMethodNonce = req.body.payment_method_nonce, function(err, result) {
-                    if (err || !result.success) return erep(res, err + "|" + result, 500, "Error updating pay info", req.user._id);
+            if (req.body.name || req.body.email || req.body.phone || req.body.payNonce) {
+                var tmp = profileFields;
+                tmp.paymentMethodNonce = req.body.payment_method_nonce;
+                tmp.company = req.body.name;
+                gateway.customer.update(profile.custID, tmp, function(err, result) {
+                    if (err) return erep(res, err, 500, "Error updating pay info", req.user._id);
                 });
             }
+            if (req.body.name) profileFields.name = req.body.name;
             if (req.body.tier) profileFields.tier = req.body.tier;
             if (req.body.tier) {
                 gateway.subscription.update(profile.PayToken, {
@@ -403,12 +406,12 @@ router.post("/change/:token", passport.authenticate("jwt", {
             }
             //update a profile
             User.findOneAndUpdate({ _id: req.user.id }, { $set: profileFields }, { new: true })
-                .then(tk.deleteOne())
                 .exec(function(e) {
                     if (e)
                         erep(res, e, 400, "Error updating profile/Error processing token", req.user._id)
                     else
-                        res.json({ success: true })
+                        tk.deleteOne()
+                        .then(res.json({ success: true }))
                 });
         });
     });

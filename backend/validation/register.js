@@ -7,7 +7,7 @@ module.exports = function validateRegisterInput(data) {
 
     data.name = !isEmpty(data.name) ? data.name : '';
     data.email = !isEmpty(data.email) ? data.email : '';
-    data.phoneNum = !isEmpty(data.phoneNum) ? data.phoneNum : '';
+    data.phone = !isEmpty(data.phone) ? data.phone : '';
     data.password = !isEmpty(data.password) ? data.password : '';
     data.password2 = !isEmpty(data.password2) ? data.password2 : '';
 
@@ -23,12 +23,12 @@ module.exports = function validateRegisterInput(data) {
         errors.name = 'Name field is required';
     }
 
-    if (Validator.isEmpty(data.phoneNum)) {
-        errors.phoneNum = 'Phone number is required';
+    if (Validator.isEmpty(data.phone)) {
+        errors.phone = 'Phone number is required';
     }
 
-    if (!(/^[\+]?[(]?[0-9]{3}[)]?[.]?[0-9]{3}[.]?[0-9]{4,6}$/im.test(data.phoneNum))) {
-        errors.phoneNum = 'Phone number is incorrectly typed(you might want to use a period as a separator)';
+    if (!(/^[\+]?[(]?[0-9]{3}[)]?[.]?[0-9]{3}[.]?[0-9]{4,6}$/im.test(data.phone))) {
+        errors.phone = 'Phone number is incorrectly typed(you might want to use a period as a separator)';
     }
 
     if (Validator.isEmpty(data.email)) {
