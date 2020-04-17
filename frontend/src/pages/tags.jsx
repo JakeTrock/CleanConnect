@@ -6,20 +6,21 @@ import Grid from "../components/grid";
 import Unit from "../components/unit";
 import {
   CallbackPopupContainer,
-  ImageContainer
+  ImageContainer,
 } from "../components/popupContainer";
-import Pagination from "../components/pagination";
+import { ButtonPagination } from "../components/pagination";
 import { paginate } from "../services/pagination";
 import * as auth from "../services/tagsAuthentication";
+import { tagLimit } from "../converters/limits";
 import "../css/unit.css";
 
 const queryString = require("query-string");
 class Tags extends Component {
   state = {
     tags: "",
-    limit: this.setLimit(),
+    limit: tagLimit(this.props.user),
     currentPage: 1,
-    pageSize: 6
+    pageSize: 6,
   };
   async stateSetter() {}
   componentDidMount() {
@@ -31,7 +32,7 @@ class Tags extends Component {
     }
     this.stateSetter();
   }*/
-  handlePageChange = page => {
+  handlePageChange = (page) => {
     this.setState({ currentPage: page });
   };
   async setTags(viewDead) {
@@ -47,17 +48,11 @@ class Tags extends Component {
       this.setState({ tags }); //to prevent infinite loop, if statement is used
     }
   }
-  setLimit() {
-    let { user } = this.props;
-    let limit = null;
-    if (user.tier === 0) limit = 5;
-    if (user.tier === 1) limit = 25;
-    return limit;
-  }
+
   render() {
     let { tags, limit, currentPage, pageSize } = this.state;
-    if (!tags) tags = "";
-    if (tags !== "" && tags.length < limit) tags.splice(0, 0, "");
+    if (tags !== "" && tags.length < limit && tags[0] !== "")
+      tags.splice(0, 0, "");
     let sortedTags = paginate(tags, currentPage, pageSize);
 
     async function deleteTag(data) {
@@ -70,7 +65,7 @@ class Tags extends Component {
       } catch (e) {}
     }
 
-    function customBehavior(item) {
+    let customBehavior = (item) => {
       //css for customBehavior and emptyBehavior are in unit.css
       let redirect = this.state.redirect;
       return (
@@ -110,16 +105,16 @@ class Tags extends Component {
           {redirect && (
             <Redirect
               to={{
-                pathname: redirect
+                pathname: redirect,
               }}
             />
           )}
         </Unit>
       );
-    }
+    };
     customBehavior = customBehavior.bind(this);
 
-    function emptyBehavior() {
+    let emptyBehavior = () => {
       return (
         <Unit>
           <div className="label label-complete">
@@ -146,19 +141,18 @@ class Tags extends Component {
           </span>
         </Unit>
       );
-    }
+    };
     emptyBehavior = emptyBehavior.bind(this);
 
     return (
       <React.Fragment>
         <Layout name="Tags">
-          <Pagination
+          <ButtonPagination
             itemsCount={tags.length}
             pageSize={pageSize}
             currentPage={currentPage}
             onPageChange={this.handlePageChange}
           />
-
           <Grid
             {...this.props}
             items={sortedTags}
