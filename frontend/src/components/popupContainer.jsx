@@ -1,16 +1,16 @@
 import React from "react";
 import Popup from "reactjs-popup";
 
-export const ImageContainer = props => {
+export const ImageContainer = (props) => {
   const trigger = props.trigger;
   const imgLink = props.imgLink;
   return (
     <Popup position="right center" trigger={trigger} modal>
-      {close => (
+      {(close) => (
         <div
           style={{
             border: "5px solid black",
-            margin: "-6px"
+            margin: "-6px",
           }}
         >
           <div>
@@ -29,26 +29,35 @@ export const ImageContainer = props => {
     </Popup>
   );
 };
-export const CallbackPopupContainer = props => {
+export const CallbackPopupContainer = (props) => {
   //const item = data.item;
   const triggerText = props.triggerText;
   const customText = props.customText;
   const callbackRoute = props.callbackRoute;
   const callbackData = props.callbackData;
+
   let buttonClass = "btn btn-info";
   if (triggerText.includes("Delete") || customText.includes("Delete"))
     buttonClass = "btn btn-danger";
-  return (
-    <Popup
-      trigger={
+
+  let triggerType = props.triggerType;
+  let trigger = "";
+  if (triggerType === "button")
+    trigger = () => {
+      return <button className={buttonClass}>{triggerText}</button>;
+    };
+  else
+    trigger = () => {
+      return (
         <div className="unitLink" href="">
           {triggerText}
         </div>
-      }
-      position="right center"
-      modal
-    >
-      {close => (
+      );
+    };
+
+  return (
+    <Popup trigger={trigger} position="right center" modal>
+      {(close) => (
         <div style={{ border: "5px solid black", margin: "-6px" }}>
           <div style={{ margin: "10px", overflow: "hidden" }}>
             <div className="close" onClick={close}>
@@ -62,7 +71,7 @@ export const CallbackPopupContainer = props => {
                 display: "block",
                 width: "30%",
                 marginLeft: "auto",
-                marginRight: "auto"
+                marginRight: "auto",
               }}
               onClick={() => {
                 close();

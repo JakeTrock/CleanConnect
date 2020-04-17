@@ -119,7 +119,27 @@ class Form extends Component {
       </div>
     );
   }
-
+  renderStep({ name, label, error, value, min, max }) {
+    const { data } = this.state;
+    let inputClass = "";
+    if (value < min || value > max) inputClass = "text-danger";
+    return (
+      <div className="form-group">
+        <div style={{ display: "flex" }}>
+          <label className="pageText">{label}:</label>
+          <input
+            className={inputClass}
+            type="number"
+            name={name}
+            step="1"
+            value={value}
+            onChange={this.handleString}
+          />
+        </div>
+        {error && <div className="alert alert-danger">{error}</div>}
+      </div>
+    );
+  }
   renderImage(name, label, error) {
     return (
       <div className="form-group">
