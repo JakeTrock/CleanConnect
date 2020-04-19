@@ -1,11 +1,7 @@
 import React, { Component } from "react";
 import Joi from "joi-browser";
-
+import { CallbackPopupContainer } from "../components/popupContainer";
 class Form extends Component {
-  /*state = {
-    data: {},
-    errors: {}
-  };*/ //commenting for now
   validate = () => {
     const options = { abortEarly: false };
     const { error } = Joi.validate(this.state.data, this.schema, options);
@@ -16,12 +12,13 @@ class Form extends Component {
   };
 
   validateProperty = (name, value) => {
+    //validates onChange
     const obj = { [name]: value };
     const schema = { [name]: this.schema[name] };
     const { error } = Joi.validate(obj, schema);
     return error ? error.details[0].message : null;
   };
-  handleSubmit = e => {
+  handleSubmit = (e) => {
     e.preventDefault();
 
     const errors = this.validate();
@@ -55,23 +52,34 @@ class Form extends Component {
     this.handleChange(select.name, select.value);
   };
 
-  renderButton(label) {
-    return (
-      <button disabled={this.validate()} className="btn btn-primary">
-        {label}
-      </button>
-    );
+  renderButton(label, onClick, disabled) {
+    let className = "btn btn-primary";
+    if (label === "Delete") className = "btn btn-danger";
+    if (disabled === null) disabled = this.validate();
+    if (!onClick)
+      return (
+        <button disabled={disabled} className={className}>
+          {label}
+        </button>
+      );
+    else
+      return (
+        <button onClick={onClick} disabled={disabled} className={className}>
+          {label}
+        </button>
+      );
   }
-  renderInput({ name, label, error, type, dropdown }) {
+  renderInput({ name, label, placeHolder, error, type, dropdown }) {
     const { data } = this.state;
     return (
       <div className="form-group">
-        <label className="pageText">{label}</label>
+        {label && <label className="pageText">{label}</label>}
         <input
           type={type}
           name={name}
           id={name}
           value={data[name]}
+          placeholder={placeHolder}
           className="form-control"
           style={{ fontFamily: "arial" }}
           onChange={this.handleString}
@@ -79,7 +87,7 @@ class Form extends Component {
         />
         {dropdown && (
           <datalist id="list">
-            {dropdown.map(option => (
+            {dropdown.map((option) => (
               <option key={option} value={option} />
             ))}
           </datalist>
@@ -101,12 +109,33 @@ class Form extends Component {
           className="form-control"
         >
           <option value="" />
-          {options.map(option => (
+          {options.map((option) => (
             <option key={option} value={option}>
               {option}
             </option>
           ))}
         </select>
+        {error && <div className="alert alert-danger">{error}</div>}
+      </div>
+    );
+  }
+  renderStep({ name, label, error, value, min, max }) {
+    const { data } = this.state;
+    let inputClass = "";
+    if (value < min || value > max) inputClass = "text-danger";
+    return (
+      <div className="form-group">
+        <div style={{ display: "flex" }}>
+          <label className="pageText">{label}:</label>
+          <input
+            className={inputClass}
+            type="number"
+            name={name}
+            step="1"
+            value={value}
+            onChange={this.handleString}
+          />
+        </div>
         {error && <div className="alert alert-danger">{error}</div>}
       </div>
     );
@@ -124,6 +153,18 @@ class Form extends Component {
           onChange={this.handleImage}
         />
         {this.renderError(error)}
+      </div>
+    );
+  }
+  renderPopup({ parameters, triggerText, customText, callback }) {
+    return (
+      <div style={{ marginTop: "1vw" }}>
+        <CallbackPopupContainer
+          triggerText={triggerText}
+          customText={customText}
+          callbackRoute={callback}
+          callbackData={parameters}
+        />
       </div>
     );
   }

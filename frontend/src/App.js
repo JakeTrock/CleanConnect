@@ -3,19 +3,21 @@ import { Route, Switch, Redirect } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import Comment from "./pages/comment";
+import Confirmation from "./pages/confirmation";
 import Dashboard from "./pages/dashboard";
 import Home from "./pages/home";
+import Inventory from "./pages/inventory";
 import Login from "./pages/login";
 import Logout from "./pages/logout";
 import Register from "./pages/register";
 import Change from "./pages/change";
+import ChangePassword from "./pages/changePassword";
 import Profile from "./pages/profile";
 import Tags from "./pages/tags";
 import PrintSheet from "./pages/printSheet";
 import Print from "./pages/print";
 import NotFound from "./pages/notFound";
-import Comment from "./pages/comment";
-import Confirmation from "./pages/confirmation";
 
 import Navbar from "./components/navbar";
 import ProtectedRoute from "./components/protectedRoute";
@@ -28,7 +30,7 @@ import "./App.css";
 class App extends Component {
   state = {
     captchaValidated: false,
-    user: auth.getCurrentUser()
+    user: auth.getCurrentUser(),
   };
   componentDidMount() {
     const user = auth.getCurrentUser();
@@ -36,7 +38,6 @@ class App extends Component {
     this.captchaSubmit = this.captchaSubmit.bind(this);
   }
   captchaSubmit() {
-    //remove from app later
     this.setState({ captchaValidated: true });
   }
   render() {
@@ -51,24 +52,30 @@ class App extends Component {
             {/* Allows a single page website to connect to all pages */}
             <NoTokenRoute path="/login" component={Login} />
             <NoTokenRoute path="/register" component={Register} />
+            <NoTokenRoute
+              path="/user/resetPass/:token"
+              component={ChangePassword}
+            />
             <ProtectedRoute path="/logout" component={Logout} />
             <ProtectedRoute
               path="/user/change/:token"
-              render={props => <Change {...props} user={user} />}
+              render={(props) => <Change {...props} user={user} />}
             />
+
             <ProtectedRoute
               path="/profile"
-              render={props => <Profile {...props} user={user} />}
+              render={(props) => <Profile {...props} user={user} />}
             />
 
             <ProtectedRoute
               path="/tags"
-              render={props => <Tags {...props} user={user} />}
+              render={(props) => <Tags {...props} user={user} />}
             />
             <ProtectedRoute
               path="/printSheet"
-              render={props => <PrintSheet {...props} user={user} />}
+              render={(props) => <PrintSheet {...props} user={user} />}
             />
+
             <Route path="/print/:token" component={Print} />
             <CaptchaRoute
               path="/tag/:token"
@@ -82,11 +89,28 @@ class App extends Component {
             {user && (
               <Route
                 exact
+                path="/inventory"
+                render={() => (
+                  <Redirect
+                    to={{
+                      pathname: "inventory/" + user.dash,
+                    }}
+                  />
+                )}
+              />
+            )}
+            <Route
+              path="/inventory/:token/:id?"
+              render={(props) => <Inventory {...props} user={user} />}
+            />
+            {user && (
+              <Route
+                exact
                 path="/"
                 render={() => (
                   <Redirect
                     to={{
-                      pathname: user.dashUrl
+                      pathname: user.dash,
                     }}
                   />
                 )}
@@ -95,8 +119,9 @@ class App extends Component {
             <Route
               exact
               path="/:token"
-              render={props => <Dashboard {...props} user={user} />}
+              render={(props) => <Dashboard {...props} user={user} />}
             />
+
             <Redirect to="/notFound" />
           </Switch>
         </main>

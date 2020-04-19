@@ -4,23 +4,23 @@ import { Redirect } from "react-router-dom";
 import Layout from "../components/layout";
 import Grid from "../components/grid";
 import Unit from "../components/unit";
-import Pagination from "../components/pagination";
+import { ButtonPagination } from "../components/pagination";
 import { paginate } from "../services/pagination";
+
 import * as auth from "../services/tagsAuthentication";
 import * as file from "../services/fileAuthentication";
 import {
   ImageContainer,
-  CallbackPopupContainer
+  CallbackPopupContainer,
 } from "../components/popupContainer";
 import { BooleanSelect } from "../components/select";
 import "../css/unit.css";
-
 /* Unfinished, need to add stuff in footer*/
 class Dashboard extends Component {
   state = {
     tags: [],
     currentPage: 1,
-    pageSize: 6
+    pageSize: 6,
   };
   async setTags(viewDead) {
     let { user, token } = this.state;
@@ -28,7 +28,7 @@ class Dashboard extends Component {
     let viewDeadBool = false;
     if (viewDead === "Yes") viewDeadBool = true;
 
-    if (user && token === user.dashUrl) {
+    if (user && token === user.dash) {
       tags = await auth.getTags(viewDeadBool);
       tags = tags.data;
     } else {
@@ -65,21 +65,21 @@ class Dashboard extends Component {
   async componentDidMount() {
     await this.setState({
       user: this.props.user,
-      token: this.props.match.params.token
+      token: this.props.match.params.token,
     });
     await this.setTags(false);
   }
 
-  handlePageChange = page => {
+  handlePageChange = (page) => {
     this.setState({ currentPage: page });
   };
   render() {
     let { tags, currentPage, pageSize, user, token, redirect } = this.state;
     if (!tags) tags = "";
     let sortedTags = paginate(tags, currentPage, pageSize);
-    let dashUrl = "";
-    if (user) dashUrl = user.dashUrl;
-    else dashUrl = token;
+    let dash = "";
+    if (user) dash = user.dash;
+    else dash = token;
 
     async function deleteComment(data) {
       const props = data.props;
@@ -106,7 +106,7 @@ class Dashboard extends Component {
       if (severity === 1) return "yellow";
       if (severity === 2) return "red";
     }
-    function customBehavior(item) {
+    let customBehavior = (item) => {
       //css for customBehavior are in unit.css
       let severity = 0;
       for (let i = 0; i < item.comments.length; i++) {
@@ -117,7 +117,7 @@ class Dashboard extends Component {
       return (
         <Unit key={item._id} name={item.name} dot={severity}>
           <div className="unitCenter" style={{ height: "39vh" }}>
-            {item.comments.map(function(comment) {
+            {item.comments.map(function (comment) {
               comment.postId = item._id;
               let opacity = "1";
               if (comment.markedForDeletion) opacity = ".7";
@@ -128,7 +128,7 @@ class Dashboard extends Component {
                       <h4 className="unitText">{comment.text}</h4>
                       <span
                         style={{
-                          backgroundColor: severityColor(comment.sev)
+                          backgroundColor: severityColor(comment.sev),
                         }}
                         className="dot rightObj"
                       />
@@ -170,21 +170,21 @@ class Dashboard extends Component {
           {/* Add tag to printable sheet here? */}
         </Unit>
       );
-    }
+    };
     customBehavior = customBehavior.bind(this);
     if (redirect)
       return (
         <Redirect
           to={{
-            pathname: redirect
+            pathname: redirect,
           }}
         />
       );
     return (
       <React.Fragment>
-        <Layout name={`Issue Tracker ${dashUrl}`}>
+        <Layout name={`Issue Tracker ${dash}`}>
           {this.state.popup}
-          <Pagination
+          <ButtonPagination
             itemsCount={tags.length}
             pageSize={pageSize}
             currentPage={currentPage}
