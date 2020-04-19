@@ -10,6 +10,7 @@ const express = require('express'),
     Comment = require('../models/Comment'),
     User = require("../models/User"),
     Tag = require('../models/Tag'),
+    Item = require("../models/Item"),
     //configure express addons
     router = express.Router(),
     //document settings and blank template image for pdf creator
@@ -17,15 +18,15 @@ const express = require('express'),
 
 // ROUTE: GET dash/:id
 // DESCRIPTION: anonymous dashboard only accessible with secret keystring
-router.get('/:id', async(req, res) => {
+router.get('/:dash', async(req, res) => {
     var outnode = {};
     await User.findOne({
-        dashUrl: req.params.id
+        dashCode: req.params.dash
     }).then(async user => {
         await Tag.find({
-            user: user._id
+            user: user._userId
         }).then(async posts => {
-            if (!posts) erep(res, "", 404, "No Inventory found", req.ip);
+            if (!posts) erep(res, "", 404, "No Tags found", req.ip);
             for (var n in posts) {
                 await Comment.find({
                     tag: posts[n]._id,
@@ -35,16 +36,28 @@ router.get('/:id', async(req, res) => {
                         for (var z in cmts) posts[n].comments.push(cmts[z]);
                 });
             }
-            Inventory.find({
-                user: user._id
-            }).then(inv => {
-                if (!inv) erep(undefined, "", 404, "No Inventory found", req.ip);
-                else outnode.inventory = inv;
-                outnode.tags = posts;
-                res.json(outnode);
+            await Inventory.find({
+                user: user._userId
+            }).then(async invs => {
+                if (invs) {
+                    for (var n = 0, len = invs.length; n < len; n++) {
+                        await Item.find({
+                            inventory: invs[n]._id,
+                            markedForDeletion: req.body.showDead
+                        }).then(cmts => {
+                            if (cmts)
+                                for (var z = 0, ln = cmts.length; z < ln; z++)
+                                    invs[n].items.push(cmts[z]);
+                        });
+                    }
+                    if (!invs) return erep(res, "", 404, "No Inventory found", req.ip);
+                    else outnode.inventory = invs;
+                    outnode.tags = invs;
+                    res.json(outnode);
+                }
             }).catch(err => erep(res, err, 404, "No Inventory found", req.ip));
-        }).catch(err => erep(res, err, 404, "No Inventory found", req.ip));
-    }).catch(err => erep(res, err, 404, "No Inventory found", req.ip));
+        }).catch(err => erep(res, err, 404, "No Tags found", req.ip));
+    }).catch(err => erep(res, err, 404, "No User found", req.ip));
 });
 
 // ROUTE: GET mgmt/print
@@ -53,10 +66,10 @@ router.get('/:id', async(req, res) => {
 router.post('/print/', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
-    User.find({
-        user: req.user._id
+    User.findOne({
+        _id: req.user._id
     }, function(err, udata) {
-        if (err) return erep(res, err, 500, "Error generating pdf", req.user._id);
+        if (err || udata == undefined) return erep(res, err, 500, "Error generating pdf", req.user._id);
         fs.readFile(__dirname + '/template2.svg', function(err, data) {
             if (err) return erep(res, err, 500, "Error generating pdf", req.user._id);
             //svg template file

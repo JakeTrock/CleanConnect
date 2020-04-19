@@ -19,35 +19,9 @@ const Inventory = new Schema({
         type: Number,
         default: 0
     },
-    items: [{
-        name: {
-            type: String,
-            required: true,
-        },
-        itemCode: {
-            type: String,
-            required: true
-        },
-        maxQuant: {
-            type: Number
-        },
-        minQuant: {
-            type: Number,
-            required: true
-        },
-        curQuant: {
-            type: Number,
-            required: true
-        },
-        ip: {
-            type: String,
-            required: true
-        },
-        date: {
-            type: Date,
-            default: Date.now
-        }
-    }],
+    items: {
+        type: Array
+    },
     date: {
         type: Date,
         default: new Date()

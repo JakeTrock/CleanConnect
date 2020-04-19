@@ -2,12 +2,12 @@
 const express = require('express'),
     fileUpload = require('express-fileupload'),
     passport = require('passport'),
-    randomBytes = require("randombytes"),
     erep = require("./erep.js"),
     keys = require('../config/keys'),
     //model import
     Inventory = require('../models/Inventory'),
     User = require("../models/User"),
+    Item = require("../models/Item"),
     // Validation Part for input
     validatePostInput = require('../validation/tag.js'),
     QRCode = require('qrcode'),
@@ -22,17 +22,27 @@ router.get('/test', (req, res) => res.send("Inventory Works"));
 
 // ROUTE: GET inventory/getall
 // DESCRIPTION: Gets full inventory listings
-router.get('/getall', passport.authenticate('jwt', {
+router.post('/getall', passport.authenticate('jwt', {
     session: false
-}), (req, res) => {
-    Inventory.find({
+}), async(req, res) => {
+    await Inventory.find({
         user: req.user._id
-    }).then(posts => {
-        if (!posts) erep(res, "", 404, "no inventories found", req.user._id)
-        res.json(posts);
-    }).catch(err => erep(res, err, 404, "no inventories found", req.user._id));
+    }).then(async posts => {
+        if (posts) {
+            for (var n = 0, len = posts.length; n < len; n++) {
+                await Item.find({
+                    inventory: posts[n]._id,
+                    markedForDeletion: req.body.showDead
+                }).then(cmts => {
+                    if (cmts)
+                        for (var z = 0, ln = cmts.length; z < ln; z++)
+                            posts[n].items.push(cmts[z]);
+                });
+            }
+            res.json(posts);
+        }
+    }).catch(err => erep(res, err, 404, "No posts found", req.user._id));
 });
-
 // ROUTE: GET inventory/getone/id
 // DESCRIPTION: gets the metadata of a single tag based on its id, can also be used to confirm if a tag exists
 router.get('/getone/:id', passport.authenticate('jwt', {
@@ -148,73 +158,85 @@ router.delete('/delete/:id', passport.authenticate('jwt', {
 
 
 router.post('/newItem/:id', (req, res) => {
-    Inventory.find({ _id: req.params.id, 'items.name': req.body.name }).then(inv => {
+    Item.find({ inventory: req.params.id, name: req.body.name }).then(inv => {
         if (inv[0] != null) return erep(res, "", 400, "Item already exists", req.ip)
-        Inventory.findOneAndUpdate({ _id: req.params.id }, {
-            $set: { date: new Date() },
-            $push: {
-                items: {
-                    name: req.body.name,
-                    itemCode: randomBytes(16).toString("hex"),
-                    maxQuant: req.body.maxQuant || undefined,
-                    minQuant: req.body.minQuant || 0,
-                    curQuant: req.body.curQuant || 0,
-                    ip: req.ip
-                }
-            }
-        }).exec(function(e, doc) {
-            if (e)
-                erep(res, e, 500, "Unable to add item", req.ip);
-            else
-                res.json({ success: true })
-        });
+        new Item({
+            name: req.body.name,
+            inventory: req.params.id,
+            maxQuant: req.body.maxQuant || undefined,
+            minQuant: req.body.minQuant || 0,
+            curQuant: req.body.curQuant || 0,
+            ip: req.ip
+        }).save(
+            Inventory.findOneAndUpdate({ _id: req.params.id }, {
+                $set: { date: new Date() }
+            }).exec(function(e, doc) {
+                if (e)
+                    erep(res, e, 500, "Unable to add item", req.ip);
+                else
+                    res.json({ success: true })
+            }));
     });
 });
 
 router.delete('/delItem/:id/:item_id', (req, res) => {
-    Inventory.updateOne({ _id: req.params.id }, { $pull: { items: { _id: req.params.item_id } } }).exec(function(e, doc) {
-        if (e || !doc)
-            erep(res, e || "couldn't find document", 500, "Unable to remove item", req.ip);
-        else
-            res.json({ success: true })
-    });
+    Item.findOneAndUpdate({
+        inventory: req.params.id,
+        _id: req.params.item_id
+    }, {
+        $set: {
+            markedForDeletion: true,
+            removedAt: new Date(),
+            deletedBy: req.ip
+        }
+    }).then(res.json({
+        success: true
+    })).catch((e) => erep(res, e, 500, "Error marking for removal", req.params.item_id));
+});
+
+router.post('/restore/:id/:item_id', (req, res) => {
+    Item.findOneAndUpdate({
+        inventory: req.params.id,
+        _id: req.params.item_id
+    }, {
+        $set: {
+            markedForDeletion: false,
+            removedAt: null,
+        }
+    }).then(res.json({
+        success: true
+    })).catch((e) => erep(res, e, 500, "Error restoring item", req.params.item_id));
 });
 
 router.post('/updItemQuant/:id/:item_id', (req, res) => {
-    Inventory.find({ _id: req.params.id, 'items.name': req.body.name }).then(inv => {
-        if (inv[0] != null) return erep(res, "", 400, "Item already exists", req.ip)
-        Inventory.findOneAndUpdate({ _id: req.params.id, "items._id": req.params.item_id }, {
-            $set: {
-                date: new Date(),
-                "items.$.curQuant": req.body.newVal
-            }
-        }).exec(function(e, doc) {
-            if (e || !doc)
-                erep(res, e || "couldn't find document", 500, "Unable to add item", req.ip);
-            else
-                res.json({ success: true })
-        });
-    });
+    Item.findOneAndUpdate({
+        inventory: req.params.id,
+        _id: req.params.item_id
+    }, {
+        $set: {
+            curQuant: req.body.newVal
+        }
+    }).then(res.json({
+        success: true
+    })).catch((e) => erep(res, e, 500, "Error updating item", req.params.item_id));
 });
 
 
 
 router.post('/changeItem/:id/:item_id', (req, res) => {
-    var fields = { date: new Date() };
-    if (req.body.name) fields['items.$.name'] = req.body.name;
-    if (req.body.maxQuant) fields['items.$.maxQuant'] = req.body.maxQuant;
-    if (req.body.minQuant) fields['items.$.minQuant'] = req.body.minQuant;
-    Inventory.find({ _id: req.params.id, 'items.name': req.body.name }).then(inv => {
-        if (inv[0] == null) return erep(res, "", 404, "Item not found", req.ip)
-        Inventory.findOneAndUpdate({ _id: req.params.id, "items._id": req.params.item_id }, {
-            $set: fields
-        }).exec(function(e, doc) {
-            if (e || !doc)
-                erep(res, e || "couldn't find document", 500, "Unable to add item", req.ip);
-            else
-                res.json({ success: true })
-        });
-    });
+    var fields = req.body;
+    fields.date = new Date();
+    // if (req.body.name) fields.name = req.body.name;
+    // if (req.body.maxQuant) fields['items.$.maxQuant'] = req.body.maxQuant;
+    // if (req.body.minQuant) fields['items.$.minQuant'] = req.body.minQuant;
+    Item.findOneAndUpdate({
+        inventory: req.params.id,
+        _id: req.params.item_id
+    }, {
+        $set: fields
+    }).then(res.json({
+        success: true
+    })).catch((e) => erep(res, e, 500, "Error updating item", req.params.item_id));
 });
 //export module for importing into central server file
 module.exports = router;

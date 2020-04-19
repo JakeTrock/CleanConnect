@@ -396,8 +396,8 @@ router.post("/change/:token", passport.authenticate("jwt", {
                 });
             }
             if (req.body.name) profileFields.name = req.body.name;
-            if (req.body.tier) profileFields.tier = req.body.tier;
             if (req.body.tier) {
+                profileFields.tier = req.body.tier;
                 gateway.subscription.update(profile.PayToken, {
                     planId: keys.tierID[req.body.tier],
                 }, function(err) {
@@ -410,8 +410,7 @@ router.post("/change/:token", passport.authenticate("jwt", {
                     if (e)
                         erep(res, e, 400, "Error updating profile/Error processing token", req.user._id)
                     else
-                        tk.deleteOne()
-                        .then(res.json({ success: true }))
+                        tk.deleteOne().then(res.json({ success: true }))
                 });
         });
     });

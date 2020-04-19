@@ -50,7 +50,7 @@ router.post('/new/:id', (req, res) => {
                 };
             } else return erep(res, "", 400, "Invalid filetype(we allow png, jpg, jpeg, webp, gif, tiff, mp4 and webm uploads up to 5.1 MB)", req.params.id)
         }
-        // Add comment to the array
+        // Add comment
         try {
             post.dateLastAccessed = new Date();
             new Comment(comment).save();
@@ -80,7 +80,7 @@ router.delete('/delete/:id/:comment_id', (req, res) => {
         }
     }).then(res.json({
         success: true
-    })).catch((e) => erep(res, e, 500, "Error saving comment", req.params.comment_id));
+    })).catch((e) => erep(res, e, 500, "Error marking for removal", req.params.comment_id));
 });
 
 // ROUTE: POST api/posts/comment/:id/:comment
