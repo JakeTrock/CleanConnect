@@ -13,7 +13,7 @@ class Comment extends Form {
     data: { text: "", severity: "", image: "", imageUrl: "" },
     errors: {},
     severityOptions: ["High", "Medium", "Low"],
-    verified: true
+    verified: true,
   };
   schema = {
     text: Joi.string().required(),
@@ -27,10 +27,10 @@ class Comment extends Form {
         .error(() => {
           return {
             message:
-              "Not a valid image type (jpg, jpeg, tiff, gif, webm, webp, mp4, or png)"
+              "Not a valid image type (jpg, jpeg, tiff, gif, webm, webp, mp4, or png)",
           };
-        })
-    })
+        }),
+    }),
   };
   async componentDidMount() {
     const token = this.props.match.params.token;
@@ -80,15 +80,15 @@ class Comment extends Form {
             name: "text",
             label: "Information about problem",
             error: errors.text,
-            dropdown: dropDownList
+            dropdown: dropDownList,
           })}
           {this.renderSelect({
             name: "severity",
             label: "Rate the severity",
             options: severityOptions,
-            error: errors.severity
-            })}
-          {this.renderButton("Submit")}
+            error: errors.severity,
+          })}
+          {this.renderButton({ label: "Submit" })}
         </form>
       </Layout>
     );

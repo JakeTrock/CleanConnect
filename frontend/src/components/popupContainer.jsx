@@ -54,7 +54,6 @@ export const CallbackPopupContainer = (props) => {
         </div>
       );
     };
-
   return (
     <Popup trigger={trigger} position="right center" modal>
       {(close) => (

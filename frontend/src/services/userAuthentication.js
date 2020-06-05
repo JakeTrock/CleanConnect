@@ -24,7 +24,7 @@ export async function register(
   password2,
   tier,
   payment_method_nonce,
-  phoneNum
+  phone
 ) {
   await axios.post(apiEndpoint + "/register", {
     name,
@@ -33,7 +33,7 @@ export async function register(
     password2,
     tier,
     payment_method_nonce,
-    phoneNum,
+    phone,
   });
 }
 
@@ -83,7 +83,7 @@ export async function completeChange(
   token,
   name,
   email,
-  phoneNum,
+  phone,
   tier,
   payNonce
 ) {
@@ -93,7 +93,7 @@ export async function completeChange(
     {
       name,
       email,
-      phoneNum,
+      phone,
       payNonce,
       tier,
     },
@@ -157,10 +157,10 @@ export function forgotPassword(parameters, token) {
   const email = parameters.email;
   if (token) {
     const password1 = parameters.password;
-    const { phoneNum, password2 } = parameters;
+    const { phone, password2 } = parameters;
     return axios.post(apiEndpoint + "/resetPass/" + token, {
       email,
-      phoneNum,
+      phone,
       password1,
       password2,
     });

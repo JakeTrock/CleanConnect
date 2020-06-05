@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Layout from "../components/layout";
 import * as auth from "../services/userAuthentication";
+import { tagLimit } from "../converters/limits";
 
 class Profile extends Component {
   editAccount() {
@@ -22,8 +23,9 @@ class Profile extends Component {
         )}
         {user && (
           <h1 className="label mb-3">
-            You are currently a tier {user.tier} member, you have up to (# of
-            tags){" "}
+            You are currently a tier {user.tier} member, you have up to
+            {" " + tagLimit(user) + " "}
+            tags
           </h1>
         )}
         <button
@@ -37,7 +39,7 @@ class Profile extends Component {
         </button>
         <h1 className="pageText text-secondary mb-3">
           This option requires email verification. Please have your preferred
-          email client open to change link.
+          email client open to find the link sent.
         </h1>
         <button
           type="button"

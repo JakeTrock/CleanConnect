@@ -7,18 +7,22 @@ const headers = {
   "Content-Type": "application/json",
   Authorization: user.getCurrentUser(true),
 };
-export function getAllInventories() {
+export function getAllInventories(showDead) {
   try {
-    return axios.get(inventoryEndpoint + "/getall", {
-      headers: headers,
-    });
+    return axios.post(
+      inventoryEndpoint + "/getall",
+      { showDead },
+      {
+        headers: headers,
+      }
+    );
   } catch (ex) {
     return null;
   }
 }
 export function getOneInventory(id) {
   try {
-    return axios.get(inventoryEndpoint + "/getone/" + id, {
+    return axios.post(inventoryEndpoint + "/getone/" + id, {
       headers: headers,
     });
   } catch (ex) {
@@ -50,14 +54,18 @@ export function deleteInventory(token) {
     headers: headers,
   });
 }
-export function getAnonInventories(token) {
+export function getAnonInventories(token, showDead) {
   try {
     const headers = {
       "Content-Type": "application/json",
     };
-    return axios.get(dashEndpoint + "/" + token, {
-      headers: headers,
-    });
+    return axios.get(
+      dashEndpoint + "/" + token,
+      { showDead },
+      {
+        headers: headers,
+      }
+    );
   } catch (ex) {
     return null;
   }
@@ -73,12 +81,24 @@ export function newItem(data, id) {
   });
 }
 
-export function updateItem(itemId, newVal, id) {
+export function updateItem(itemId, id, newVal) {
   return axios.post(inventoryEndpoint + "/updItemQuant/" + id + "/" + itemId, {
     newVal,
   });
 }
 
+export function updateItemDetails(itemId, id, name, maxQuant, minQuant) {
+  return axios.post(inventoryEndpoint + "/changeItem/" + id + "/" + itemId, {
+    name,
+    maxQuant,
+    minQuant,
+  });
+}
+
 export function deleteItem(itemId, id) {
   return axios.delete(inventoryEndpoint + "/delItem/" + id + "/" + itemId);
+}
+
+export function restoreItem(itemId, id) {
+  return axios.post(inventoryEndpoint + "/restore/" + id + "/" + itemId);
 }

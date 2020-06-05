@@ -53,7 +53,7 @@ class Login extends Form {
             error: errors.password,
             type: "password",
           })}
-          {this.renderButton("Login")}
+          {this.renderButton({ label: "Login" })}
           {email &&
             this.renderPopup({
               parameters: { email: email },

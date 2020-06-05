@@ -34,9 +34,8 @@ class Dashboard extends Component {
     } else {
       if (token) {
         try {
-          tags = await auth.anonTags(token, viewDeadBool); //NOTE: Deal with problem in future, you can see all dead tags
-          tags = tags.data;
-          console.log(tags);
+          const request = await auth.anonTags(token, viewDeadBool); //NOTE: Deal with problem in future, you can see all dead tags
+          tags = request.data.tags;
         } catch {}
       }
     }
@@ -77,9 +76,9 @@ class Dashboard extends Component {
     let { tags, currentPage, pageSize, user, token, redirect } = this.state;
     if (!tags) tags = "";
     let sortedTags = paginate(tags, currentPage, pageSize);
-    let dash = "";
+    /*let dash = "";
     if (user) dash = user.dash;
-    else dash = token;
+    else dash = token;*/
 
     async function deleteComment(data) {
       const props = data.props;
@@ -108,6 +107,7 @@ class Dashboard extends Component {
     }
     let customBehavior = (item) => {
       //css for customBehavior are in unit.css
+      //customBehavior is for custom tag units
       let severity = 0;
       for (let i = 0; i < item.comments.length; i++) {
         severity += item.comments[i].sev;
@@ -120,49 +120,48 @@ class Dashboard extends Component {
             {item.comments.map(function (comment) {
               comment.postId = item._id;
               let opacity = "1";
-              if (comment.markedForDeletion) opacity = ".7";
+              if (comment.markedForDeletion) opacity = ".6";
               return (
                 <React.Fragment key={comment._id}>
-                  <div style={{ opacity: opacity }}>
-                    <div className="mt-2 ml-2" style={{ display: "flex" }}>
-                      <h4 className="unitText">{comment.text}</h4>
-                      <span
-                        style={{
-                          backgroundColor: severityColor(comment.sev),
-                        }}
-                        className="dot rightObj"
-                      />
-                    </div>
-                    {!comment.markedForDeletion && (
-                      <CallbackPopupContainer
-                        triggerText="Delete Comment"
-                        customText={`This will delete the comment with info: ${comment.text}. Proceed?`}
-                        callbackRoute={deleteComment}
-                        callbackData={{ props: this.props, item: comment }}
-                      />
-                    )}
-                    {comment.markedForDeletion && user && (
-                      <CallbackPopupContainer
-                        triggerText="Restore Comment"
-                        customText={`This will restore the comment with info: ${comment.text}. Proceed?`}
-                        callbackRoute={readdComment}
-                        callbackData={{ props: this.props, item: comment }}
-                      />
-                    )}
-                    <ImageContainer
-                      trigger={
-                        <img
-                          className="centerObj"
-                          style={{ cursor: "pointer" }}
-                          src={comment.img}
-                          alt=""
-                        />
-                      }
-                      imgLink={comment.img}
+                  <div
+                    className="mt-2 ml-2"
+                    style={{ display: "flex", opacity: opacity }}
+                  >
+                    <h4 className="unitText">{comment.text}</h4>
+                    <span
+                      style={{
+                        backgroundColor: severityColor(comment.sev),
+                      }}
+                      className="dot rightObj"
                     />
-                    {/* TEMPORARY*/}
-                    {/* Make small then big*/}
                   </div>
+                  {!comment.markedForDeletion && (
+                    <CallbackPopupContainer
+                      triggerText="Delete Comment"
+                      customText={`This will delete the comment with info: ${comment.text}. Proceed?`}
+                      callbackRoute={deleteComment}
+                      callbackData={{ props: this.props, item: comment }}
+                    />
+                  )}
+                  {comment.markedForDeletion && user && (
+                    <CallbackPopupContainer
+                      triggerText="Restore Comment"
+                      customText={`This will restore the comment with info: ${comment.text}. Proceed?`}
+                      callbackRoute={readdComment}
+                      callbackData={{ props: this.props, item: comment }}
+                    />
+                  )}
+                  <ImageContainer
+                    trigger={
+                      <img
+                        className="centerObj"
+                        style={{ cursor: "pointer", opacity: opacity }}
+                        src={comment.img}
+                        alt=""
+                      />
+                    }
+                    imgLink={comment.img}
+                  />
                 </React.Fragment>
               );
             }, this)}
@@ -182,7 +181,7 @@ class Dashboard extends Component {
       );
     return (
       <React.Fragment>
-        <Layout name={`Issue Tracker ${dash}`}>
+        <Layout name={`Issue Tracker`}>
           {this.state.popup}
           <ButtonPagination
             itemsCount={tags.length}

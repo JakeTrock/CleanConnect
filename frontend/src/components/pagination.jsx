@@ -34,8 +34,8 @@ export const ButtonPagination = ({
 };
 
 export const NavbarPagination = ({
-  pageSize,
   currentPage,
+  pageSize,
   onPageChange,
   items,
   customBehavior,
@@ -46,7 +46,11 @@ export const NavbarPagination = ({
       className="navbar navbar-expand-lg bg-light mb-4"
       style={{ borderBottom: "1px solid black" }}
     >
-      {currentPage > 1 && <div onClick={() => onPageChange(-1)}>&lt;</div>}
+      {currentPage > 1 && (
+        <div className="mr-auto" onClick={() => onPageChange(-1)}>
+          &lt;
+        </div>
+      )}
       {items &&
         items.map(function (item) {
           return (
@@ -58,7 +62,7 @@ export const NavbarPagination = ({
       {emptyBehavior && (
         <div className="ml-auto mr-auto">{emptyBehavior()}</div>
       )}
-      {currentPage < pageSize && (
+      {currentPage * pageSize - 1 < items.length && (
         <div className="ml-auto" onClick={() => onPageChange(1)}>
           &gt;
         </div>

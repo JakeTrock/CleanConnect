@@ -2,19 +2,27 @@ import React, { Component } from "react";
 import Joi from "joi-browser";
 import { CallbackPopupContainer } from "../components/popupContainer";
 class Form extends Component {
-  validate = () => {
-    const options = { abortEarly: false };
-    const { error } = Joi.validate(this.state.data, this.schema, options);
+  validate = (schema) => {
+    if (!schema) schema = this.schema;
+    const options = { abortEarly: false, allowUnknown: true };
+    const { error } = Joi.validate(this.state.data, schema, options);
     if (!error) return null;
     const errors = {};
-    //for (let item of error.details) errors[item.path[0]] = item.message;
+    for (let item of error.details) errors[item.path[0]] = item.message;
     return errors;
   };
 
   validateProperty = (name, value) => {
     //validates onChange
     const obj = { [name]: value };
-    const schema = { [name]: this.schema[name] };
+    let schema = undefined;
+    if (this.schema[name]) schema = { [name]: this.schema[name] };
+    else {
+      for (let key in this.schema) {
+        const dict = this.schema[key];
+        if (dict[name]) schema = { [name]: dict[name] };
+      }
+    }
     const { error } = Joi.validate(obj, schema);
     return error ? error.details[0].message : null;
   };
@@ -52,10 +60,11 @@ class Form extends Component {
     this.handleChange(select.name, select.value);
   };
 
-  renderButton(label, onClick, disabled) {
+  renderButton({ label, onClick, disabled, schema } = {}) {
+    //renderButton(label, onClick, disabled) {
     let className = "btn btn-primary";
     if (label === "Delete") className = "btn btn-danger";
-    if (disabled === null) disabled = this.validate();
+    if (disabled === undefined) disabled = this.validate(schema); //pass parammeters here to validate
     if (!onClick)
       return (
         <button disabled={disabled} className={className}>
@@ -120,13 +129,12 @@ class Form extends Component {
     );
   }
   renderStep({ name, label, error, value, min, max }) {
-    const { data } = this.state;
     let inputClass = "";
     if (value < min || value > max) inputClass = "text-danger";
     return (
       <div className="form-group">
         <div style={{ display: "flex" }}>
-          <label className="pageText">{label}:</label>
+          <label className="pageText mr-2">{label}:</label>
           <input
             className={inputClass}
             type="number"

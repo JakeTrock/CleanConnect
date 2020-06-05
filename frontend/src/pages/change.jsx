@@ -20,7 +20,7 @@ class Change extends Form {
     data: {
       email: "",
       name: "",
-      phoneNum: "",
+      phone: "",
       tier: "",
       payment_method_nonce: "",
     },
@@ -30,7 +30,7 @@ class Change extends Form {
   schema = {
     name: Joi.string().required(),
     email: Joi.string().email().required(),
-    phoneNum: Joi.string()
+    phone: Joi.string()
       .length(10)
       .regex(/^\d+$/)
       .error(() => {
@@ -56,7 +56,7 @@ class Change extends Form {
     let data = this.state.data;
     data["name"] = user.name;
     data["email"] = user.email;
-    //data["phoneNum"] = reversePhoneConverter(user.phoneNum);
+    //data["phone"] = reversePhoneConverter(user.phone);
     data["tier"] = reverseTierConverter(user.tier);
     this.setState({ data });
     // /isValid/token
@@ -68,12 +68,12 @@ class Change extends Form {
       const token = this.props.match.params.token;
       const { data } = this.state;
       const tier = tierConverter(data.tier);
-      const phoneNum = phoneConverter(data.phoneNum);
+      const phone = phoneConverter(data.phone);
       await auth.completeChange(
         token,
         data.name,
         data.email,
-        phoneNum,
+        phone,
         tier,
         data.payment_method_nonce
       );
@@ -85,7 +85,7 @@ class Change extends Form {
         if (ex.response.status === 400) {
           errors.email = ex.response.data.email;
           errors.name = ex.response.data.name;
-          errors.phoneNum = ex.response.data.phoneNum;
+          errors.phone = ex.response.data.phone;
           errors.tier = ex.response.data.details.tier;
           errors.payment_method_nonce =
             ex.response.data.details.payment_method_nonce;
@@ -112,9 +112,9 @@ class Change extends Form {
             error: errors.email,
           })}
           {this.renderInput({
-            name: "phoneNum",
+            name: "phone",
             label: "Phone Number",
-            error: errors.phoneNum,
+            error: errors.phone,
           })}
           {this.renderSelect({
             name: "tier",
@@ -132,7 +132,7 @@ class Change extends Form {
             props: user,
             error: errors.payment_method_nonce,
           })}
-          {this.renderButton("Submit")}
+          {this.renderButton({ label: "Submit" })}
         </form>
       </Layout>
     );

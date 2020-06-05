@@ -97,7 +97,7 @@ class Change extends Form {
             error: errors.password2,
             type: "password",
           })}
-          {this.renderButton("Submit")}
+          {this.renderButton({ label: "Submit" })}
         </form>
       </Layout>
     );

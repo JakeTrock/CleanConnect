@@ -147,9 +147,13 @@ export function anonTags(token, showDead) {
     /*const headers = {
       "Content-Type": "application/json",
     };*/
-    return axios.get(dashEndpoint + "/" + token, showDead, {
-      headers: headers,
-    });
+    return axios.get(
+      dashEndpoint + "/" + token,
+      { showDead },
+      {
+        headers: headers,
+      }
+    );
   } catch (ex) {
     return null;
   }

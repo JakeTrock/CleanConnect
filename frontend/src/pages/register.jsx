@@ -18,7 +18,7 @@ class Register extends Form {
       password2: "",
       tier: "",
       payment_method_nonce: "",
-      phoneNum: "",
+      phone: "",
     },
     errors: {},
     formCompleted: false,
@@ -30,7 +30,7 @@ class Register extends Form {
     password2: Joi.string().required().min(6),
     tier: Joi.string().required(),
     payment_method_nonce: Joi.string().required(),
-    phoneNum: Joi.string()
+    phone: Joi.string()
       .length(10)
       .regex(/^\d+$/)
       .error(() => {
@@ -45,7 +45,7 @@ class Register extends Form {
     try {
       const { data } = this.state;
       const tier = tierConverter(data.tier);
-      const phoneNum = phoneConverter(data.phoneNum);
+      const phone = phoneConverter(data.phone);
       await auth.register(
         data.name,
         data.email,
@@ -53,7 +53,7 @@ class Register extends Form {
         data.password2,
         tier,
         data.payment_method_nonce,
-        phoneNum
+        phone
       );
       this.setState({ formCompleted: true }); //const { state } = this.props.location; //window.location = state ? state.from.pathname : "/login";
     } catch (ex) {
@@ -67,7 +67,7 @@ class Register extends Form {
         errors.tier = ex.response.data.details.tier;
         errors.payment_method_nonce =
           ex.response.data.details.payment_method_nonce;
-        errors.phoneNum = ex.response.data.details.phoneNum;
+        errors.phone = ex.response.data.details.phone;
         this.setState({ errors });
       }
     }
@@ -89,9 +89,9 @@ class Register extends Form {
             error: errors.email,
           })}
           {this.renderInput({
-            name: "phoneNum",
+            name: "phone",
             label: "Phone Number",
-            error: errors.phoneNum,
+            error: errors.phone,
           })}
           {this.renderInput({
             name: "password",
@@ -120,7 +120,7 @@ class Register extends Form {
             Component: Payment,
             error: errors.payment_method_nonce,
           })}
-          {this.renderButton("Register")}
+          {this.renderButton({ label: "Register" })}
         </form>
       </Layout>
     );
