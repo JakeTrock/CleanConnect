@@ -74,14 +74,6 @@ app.use('/inventory', inventory);
 
 app.listen(5000, () => console.log("Server running on port 5000"));
 
-(async () => {
-    fs.readFile(__dirname + "/config/template1.svg", (err, data) => {
-        process.env.tagSVG = data.toString()
-    });
-    fs.readFile(__dirname + "/config/template2.svg", (err, data) => {
-        process.env.invSVG = data.toString()
-    });
-})()
 
 process
     .on('unhandledRejection', (reason, p) => {
@@ -117,15 +109,6 @@ const delExp = new CronJob("00 00 00 * * *", function () {
                                     .catch(e => callback(helpers.erep(e)))
                                     .then(callback())
                             }))
-                        .then(fs.readdir(tempDir))
-                        .then(files => {
-                            async.each(files, (file, callback) => {
-                                if (fs.statSync(tempDir + file).birthtime < d && file.split(".")[1] === "pdf")
-                                    fs.unlinkSync(tempDir + file)
-                                    .catch(callback)
-                                    .then(callback());
-                            });
-                        })
                         .then(callback(null, true))
                         .catch(e => callback(e, false));
                 },
