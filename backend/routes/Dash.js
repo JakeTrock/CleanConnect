@@ -1,8 +1,4 @@
 const express = require('express'),
-    PDFDocument = require('pdfkit'),
-    SVGtoPDF = require('svg-to-pdfkit'),
-    randomBytes = require("randombytes"),
-    fs = require('fs'),
     helpers = require('../helpers'),
 
     //model import
@@ -11,11 +7,7 @@ const express = require('express'),
         Tag = require('../models/Tag'),
         Inventory = require("../models/Inventory"),
         //configure express addons
-        router = express.Router(),
-        //document settings and blank template image for pdf creator
-        docsettings = [{
-            size: 'LETTER'
-        }];
+        router = express.Router();
 
 // ROUTE: GET dash/:id
 // DESCRIPTION: anonymous dashboard only accessible with secret keystring

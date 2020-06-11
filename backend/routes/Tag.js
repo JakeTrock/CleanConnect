@@ -2,20 +2,12 @@
 const express = require("express"),
     fileUpload = require("express-fileupload"),
     helpers = require('../helpers'),
-    PDFDocument = require("pdfkit"),
-    SVGtoPDF = require("svg-to-pdfkit"),
-    randomBytes = require("randombytes"),
-    fs = require("fs"),
     //model import
     Tag = require("../models/Tag.js"),
     User = require("../models/User"),
     // Validation Part for input
     //configure express addons
-    router = express.Router(),
-    //document settings and blank template image for pdf creator
-    docsettings = [{
-        size: "LETTER"
-    }];
+    router = express.Router();
 router.use(fileUpload());
 
 // ROUTE: GET tag/test
