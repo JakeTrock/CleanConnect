@@ -19,16 +19,16 @@
         "express": "^4.16.3",
         "express-fileupload": "^1.1.6-alpha.6",
         "helmet": "^3.22.0",
-        "jsonwebtoken": "^8.3.0",
-        "mongoose": "^5.6.11",
-        "passport": "^0.4.0",
-        "passport-jwt": "^4.0.0",
+        "jwt-then": "^1.0.1",
+        "mongoose": "^5.9.18",
         "pdfkit": "^0.11.0",
+        "promise-async": "^0.2.0",
         "qrcode": "^1.4.4",
         "randombytes": "^2.1.0",
         "shelljs.exec": "^1.1.8",
         "svg-to-pdfkit": "^0.1.8",
-        "validator": "^10.4.0"
+        "validator": "^10.4.0",
+        "xss": "^1.0.6"
     },
     "devDependencies": {
         "nodemon": "^2.0.2",
