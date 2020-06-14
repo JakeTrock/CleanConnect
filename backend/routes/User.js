@@ -21,7 +21,6 @@ const express = require("express"),
 // DESCRIPTION: tests user route
 // INPUT: none
 router.get("/test", (req, res) => res.send("User Works"));
-
 // ROUTE: POST user/register
 // DESCRIPTION: sends registration email to user
 // INPUT: user name, email and password(all as strings), via json body
@@ -39,7 +38,6 @@ router.post("/register", (req, res) => {
             e => res.json(helpers.erep(e))
         );
 });
-
 // ROUTE: GET user/resend
 // DESCRIPTION: resends verification email to user
 // INPUT: email as string via json body
@@ -72,7 +70,6 @@ router.post("/resend", (req, res) => {
         }
     });
 });
-
 // ROUTE: GET user/confirm/:token
 // DESCRIPTION: confirms that user exists, deletes verif token after it isn't necessary
 // INPUT: token value via the url
@@ -83,11 +80,9 @@ router.get("/confirm/:token", (req, res) => {
             e => res.json(helpers.erep(e))
         );
 });
-
 // ROUTE: POST user/login
 // DESCRIPTION: generates token based on user properties submitted
 // INPUT: user details via json user token
-
 router.post("/login", (req, res) => {
     User.login(req.body.email, req.body.password)
         .then(
@@ -97,7 +92,6 @@ router.post("/login", (req, res) => {
             e => res.json(helpers.erep(e))
         );
 });
-
 // ROUTE: POST user/changeinfo
 // DESCRIPTION: sends verification email to change account details
 // INPUT: user id from jwt header
@@ -112,7 +106,6 @@ router.post("/changeinfo", helpers.passport, (req, res) => {
         e => res.json(helpers.erep(e))
     );
 });
-
 // ROUTE: POST user/change/:token
 // DESCRIPTION: recieves verification email to change account details
 // INPUT: new user details via json body
@@ -124,7 +117,6 @@ router.post("/change/:token", helpers.passport, (req, res) => {
         );
     });
 });
-
 // ROUTE: POST user/resetPass
 // DESCRIPTION: sends verification email to change account password
 // INPUT: email
@@ -138,7 +130,6 @@ router.post("/resetPass", (req, res) => {
         e => res.json(helpers.erep(e))
     );
 });
-
 // ROUTE: POST user/resetPass
 // DESCRIPTION: recieves verification email to change password
 // INPUT: email and new password twice
@@ -153,7 +144,6 @@ router.post("/resetPass/:token", (req, res) => {
         e => res.json(helpers.erep(e))
     );
 });
-
 // ROUTE: DELETE user/deleteinfo
 // DESCRIPTION: sends verification email to delete account
 // INPUT: user details via json user token
@@ -168,7 +158,6 @@ router.delete("/deleteinfo", helpers.passport, (req, res) => {
         e => res.json(helpers.erep(e))
     );
 });
-
 // ROUTE: GET user/delete/:token
 // DESCRIPTION: recieves deletion email link request
 // INPUT: token value via url bar
@@ -183,9 +172,11 @@ router.get("/delete/:token", helpers.passport, (req, res) => {
                 async.parallel({
                         delUser: (callback) => User.findByIdAndDelete(req.user._id).then(callback()).catch(callback),
                         payCancel: (callback) => gateway.subscription.cancel(user.PayToken).then(callback()).catch(callback),
-                        delIndexes: (callback) => UserIndex.deleteMany({ //TODO:this leaves one uindex??
+                        delIndexes: (callback) => UserIndex.deleteMany({
                             _userId: user._id,
-                        }).then(callback()).catch(callback),
+                        }).then(() => UserIndex.deleteMany({
+                            email: user.email,
+                        })).then(callback()).catch(callback),
                         delTags: (callback) => Tag.purge(user._id).then(callback()).catch(callback),
                         delInvs: (callback) => Inventory.purge(user._id).then(callback()).catch(callback)
                     })
@@ -198,13 +189,16 @@ router.get("/delete/:token", helpers.passport, (req, res) => {
 // ROUTE: POST user/isValid/:token
 // DESCRIPTION: checks if token is still valid
 // INPUT: token value via url bar
-router.post("/isValid/:token", helpers.passport, (req, res) => {
-    UserIndex.get(req.params.token).then(
-        res.json(helpers.scadd()),
-        e => res.json(helpers.erep(e))
-    );
+router.get("/isValid/:token", (req, res) => {
+    UserIndex.exists({
+        token: req.params.token
+    }).then((ex) => {
+        if (ex) res.json(helpers.scadd())
+        else res.json({
+            err: "token does not exist"
+        })
+    });
 });
-
 // ROUTE: GET user/current
 // DESCRIPTION: returns current user
 // INPUT: jwt token details

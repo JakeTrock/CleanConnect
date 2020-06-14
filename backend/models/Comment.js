@@ -38,7 +38,7 @@ const CommentSchema = new Schema({
   },
   ip: {
     type: String,
-    required: true,
+    // required: true //TODO:why won't this work?
   },
 }, {
   timestamps: true
@@ -86,10 +86,11 @@ CommentSchema.statics = {
         err: "You'll have to clean up your language before we clean up this room."
       });
       else {
-        let newDoc = this.model("Comment")(details);
-        newDoc.save()
-          .then(tag.addComment(newDoc))
-          .then(tag.save())
+        this.create([details], {
+            omitUndefined: true
+          })
+          .then(newDoc => tag.addComment(newDoc[0]))
+          .then(() => tag.save())
           .then(resolve())
           .catch(reject);
       }

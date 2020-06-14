@@ -17,7 +17,7 @@ router.get('/test', (req, res) => res.send("Inventory Works"));
 
 // ROUTE: GET inventory/getall
 // DESCRIPTION: Gets full inventory listings
-router.get('/getall', helpers.passport, async (req, res) => {
+router.post('/getall', helpers.passport, async (req, res) => {
     Inventory.getall(req.user._id, req.body.showDead)
         .then(
             out => res.json(helpers.scadd(out)),

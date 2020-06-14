@@ -76,6 +76,10 @@ waterfall([
                 "tier": 1
             }, callback)
         },
+        //isvalid check
+        (callback) => {
+            request("GET", "/user/isValid/" + verlnk, "", "", "", callback)
+        },
         //res3nd verif
         (callback) => {
             request("POST", "/user/resend", defaultBody, "json", {
@@ -518,7 +522,7 @@ waterfall([
             }, callback)
         },
         (callback) => {
-            request("GET", "/inventory/getall", authBody, "json", {
+            request("POST", "/inventory/getall", authBody, "json", {
                 "showDead": "false"
             }, callback)
         },
@@ -654,7 +658,7 @@ waterfall([
             request("GET", "/inventory/exists/" + userInv[5]._id, "", "", "", callback)
         },
         (callback) => {
-            request("GET", "/inventory/getall", authBody, "json", {
+            request("POST", "/inventory/getall", authBody, "json", {
                 "showDead": "false"
             }, callback)
         },
