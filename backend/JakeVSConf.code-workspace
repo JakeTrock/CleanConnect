@@ -1,12 +1,7 @@
 {
-	"folders": [
-		{
-			"path": ".."
-		},
-		{
-			"name": "Quick Queries",
-			"path": "../../../.config/VSCodium/User/workspaceStorage/993fdbd00bb30763c0a62657deeaf950/GitHub.vscode-codeql/quick-queries"
-		}
-	],
-	"settings": {}
+    "folders": [
+        {
+            "path": "."
+        }
+    ]
 }

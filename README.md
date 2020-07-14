@@ -30,10 +30,10 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 
 ## Issue board (both)
 * https://github.com/codemix/fast.js/tree/master
-* new slogan needed for qr stickers
 
 ## Issue board (Jake)
-* Potentially replace blobs with images
+* migrate from DO to https://developers.cloudflare.com/workers/ https://dzone.com/articles/comparing-serverless-architecture-providers-aws-az
+* change mail system
 
 ## Notes to Jake from Justin
 * Going to need list of payment costs and what they'll give you even if temporary

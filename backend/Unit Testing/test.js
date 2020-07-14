@@ -5,7 +5,8 @@ const mongoose = require('mongoose');
 const defaultBody = {
     "content-type": "application/json"
 };
-var authNoBody, authBody, token, verlnk, userDetails, userInv, userTags, pdfname;
+//TODO: https://github.com/vlucas/frisby
+var authNoBody, authBody, token, verlnk, userDetails, userInv, userTags;
 
 function request(reqType, url, headers, bodyType, reqBody, callback) {
     console.log(url + "\n==================================\n");
@@ -21,7 +22,7 @@ function request(reqType, url, headers, bodyType, reqBody, callback) {
             throw new Error(res.error);
         }
         console.log(JSON.stringify(res.body) + "\n==================================\n");
-        if (url == "/user/resend" || url == "/user/register" || url == "/user/changeinfo/" || url == "/user/resetPass/" || url == "/user/resend" || url == "/user/deleteinfo") verlnk = res.body.link.split("/")[5];
+        if (url == "/user/resend" || url == "/user/register" || url == "/user/changeinfo/" || url == "/user/resetPass/" || url == "/user/resend" || url == "/user/deleteinfo") verlnk = res.body.status;
 
         if (url == "/user/login") {
             token = res.body.token;
@@ -34,7 +35,6 @@ function request(reqType, url, headers, bodyType, reqBody, callback) {
             };
         }
         if (url == "/user/current") userDetails = res.body;
-        // if (url == "/tag/print/") pdfname = res.body.filename;
         if (url == "/tag/getall") userTags = res.body;
         if (url == "/inventory/getall") userInv = res.body;
         callback();
@@ -263,23 +263,18 @@ waterfall([
         (callback) => {
             request("DELETE", "/tag/delete/" + userTags[10]._id, authNoBody, "", "", callback)
         },
-        // (callback) => {
-        //     request("POST", "/tag/print/", authBody, "json", {
-        //         "printIteration": [
-        //             1, 3, 1, 2, 2, 3, 1, 4, 3, 2, 4, 2, 1, 2, 1, 2, 1, 3, 5
-        //         ]
-        //     }, callback)
-        // },
         //(comment testzzzzzzzz)============================================================================
         (callback) => {
             console.log("/comment/new/" + userTags[0]._id + "\n================================\n");
             var req = unirest("POST", prefix + "/comment/new/" + userTags[0]._id);
             req.headers({
-                "content-type": "multipart/form-data; boundary=---011000010111000001101001"
+                "content-type": "multipart/form-data"
             });
 
             req.field("text", "testing");
             req.field("sev", "2");
+
+            req.attach('img', 'testing.jpg');
 
             req.end(function (res) {
                 if (res.error) throw new Error(res.body + "\n\n" + res.error);
@@ -296,6 +291,7 @@ waterfall([
 
             req.field("text", "testing");
             req.field("sev", "2");
+            req.attach('img', 'testing.jpg');
 
             req.end(function (res) {
                 if (res.error) throw new Error(res.body + "\n\n" + res.error);
@@ -312,6 +308,7 @@ waterfall([
 
             req.field("text", "testing");
             req.field("sev", "2");
+            req.attach('img', 'testing.jpg');
 
             req.end(function (res) {
                 if (res.error) throw new Error(res.body + "\n\n" + res.error);
@@ -328,6 +325,7 @@ waterfall([
 
             req.field("text", "testing");
             req.field("sev", "2");
+            req.attach('img', 'testing.jpg');
 
             req.end(function (res) {
                 if (res.error) throw new Error(res.body + "\n\n" + res.error);
@@ -344,6 +342,7 @@ waterfall([
 
             req.field("text", "testing");
             req.field("sev", "2");
+            req.attach('img', 'testing.jpg');
 
             req.end(function (res) {
                 if (res.error) throw new Error(res.body + "\n\n" + res.error);
@@ -360,6 +359,7 @@ waterfall([
 
             req.field("text", "testing");
             req.field("sev", "2");
+            req.attach('img', 'testing.jpg');
 
             req.end(function (res) {
                 if (res.error) throw new Error(res.body + "\n\n" + res.error);
@@ -376,6 +376,7 @@ waterfall([
 
             req.field("text", "testing");
             req.field("sev", "2");
+            req.attach('img', 'testing.jpg');
 
             req.end(function (res) {
                 if (res.error) throw new Error(res.body + "\n\n" + res.error);
@@ -392,6 +393,7 @@ waterfall([
 
             req.field("text", "testing");
             req.field("sev", "2");
+            req.attach('img', 'testing.jpg');
 
             req.end(function (res) {
                 if (res.error) throw new Error(res.body + "\n\n" + res.error);
@@ -408,6 +410,7 @@ waterfall([
 
             req.field("text", "testing");
             req.field("sev", "2");
+            req.attach('img', 'testing.jpg');
 
             req.end(function (res) {
                 if (res.error) throw new Error(res.body + "\n\n" + res.error);
@@ -424,6 +427,7 @@ waterfall([
 
             req.field("text", "testing");
             req.field("sev", "2");
+            req.attach('img', 'testing.jpg');
 
             req.end(function (res) {
                 if (res.error) throw new Error(res.body + "\n\n" + res.error);
@@ -567,14 +571,6 @@ waterfall([
             }, callback)
         },
         (callback) => {
-            request("POST", "/inventory/newItem/" + userInv[4]._id, defaultBody, "json", {
-                "name": "industrial strength cleanser5",
-                "maxQuant": "100",
-                "minQuant": "20",
-                "curQuant": "37"
-            }, callback)
-        },
-        (callback) => {
             request("POST", "/inventory/newItem/" + userInv[5]._id, defaultBody, "json", {
                 "name": "industrial strength cleanser6",
                 "maxQuant": "100",
@@ -646,14 +642,14 @@ waterfall([
                 "curQuant": "37"
             }, callback)
         },
-        // (callback) => {
-        //     request("POST", "/inventory/newItem/" + userInv[14]._id, defaultBody, "json", {
-        //         "name": "industrial strength cleanser15",
-        //         "maxQuant": "100",
-        //         "minQuant": "20",
-        //         "curQuant": "37"
-        //     }, callback)
-        // },
+        (callback) => {
+            request("POST", "/inventory/newItem/" + userInv[14]._id, defaultBody, "json", {
+                "name": "industrial strength cleanser15",
+                "maxQuant": "100",
+                "minQuant": "20",
+                "curQuant": "37"
+            }, callback)
+        },
         (callback) => {
             request("GET", "/inventory/exists/" + userInv[5]._id, "", "", "", callback)
         },
@@ -681,16 +677,8 @@ waterfall([
         (callback) => {
             request("GET", "/dash/" + userDetails.dashCode, "", "", "", callback)
         },
-        // (callback) => {
-        //     request("POST", "/dash/print/", authBody, "json", {
-        //         "printIteration": 2
-        //     }, callback)
-        // },
-        //(file testzzzzzzzz)===============================================================================
-        // (callback) => {
-        //     request("GET", "/file/pdf/" + pdfname + ".pdf", "", "", "", callback)
-        // },
-        // (callback) => { request("GET", "/file/img/" + userTags[5].comments[0].img, "", "", "", callback) },
+        //(file test)===============================================================================
+        (callback) => { request("GET", "/comment/img/" + userTags[5].comments[0].img, "", "", "", callback) },
         //(kleenup)=========================================================================================
         (callback) => {
             request("DELETE", "/user/deleteinfo", authNoBody, "", "", callback)
