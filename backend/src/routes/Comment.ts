@@ -41,7 +41,7 @@ router.post("/new/:id", upload.single('img'), (req: RequestWithFiles, res: Respo
             Comment.new({
                 ip: req.ip,
                 tag: new helpers.toObjID(req.params.id),
-                text: xss.uriInHTMLData(req.body.text),
+                text: xss.uriQueryInHTMLData(req.body.text).replace(/%20/g," "),
                 img: (req.file) ? req.file.id : undefined,
                 sev: req.body.sev,
             }, tag)
