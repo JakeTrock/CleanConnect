@@ -50,9 +50,8 @@ export default {
                     .then(() => user.save())
                     .then(() => resolve())
                     .catch(reject);
-            } else {
+            } else
                 reject('You have hit the inventory limit for this tier, please consider upgrading');
-            }
         });
     },
     change: (id: Types.ObjectId, updated: InventoryChangeInterface) => {
@@ -72,11 +71,17 @@ export default {
             async.parallel({
                 Item: (cb) => Item.deleteMany({
                     inventory: id
-                }).then(() => cb()).catch(cb),
+                })
+                    .then(cb())
+                    .catch(cb),
                 Tag: (cb) => Inventory.deleteOne({
                     _id: id
-                }).then(() => cb()).catch(cb),
-                User: (cb) => User.removeInv(user._id, id).then(() => cb()).catch(cb)
+                })
+                    .then(cb())
+                    .catch(cb),
+                User: (cb) => User.removeItem(user._id, id, "invs")
+                    .then(cb())
+                    .catch(cb)
             }).then(() => resolve())
                 .catch(reject);
         });
@@ -90,10 +95,18 @@ export default {
                     async.parallel({
                         Items: (cb) => Item.deleteMany({
                             inventory: value._id
-                        }).then(() => cb()).catch(cb),
-                        Invs: (cb) => Inventory.findByIdAndDelete(value._id).then(() => cb()).catch(cb),
-                        User: (cb) => User.removeInv(userID, value._id).then(() => cb()).catch(cb)
-                    }).then(callback()).catch(callback)))
+                        })
+                            .then(cb())
+                            .catch(cb),
+                        Invs: (cb) => Inventory.findByIdAndDelete(value._id).
+                            then(cb())
+                            .catch(cb),
+                        User: (cb) => User.removeItem(userID, value._id, "invs")
+                            .then(cb())
+                            .catch(cb)
+                    })
+                        .then(callback())
+                        .catch(callback)))
                 .then(() => resolve())
                 .catch(reject);
         });

@@ -24,7 +24,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_conf_1 = __importDefault(require("./config/express.conf"));
 const schedule = __importStar(require("node-schedule"));
-const braintree_1 = __importDefault(require("braintree"));
 const asyncpromise_1 = __importDefault(require("./asyncpromise"));
 const User_1 = __importDefault(require("./models/User"));
 const UserIndex_1 = __importDefault(require("./models/UserIndex"));
@@ -34,12 +33,6 @@ const Inventory_1 = __importDefault(require("./models/Inventory"));
 const helpers_1 = __importDefault(require("./helpers"));
 const keys_json_1 = __importDefault(require("./config/keys.json"));
 const util_1 = require("util");
-const gateway = braintree_1.default.connect({
-    environment: braintree_1.default.Environment.Sandbox,
-    merchantId: keys_json_1.default.mid,
-    publicKey: keys_json_1.default.pbk,
-    privateKey: keys_json_1.default.prk,
-});
 if (!keys_json_1.default.testing) {
     process.env.topLevelDomain = "cleanconnect.us";
     process.env.domainPrefix = "https://";
@@ -59,21 +52,31 @@ process
 });
 schedule.scheduleJob("00 00 00 * * *", () => {
     console.log("Goodnight, time to delete some stuff! (-_-)ᶻᶻᶻᶻ");
+    let d = new Date();
     asyncpromise_1.default.parallel({
         oneWeek: (callback) => {
-            var d = new Date();
             d.setDate(d.getDate() - 7);
             UserIndex_1.default.listPrunable(d).then((list) => asyncpromise_1.default.each(list, (elem, callback) => {
-                User_1.default.findById(elem._userId).then(user => asyncpromise_1.default.parallel({
-                    payCancel: gateway.subscription.cancel(user.PayToken),
-                    userRemove: User_1.default.findOneAndRemove({
+                User_1.default.findById(elem._userId).then((user) => asyncpromise_1.default.parallel({
+                    payCancel: (cb) => express_conf_1.default.gateway.subscription.cancel(user.PayToken)
+                        .then(cb())
+                        .catch(cb),
+                    userRemove: (cb) => User_1.default.findOneAndRemove({
                         _id: user._id,
-                    }),
-                    indexRemove: UserIndex_1.default.deleteMany({
+                    })
+                        .then(cb())
+                        .catch(cb),
+                    indexRemove: (cb) => UserIndex_1.default.deleteMany({
                         _userId: user._id,
-                    }),
-                    tagPurge: Tag_1.default.purge(user._id),
-                    invPurge: Inventory_1.default.purge(user._id)
+                    })
+                        .then(cb())
+                        .catch(cb),
+                    tagPurge: (cb) => Tag_1.default.purge(user._id)
+                        .then(cb())
+                        .catch(cb),
+                    invPurge: (cb) => Inventory_1.default.purge(user._id)
+                        .then(cb())
+                        .catch(cb)
                 }))
                     .catch(e => callback(e))
                     .then(callback());
@@ -82,7 +85,6 @@ schedule.scheduleJob("00 00 00 * * *", () => {
                 .catch(e => callback(e, false));
         },
         oneMonth: callback => {
-            var d = new Date();
             d.setDate(d.getDate() - 23);
             Comment_1.default.find({
                 markedForDeletion: true,
@@ -91,8 +93,8 @@ schedule.scheduleJob("00 00 00 * * *", () => {
                 }
             }).then((list) => asyncpromise_1.default.each(list, (elem, callback) => {
                 Comment_1.default.rmImageDelete(elem._id)
-                    .catch(e => callback(e))
-                    .then(callback());
+                    .then(callback())
+                    .catch(e => callback(e));
             }))
                 .then(callback(null, true))
                 .catch(e => callback(e, false));

@@ -23,11 +23,10 @@ export default {
                 tag: id
             }).then((cmt: Array<ifCommentDocument>) => async.forEachOf(cmt, (value: ifCommentDocument, key: Number, callback) => async.parallel({
                 imageDeletion: (cb) => {
-                    if (value.img) {
+                    if (value.img) 
                         econf.gfs.delete(new helpers.toObjID(value.img))
-                            .then(() => cb())
+                            .then(cb())
                             .catch((e) => cb(e))
-                    }
                 },
                 commentDeletion: (cb) => {
                     value.deleteOne()

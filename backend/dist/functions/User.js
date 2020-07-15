@@ -34,39 +34,24 @@ exports.default = {
         return new Promise((resolve, reject) => {
             User_1.default.findById(id)
                 .then((user) => {
-                if (user) {
+                if (user)
                     resolve(user);
-                }
                 reject("No such user exists!");
             });
         });
     },
-    removeTag: (user, id) => {
+    removeItem: (user, id, op) => {
         return new Promise((resolve, reject) => {
             User_1.default.updateOne({
                 _id: user
             }, {
                 "$pull": {
-                    "tags": id
+                    op: id
                 }
             }, {
                 runValidators: true
             })
                 .then(() => resolve())
-                .catch(reject);
-        });
-    },
-    removeInv: (user, id) => {
-        return new Promise((resolve, reject) => {
-            User_1.default.updateOne({
-                _id: user
-            }, {
-                "$pull": {
-                    "invs": id
-                }
-            }, {
-                runValidators: true
-            }).then(() => resolve())
                 .catch(reject);
         });
     },
@@ -136,13 +121,13 @@ exports.default = {
                 .catch(reject);
         });
     },
-    changePass: (email, password1, password2, phone) => {
+    changePass: (info) => {
         return new Promise((resolve, reject) => {
-            if (!password1 && !password2 && !(password1 === password2))
+            if (!info.password1 && !info.password2 && !(info.password1 === info.password2))
                 reject("password error");
-            bcryptjs_1.default.hash(password1, 10).then((hash) => User_1.default.findOneAndUpdate({
-                email: email,
-                phone: phone,
+            bcryptjs_1.default.hash(info.password1, 10).then((hash) => User_1.default.findOneAndUpdate({
+                email: info.email,
+                phone: info.phone,
             }, {
                 $set: {
                     password: hash,
@@ -157,7 +142,6 @@ exports.default = {
     new: (details, gateway) => {
         return new Promise((resolve, reject) => {
             if (details.payment_method_nonce && details.password === details.password2) {
-                let payTemp = details.payment_method_nonce;
                 asyncpromise_1.default.parallel({
                     codes: (callback) => {
                         const dc = crypto.randomBytes(16).toString("hex").substring(8);
@@ -185,7 +169,7 @@ exports.default = {
                             email: details.email,
                             company: details.name,
                             phone: details.phone,
-                            paymentMethodNonce: payTemp
+                            paymentMethodNonce: details.payment_method_nonce
                         })
                             .then((customerResult) => {
                             tmp.custID = customerResult.customer.id;

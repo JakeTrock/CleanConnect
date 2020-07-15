@@ -18,8 +18,7 @@ exports.default = {
                 .then((tag) => {
                 if (tag)
                     resolve(tag);
-                else
-                    reject("No such tag exists!");
+                reject("No such tag exists!");
             });
         });
     },
@@ -56,9 +55,8 @@ exports.default = {
                     .then(() => resolve())
                     .catch(reject);
             }
-            else {
+            else
                 reject('You have hit the tag limit for this tier, please consider upgrading');
-            }
         });
     },
     change: (id, updated) => {
@@ -75,11 +73,17 @@ exports.default = {
     removal: (id, uid) => {
         return new Promise((resolve, reject) => {
             asyncpromise_1.default.parallel({
-                Comment: (cb) => Comment_1.default.rmImageDelete(id).then(() => cb()).catch(cb),
+                Comment: (cb) => Comment_1.default.rmImageDelete(id)
+                    .then(cb())
+                    .catch(cb),
                 Tag: (cb) => Tag_1.default.deleteOne({
                     _id: id
-                }).then(() => cb()).catch(cb),
-                User: (cb) => User_1.default.removeTag(id, uid).then(() => cb()).catch(cb)
+                })
+                    .then(cb())
+                    .catch(cb),
+                User: (cb) => User_1.default.removeItem(id, uid, "tags")
+                    .then(cb())
+                    .catch(cb)
             }).then(() => resolve())
                 .catch(reject);
         });
@@ -90,10 +94,18 @@ exports.default = {
                 user: userID
             }).then((inv) => asyncpromise_1.default.forEachOf(inv, (value, key, callback) => {
                 asyncpromise_1.default.parallel({
-                    Comments: (cb) => Comment_1.default.rmImageDelete(value._id).then(() => cb()).catch(cb),
-                    Tag: (cb) => Tag_1.default.findByIdAndDelete(value._id).then(() => cb()).catch(cb),
-                    User: (cb) => User_1.default.removeTag(userID, value._id).then(() => cb()).catch(cb)
-                }).then(callback()).catch(callback);
+                    Comments: (cb) => Comment_1.default.rmImageDelete(value._id)
+                        .then(cb())
+                        .catch(cb),
+                    Tag: (cb) => Tag_1.default.findByIdAndDelete(value._id)
+                        .then(cb())
+                        .catch(cb),
+                    User: (cb) => User_1.default.removeItem(userID, value._id, "tags")
+                        .then(cb())
+                        .catch(cb)
+                })
+                    .then(callback())
+                    .catch(callback);
             }))
                 .then(() => resolve())
                 .catch(reject);

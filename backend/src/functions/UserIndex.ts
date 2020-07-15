@@ -8,10 +8,10 @@ import UserIndex from '../models/UserIndex';
 export default {
     get: (token: string) => {
         return new Promise((resolve, reject) => {
-            UserIndex.findOne({
+            UserIndex.exists({
                 token: token
-            }).then((index: ifUserIndexDocument) => {
-                if (index.token) resolve();
+            }).then((exists:boolean) => {
+                if (exists) resolve();
                 reject('No user exists with this token');
             });
         });
@@ -35,9 +35,7 @@ export default {
                 token: token
             }).then((index: ifUserIndexDocument) => {
                 if (!index) return reject("no token found");
-                else {
-                    return index;
-                }
+                else return index;
             }).then((index: ifUserIndexDocument) => async.parallel({
                 findUser: (callback) => {
                     User.findOne({

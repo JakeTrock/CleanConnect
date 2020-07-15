@@ -7,17 +7,13 @@ import xss from 'xss-filters';
 import helpers from '../helpers';
 import Comment from '../models/Comment';
 import Tag from '../models/Tag';
-import { ifTagDocument } from "../interfaces";
+import { ifTagDocument, RequestWithFiles } from "../interfaces";
 import econf from '../config/express.conf';
 import upload from '../models/Image';
 
 
 //router and request config
-interface RequestWithFiles extends Request {
-    files: any
-}
 let router = Router();
-// router.use(fileUpload());
 
 // ROUTE: POST comment/test
 // DESCRIPTION: tests comment route

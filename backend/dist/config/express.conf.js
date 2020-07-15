@@ -34,10 +34,17 @@ const Comment_1 = __importDefault(require("../routes/Comment"));
 const Dash_1 = __importDefault(require("../routes/Dash"));
 const Inventory_1 = __importDefault(require("../routes/Inventory"));
 const helpers_1 = __importDefault(require("../helpers"));
+const braintree_1 = __importDefault(require("braintree"));
 const keys_json_1 = __importDefault(require("../config/keys.json"));
 class ExpressConfiguration {
     constructor() {
         this.dbUrl = config.url;
+        this.gateway = braintree_1.default.connect({
+            environment: braintree_1.default.Environment.Sandbox,
+            merchantId: keys_json_1.default.mid,
+            publicKey: keys_json_1.default.pbk,
+            privateKey: keys_json_1.default.prk,
+        });
         this.app = express.default();
         this.config();
         this.dbConnect();

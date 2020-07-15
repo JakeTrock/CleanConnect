@@ -1,7 +1,6 @@
 //module import block
 import econf from './config/express.conf';
 import * as schedule from "node-schedule";
-import braintree from 'braintree';
 import async from './asyncpromise';
 import User from './models/User';
 import UserIndex from './models/UserIndex';
@@ -11,13 +10,8 @@ import Inventory from './models/Inventory';
 import helpers from './helpers';
 import keys from './config/keys.json';
 import { inspect } from 'util';
-import { ifCommentDocument, ifUserIndexDocument } from './interfaces';
-const gateway = braintree.connect({
-    environment: braintree.Environment.Sandbox,
-    merchantId: keys.mid,
-    publicKey: keys.pbk,
-    privateKey: keys.prk,
-});
+import { ifCommentDocument, ifUserIndexDocument, ifUserDocument } from './interfaces';
+
 
 //setup bodyparser and express
 if (!keys.testing) {
@@ -48,23 +42,33 @@ process
 // INPUT: NONE
 schedule.scheduleJob("00 00 00 * * *", () => {
     console.log("Goodnight, time to delete some stuff! (-_-)ᶻᶻᶻᶻ");
+    let d: Date = new Date();
     async.parallel({
         //older than one week block
         oneWeek: (callback) => {
-            var d = new Date();
             d.setDate(d.getDate() - 7);
             UserIndex.listPrunable(d).then((list: Array<ifUserIndexDocument>) =>
                 async.each(list, (elem: ifUserIndexDocument, callback) => {
-                    User.findById(elem._userId).then(user => async.parallel({
-                        payCancel: gateway.subscription.cancel(user.PayToken),
-                        userRemove: User.findOneAndRemove({
+                    User.findById(elem._userId).then((user: ifUserDocument) => async.parallel({
+                        payCancel: (cb) => econf.gateway.subscription.cancel(user.PayToken)
+                            .then(cb())
+                            .catch(cb),
+                        userRemove: (cb) => User.findOneAndRemove({
                             _id: user._id,
-                        }),
-                        indexRemove: UserIndex.deleteMany({
+                        })
+                            .then(cb())
+                            .catch(cb),
+                        indexRemove: (cb) => UserIndex.deleteMany({
                             _userId: user._id,
-                        }),
-                        tagPurge: Tag.purge(user._id),
-                        invPurge: Inventory.purge(user._id)
+                        })
+                            .then(cb())
+                            .catch(cb),
+                        tagPurge: (cb) => Tag.purge(user._id)
+                            .then(cb())
+                            .catch(cb),
+                        invPurge: (cb) => Inventory.purge(user._id)
+                            .then(cb())
+                            .catch(cb)
                     }))
                         .catch(e => callback(e))
                         .then(callback())
@@ -74,7 +78,6 @@ schedule.scheduleJob("00 00 00 * * *", () => {
         },
         //older than one month block
         oneMonth: callback => {
-            var d = new Date();
             d.setDate(d.getDate() - 23);
             //remove images connected to stale comments
             Comment.find({
@@ -85,8 +88,8 @@ schedule.scheduleJob("00 00 00 * * *", () => {
             }).then((list: Array<ifCommentDocument>) =>
                 async.each(list, (elem: ifCommentDocument, callback) => {
                     Comment.rmImageDelete(elem._id)
-                        .catch(e => callback(e))
                         .then(callback())
+                        .catch(e => callback(e))
                 }))
                 .then(callback(null, true))
                 .catch(e => callback(e, false));

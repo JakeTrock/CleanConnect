@@ -30,10 +30,10 @@ const UserIndex_1 = __importDefault(require("../models/UserIndex"));
 exports.default = {
     get: (token) => {
         return new Promise((resolve, reject) => {
-            UserIndex_1.default.findOne({
+            UserIndex_1.default.exists({
                 token: token
-            }).then((index) => {
-                if (index.token)
+            }).then((exists) => {
+                if (exists)
                     resolve();
                 reject('No user exists with this token');
             });
@@ -59,9 +59,8 @@ exports.default = {
             }).then((index) => {
                 if (!index)
                     return reject("no token found");
-                else {
+                else
                     return index;
-                }
             }).then((index) => asyncpromise_1.default.parallel({
                 findUser: (callback) => {
                     User_1.default.findOne({

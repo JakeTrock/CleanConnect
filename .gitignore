@@ -84,3 +84,4 @@ mykeys/CleanConnectKey.pub
 backend/routes/sources/*
 backend/turbo-*
 mykeys/puttykey
+*.logs

@@ -25,11 +25,10 @@ exports.default = {
                 tag: id
             }).then((cmt) => asyncpromise_1.default.forEachOf(cmt, (value, key, callback) => asyncpromise_1.default.parallel({
                 imageDeletion: (cb) => {
-                    if (value.img) {
+                    if (value.img)
                         express_conf_1.default.gfs.delete(new helpers_1.default.toObjID(value.img))
-                            .then(() => cb())
+                            .then(cb())
                             .catch((e) => cb(e));
-                    }
                 },
                 commentDeletion: (cb) => {
                     value.deleteOne()

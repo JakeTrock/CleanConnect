@@ -1,5 +1,6 @@
 import { Types, Document, Model } from 'mongoose';
 import { BraintreeGateway } from 'braintree';
+import { Request } from "express";
 
 //Mongoose Document Interfaces
 export interface ifUserDocument extends Document {
@@ -20,11 +21,10 @@ export interface ifUserDocument extends Document {
 //static function interfaces
 export interface ifUserModel extends Model<ifUserDocument> {
     get: (id: string) => Promise<ifUserDocument>;
-    removeTag: (user: Types.ObjectId, id: Types.ObjectId) => Promise<void>;
-    removeInv: (user: Types.ObjectId, id: Types.ObjectId) => Promise<void>;
+    removeItem: (user: Types.ObjectId, id: Types.ObjectId, op: string) => Promise<void>;
     login: (field1: string, field2: string) => Promise<String>;
     changeInfo: (usr: Types.ObjectId, changeFields: UserChangeFields, gateway: BraintreeGateway) => Promise<void>;
-    changePass: (email: string, password1: string, password2: string, phone: string) => Promise<void>;
+    changePass: (info: changePassInterface) => Promise<void>;
     new: (details: UserNewInterface, gateway: BraintreeGateway) => Promise<ifUserDocument>;
 }
 
@@ -221,4 +221,15 @@ export interface JWTuser {
 export interface JWTreg {
     pass: boolean;
     usr: JWTuser;
+}
+
+export interface RequestWithFiles extends Request {
+    files: any
+}
+
+export interface changePassInterface {
+    email: ifUserDocument["email"],
+    password1: string,
+    password2: string,
+    phone: ifUserDocument["phone"]
 }

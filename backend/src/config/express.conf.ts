@@ -11,12 +11,20 @@ import comment from '../routes/Comment';
 import dash from '../routes/Dash';
 import inventory from '../routes/Inventory';
 import helpers from '../helpers';
+import braintree from 'braintree';
 import keys from '../config/keys.json';//secret generator:dd if=/dev/random bs=2 count=3 2>/dev/null | perl -e '$hex = <>; $hex = unpack("H*", $hex) ; $hex =~ s/(..)(?!.?$)/$1:/g; print "$hex\n";'
 // Logic
 class ExpressConfiguration {
     public app: express.Application;
     public dbUrl: string = config.url;
     public gfs;
+    public gateway = braintree.connect({
+        environment: braintree.Environment.Sandbox,
+        merchantId: keys.mid,
+        publicKey: keys.pbk,
+        privateKey: keys.prk,
+    });
+    
     constructor() {
         this.app = express.default();
         this.config();

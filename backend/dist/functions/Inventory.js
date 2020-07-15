@@ -55,9 +55,8 @@ exports.default = {
                     .then(() => resolve())
                     .catch(reject);
             }
-            else {
+            else
                 reject('You have hit the inventory limit for this tier, please consider upgrading');
-            }
         });
     },
     change: (id, updated) => {
@@ -77,11 +76,17 @@ exports.default = {
             asyncpromise_1.default.parallel({
                 Item: (cb) => Item_1.default.deleteMany({
                     inventory: id
-                }).then(() => cb()).catch(cb),
+                })
+                    .then(cb())
+                    .catch(cb),
                 Tag: (cb) => Inventory_1.default.deleteOne({
                     _id: id
-                }).then(() => cb()).catch(cb),
-                User: (cb) => User_1.default.removeInv(user._id, id).then(() => cb()).catch(cb)
+                })
+                    .then(cb())
+                    .catch(cb),
+                User: (cb) => User_1.default.removeItem(user._id, id, "invs")
+                    .then(cb())
+                    .catch(cb)
             }).then(() => resolve())
                 .catch(reject);
         });
@@ -93,10 +98,18 @@ exports.default = {
             }).then((inv) => asyncpromise_1.default.forEachOf(inv, (value, key, callback) => asyncpromise_1.default.parallel({
                 Items: (cb) => Item_1.default.deleteMany({
                     inventory: value._id
-                }).then(() => cb()).catch(cb),
-                Invs: (cb) => Inventory_1.default.findByIdAndDelete(value._id).then(() => cb()).catch(cb),
-                User: (cb) => User_1.default.removeInv(userID, value._id).then(() => cb()).catch(cb)
-            }).then(callback()).catch(callback)))
+                })
+                    .then(cb())
+                    .catch(cb),
+                Invs: (cb) => Inventory_1.default.findByIdAndDelete(value._id).
+                    then(cb())
+                    .catch(cb),
+                User: (cb) => User_1.default.removeItem(userID, value._id, "invs")
+                    .then(cb())
+                    .catch(cb)
+            })
+                .then(callback())
+                .catch(callback)))
                 .then(() => resolve())
                 .catch(reject);
         });

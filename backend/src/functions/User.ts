@@ -2,7 +2,7 @@ import QRCode from 'qrcode';
 import async from '../asyncpromise';
 import bcrypt from 'bcryptjs';
 import jwt from 'jwt-then';
-import { ifUserDocument, UserChangeFields, UserNewInterface, PaymentReturnInterface } from '../interfaces';
+import { ifUserDocument, UserChangeFields, UserNewInterface, PaymentReturnInterface, changePassInterface } from '../interfaces';
 import { BraintreeGateway } from 'braintree';
 import { Types } from 'mongoose';
 import keys from '../config/keys.json';
@@ -14,39 +14,23 @@ export default {
         return new Promise((resolve, reject) => {
             User.findById(id)
                 .then((user: ifUserDocument) => {
-                    if (user) {
-                        resolve(user);
-                    }
+                    if (user) resolve(user);
                     reject("No such user exists!");
                 });
         });
     },
-    removeTag: (user: Types.ObjectId, id: Types.ObjectId) => {
+    removeItem: (user: Types.ObjectId, id: Types.ObjectId, op: string) => {
         return new Promise((resolve, reject) => {
             User.updateOne({
                 _id: user
             }, {
                 "$pull": {
-                    "tags": id
+                    op: id
                 }
             }, {
                 runValidators: true
             })
                 .then(() => resolve())
-                .catch(reject);
-        });
-    },
-    removeInv: (user: Types.ObjectId, id: Types.ObjectId) => {
-        return new Promise((resolve, reject) => {
-            User.updateOne({
-                _id: user
-            }, {
-                "$pull": {
-                    "invs": id
-                }
-            }, {
-                runValidators: true
-            }).then(() => resolve())
                 .catch(reject);
         });
     },
@@ -114,13 +98,13 @@ export default {
                 .catch(reject);
         });
     },
-    changePass: (email: string, password1: string, password2: string, phone: string) => {
+    changePass: (info: changePassInterface) => {
         return new Promise((resolve, reject) => {
-            if (!password1 && !password2 && !(password1 === password2)) reject("password error");
-            bcrypt.hash(password1, 10).then((hash: string) =>
+            if (!info.password1 && !info.password2 && !(info.password1 === info.password2)) reject("password error");
+            bcrypt.hash(info.password1, 10).then((hash: string) =>
                 User.findOneAndUpdate({
-                    email: email,
-                    phone: phone,
+                    email: info.email,
+                    phone: info.phone,
                 }, {
                     $set: {
                         password: hash,
@@ -135,7 +119,6 @@ export default {
     new: (details: UserNewInterface, gateway: BraintreeGateway) => {
         return new Promise((resolve, reject) => {
             if (details.payment_method_nonce && details.password === details.password2) {
-                let payTemp = details.payment_method_nonce;
                 async.parallel({
                     codes: (callback) => {
                         const dc = crypto.randomBytes(16).toString("hex").substring(8);
@@ -163,7 +146,7 @@ export default {
                             email: details.email,
                             company: details.name,
                             phone: details.phone,
-                            paymentMethodNonce: payTemp
+                            paymentMethodNonce: details.payment_method_nonce
                         })
                             .then((customerResult: any) => {//TODO: typing troubles here, and below
                                 tmp.custID = customerResult.customer.id;

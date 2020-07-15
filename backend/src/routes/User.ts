@@ -3,23 +3,17 @@ import {
     Response,
     Router
 } from "express";
-import braintree, { ClientToken } from 'braintree';
+import { ClientToken } from 'braintree';
+import econf from '../config/express.conf';
 import helpers from '../helpers';
 import User from '../models/User';
 import UserIndex from '../models/UserIndex';
 import Inventory from '../models/Inventory';
 import Tag from '../models/Tag';
-import keys from '../config/keys.json';
 import async from '../asyncpromise';
 import { ifUserDocument } from "../interfaces";
 let router = Router();
-//Load models
-const gateway = braintree.connect({
-    environment: braintree.Environment.Sandbox,
-    merchantId: keys.mid,
-    publicKey: keys.pbk,
-    privateKey: keys.prk,
-});
+
 // ROUTE: GET user/test
 // DESCRIPTION: tests user route
 // INPUT: none
@@ -29,7 +23,7 @@ router.get("/test", (req: Request, res: Response) => res.send("User Works"));
 // DESCRIPTION: sends registration email to user
 // INPUT: user name, email and password(all as strings), via json body
 router.post("/register", (req: Request, res: Response) => {
-    User.new(req.body, gateway)
+    User.new(req.body, econf.gateway)
         .then((user: ifUserDocument) =>
             UserIndex.createIndex({
                 _id: user._id,
@@ -101,7 +95,7 @@ router.post("/changeinfo", helpers.passport, (req: Request, res: Response) => {
 // INPUT: new user details via json body
 router.post("/change/:token", helpers.passport, (req: Request, res: Response) => {
     UserIndex.confirm(req.params.token)
-        .then((user: ifUserDocument) => User.changeInfo(user._id, req.body, gateway))
+        .then((user: ifUserDocument) => User.changeInfo(user._id, req.body, econf.gateway))
         .then(() => res.json(helpers.blankres))
         .catch(e => res.json(helpers.erep(e)));
 });
@@ -122,12 +116,7 @@ router.post("/resetPass", (req: Request, res: Response) => {
 // DESCRIPTION: recieves verification email to change password
 // INPUT: email and new password twice
 router.post("/resetPass/:token", (req: Request, res: Response) => {
-    User.changePass(
-        req.body.email,
-        req.body.password1,
-        req.body.password2,
-        req.body.phone
-    )
+    User.changePass(req.body)
         .then(() => res.json(helpers.blankres))
         .catch(e => res.json(helpers.erep(e)));
 });
@@ -154,15 +143,25 @@ router.get("/delete/:token", helpers.passport, (req: Request, res: Response) => 
                 res.json("email token does not match current user cookie, please log into this computer to load the cookie into your memory");
             else
                 async.parallel({
-                    delUser: (callback) => User.findByIdAndDelete(req.user._id).then(callback()).catch(callback),
-                    payCancel: (callback) => gateway.subscription.cancel(user.PayToken).then(callback()).catch(callback),
+                    delUser: (callback) => User.findByIdAndDelete(req.user._id)
+                        .then(callback())
+                        .catch(callback),
+                    payCancel: (callback) => econf.gateway.subscription.cancel(user.PayToken)
+                        .then(callback())
+                        .catch(callback),
                     delIndexes: (callback) => UserIndex.deleteMany({
                         _userId: user._id,
                     }).then(() => UserIndex.deleteMany({
                         email: user.email,
-                    })).then(callback()).catch(callback),
-                    delTags: (callback) => Tag.purge(user._id).then(callback()).catch(callback),
-                    delInvs: (callback) => Inventory.purge(user._id).then(callback()).catch(callback)
+                    }))
+                        .then(callback())
+                        .catch(callback),
+                    delTags: (callback) => Tag.purge(user._id)
+                        .then(callback())
+                        .catch(callback),
+                    delInvs: (callback) => Inventory.purge(user._id)
+                        .then(callback())
+                        .catch(callback)
                 })
                     .then(() => res.json(helpers.blankres))
                     .catch(e => res.json(helpers.erep(e)));
@@ -195,15 +194,23 @@ router.get("/current", helpers.passport, (req: Request, res: Response) => {
             })))
         .catch(e => res.json(helpers.erep(e)));
 });
+
+// ROUTE: GET user/getClientToken
+// DESCRIPTION: returns generic client token
+// INPUT: none
 router.get("/getClientToken", (req: Request, res: Response) => {
-    gateway.clientToken.generate({})
+    econf.gateway.clientToken.generate({})
         .then((response: ClientToken) => res.json(helpers.scadd({
             clientToken: response.clientToken
         }))).catch(e => res.json(helpers.erep(e)));
 });
+
+// ROUTE: GET user/getAuthClientToken
+// DESCRIPTION: returns user-custom client token
+// INPUT: jwt token details
 router.get("/getAuthClientToken", helpers.passport, (req: Request, res: Response) => {
     User.get(req.user._id)
-        .then((usr: ifUserDocument) => gateway.clientToken.generate({
+        .then((usr: ifUserDocument) => econf.gateway.clientToken.generate({
             customerId: usr.custID,
         }))
         .then((response: ClientToken) => res.json(helpers.scadd({

@@ -21,7 +21,7 @@ router.post("/new/:id", Image_1.default.single('img'), (req, res) => {
         Comment_1.default.new({
             ip: req.ip,
             tag: new helpers_1.default.toObjID(req.params.id),
-            text: xss_filters_1.default.uriInHTMLData(req.body.text),
+            text: xss_filters_1.default.uriQueryInHTMLData(req.body.text).replace(/%20/g, " "),
             img: (req.file) ? req.file.id : undefined,
             sev: req.body.sev,
         }, tag)
