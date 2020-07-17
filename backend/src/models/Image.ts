@@ -15,7 +15,7 @@ const storage = new GridFsStorage({
     url: keys.url,
     file: (req, file) => {
         return new Promise((resolve, reject) => {
-            if (codecs.indexOf(file.mimetype) >= 0) {//TODO:add filesize limit
+            if (codecs.indexOf(file.mimetype) >= 0) {
                 resolve({
                     bucketName: 'uploads'
                 });
