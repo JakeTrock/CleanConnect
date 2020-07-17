@@ -681,12 +681,12 @@ waterfall([
             request("GET", "/comment/img/" + userTags[5].comments[0].img, "", "", "", callback)
         },
         //(kleenup)=========================================================================================
-        (callback) => {
-            request("DELETE", "/user/deleteinfo", authNoBody, "", "", callback)
-        },
-        (callback) => {
-            request("GET", "/user/delete/" + verlnk, authNoBody, "", "", callback)
-        },
+        // (callback) => {
+        //     request("DELETE", "/user/deleteinfo", authNoBody, "", "", callback)
+        // },
+        // (callback) => {
+        //     request("GET", "/user/delete/" + verlnk, authNoBody, "", "", callback)
+        // },
         function (callback) {
             callback();
         }

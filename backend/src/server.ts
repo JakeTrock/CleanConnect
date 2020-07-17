@@ -47,32 +47,34 @@ schedule.scheduleJob("00 00 00 * * *", () => {
         //older than one week block
         oneWeek: (callback) => {
             d.setDate(d.getDate() - 7);
-            UserIndex.listPrunable(d).then((list: Array<ifUserIndexDocument>) =>
-                async.each(list, (elem: ifUserIndexDocument, callback) => {
-                    User.findById(elem._userId).then((user: ifUserDocument) => async.parallel({
-                        payCancel: (cb) => econf.gateway.subscription.cancel(user.PayToken)
-                            .then(cb())
-                            .catch(cb),
-                        userRemove: (cb) => User.findOneAndRemove({
-                            _id: user._id,
-                        })
-                            .then(cb())
-                            .catch(cb),
-                        indexRemove: (cb) => UserIndex.deleteMany({
-                            _userId: user._id,
-                        })
-                            .then(cb())
-                            .catch(cb),
-                        tagPurge: (cb) => Tag.purge(user._id)
-                            .then(cb())
-                            .catch(cb),
-                        invPurge: (cb) => Inventory.purge(user._id)
-                            .then(cb())
-                            .catch(cb)
+            UserIndex.listPrunable(d)
+                .then((list: Array<ifUserIndexDocument>) =>
+                    async.each(list, (elem: ifUserIndexDocument, callback) => {
+                        User.findById(elem._userId).then((user: ifUserDocument) =>
+                            async.parallel({
+                                payCancel: (cb) => econf.gateway.subscription.cancel(user.PayToken)
+                                    .then(cb())
+                                    .catch(cb),
+                                userRemove: (cb) => User.findOneAndRemove({
+                                    _id: user._id,
+                                })
+                                    .then(cb())
+                                    .catch(cb),
+                                indexRemove: (cb) => UserIndex.deleteMany({
+                                    _userId: user._id,
+                                })
+                                    .then(cb())
+                                    .catch(cb),
+                                tagPurge: (cb) => Tag.purge(user._id)
+                                    .then(cb())
+                                    .catch(cb),
+                                invPurge: (cb) => Inventory.purge(user._id)
+                                    .then(cb())
+                                    .catch(cb)
+                            }))
+                            .then(callback())
+                            .catch(console.log)
                     }))
-                        .catch(e => callback(e))
-                        .then(callback())
-                }))
                 .then(callback(null, true))
                 .catch(e => callback(e, false));
         },
@@ -94,6 +96,6 @@ schedule.scheduleJob("00 00 00 * * *", () => {
                 .then(callback(null, true))
                 .catch(e => callback(e, false));
         }
-    }).then(console.log)
-        .catch(helpers.erep);
+    }).then(out => console.log(out))
+        .catch(console.log);
 });

@@ -19,11 +19,13 @@ export default {
     },
     rmImageDelete: (id: Types.ObjectId) => {
         return new Promise((resolve, reject) => {
-            Comment.find({
+            Comment.find().or([{
                 tag: id
-            }).then((cmt: Array<ifCommentDocument>) => async.forEachOf(cmt, (value: ifCommentDocument, key: Number, callback) => async.parallel({
+            }, {
+                _id: id
+            }]).then((cmt: Array<ifCommentDocument>) => async.forEachOf(cmt, (value: ifCommentDocument, key: Number, callback) => async.parallel({
                 imageDeletion: (cb) => {
-                    if (value.img) 
+                    if (value.img)
                         econf.gfs.delete(new helpers.toObjID(value.img))
                             .then(cb())
                             .catch((e) => cb(e))
