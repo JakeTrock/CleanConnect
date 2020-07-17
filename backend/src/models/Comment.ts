@@ -34,7 +34,7 @@ const CommentSchema: Schema = new Schema({
   },
   ip: {
     type: String,
-    // required: true //TODO:why won't this work?
+    required: true
   },
 }, {
   timestamps: true
