@@ -30,4 +30,9 @@ const storage = new multer_gridfs_storage_1.default({
         });
     }
 });
-exports.default = multer_1.default({ storage });
+exports.default = multer_1.default({
+    storage,
+    limits: {
+        fileSize: 32000000
+    }
+});

@@ -26,7 +26,7 @@ router.post("/new", helpers_1.default.passport, (req, res) => {
 });
 router.post("/getall", helpers_1.default.passport, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     Tag_1.default.getall(req.user._id, req.body.showDead)
-        .then(out => res.json(helpers_1.default.scadd(out)))
+        .then(out => res.json(helpers_1.default.scadd({ tags: out })))
         .catch(e => res.json(helpers_1.default.erep(e)));
 }));
 router.get("/getone/:id", helpers_1.default.passport, (req, res) => {

@@ -98,7 +98,7 @@ exports.default = {
         success: true
     },
     erep: function (err) {
-        const ptx = util_1.inspect(err);
+        const ptx = util_1.inspect((err.message) ? err.message : err);
         logger.error(ptx);
         return {
             message: ptx,
