@@ -27,7 +27,7 @@ router.post("/new", helpers.passport, (req: Request, res: Response) => {
 // DESCRIPTION: pregenerates qr codes, skipping tags that are already generated
 router.post("/getall", helpers.passport, async (req: Request, res: Response) => {
     Tag.getall(req.user._id, req.body.showDead)
-        .then(out => res.json(helpers.scadd(out)))
+        .then(out => res.json(helpers.scadd({ tags: out })))
         .catch(e => res.json(helpers.erep(e)));
 });
 

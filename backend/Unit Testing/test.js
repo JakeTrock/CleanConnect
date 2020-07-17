@@ -34,8 +34,8 @@ function request(reqType, url, headers, bodyType, reqBody, callback) {
             };
         }
         if (url == "/user/current") userDetails = res.body;
-        if (url == "/tag/getall") userTags = res.body;
-        if (url == "/inventory/getall") userInv = res.body;
+        if (url == "/tag/getall") userTags = res.body.tags;
+        if (url == "/inventory/getall") userInv = res.body.invs;
         callback();
         return JSON.stringify(res.body);
     });
@@ -677,7 +677,9 @@ waterfall([
             request("GET", "/dash/" + userDetails.dashCode, "", "", "", callback)
         },
         //(file test)===============================================================================
-        (callback) => { request("GET", "/comment/img/" + userTags[5].comments[0].img, "", "", "", callback) },
+        (callback) => {
+            request("GET", "/comment/img/" + userTags[5].comments[0].img, "", "", "", callback)
+        },
         //(kleenup)=========================================================================================
         (callback) => {
             request("DELETE", "/user/deleteinfo", authNoBody, "", "", callback)
