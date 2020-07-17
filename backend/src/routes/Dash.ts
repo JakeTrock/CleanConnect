@@ -14,7 +14,7 @@ let router = Router();
 
 // ROUTE: GET dash/:id
 // DESCRIPTION: anonymous dashboard only accessible with secret keystring
-router.get('/:dash', async (req: Request, res: Response) => {
+router.get('/:dash', (req: Request, res: Response) => {
     User.findOne({
         dashCode: req.params.dash
     }).then((user: ifUserDocument) => {
