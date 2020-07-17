@@ -2,7 +2,7 @@ import QRCode from 'qrcode';
 import async from '../asyncpromise';
 import bcrypt from 'bcryptjs';
 import jwt from 'jwt-then';
-import { ifUserDocument, UserChangeFields, UserNewInterface, PaymentReturnInterface, changePassInterface } from '../interfaces';
+import { ifUserDocument, UserChangeFields, UserNewInterface, PaymentReturnInterface, changePassInterface, custresInterface, subresInterface } from '../interfaces';
 import { BraintreeGateway } from 'braintree';
 import { Types } from 'mongoose';
 import keys from '../config/keys.json';
@@ -148,14 +148,14 @@ export default {
                             phone: details.phone,
                             paymentMethodNonce: details.payment_method_nonce
                         })
-                            .then((customerResult: any) => {//TODO: typing troubles here, and below
+                            .then((customerResult: custresInterface) => {
                                 tmp.custID = customerResult.customer.id;
                                 return gateway.subscription.create({
                                     paymentMethodToken: customerResult.customer.paymentMethods[0].token,
                                     planId: keys.tierID[details.tier]
                                 });
                             })
-                            .then((subscriptionResult: any) => {//what type?
+                            .then((subscriptionResult: subresInterface) => {
                                 tmp.PayToken = subscriptionResult.subscription.id;
                                 callback(null, tmp);
                             }).catch(err => callback(err, null));
@@ -172,7 +172,7 @@ export default {
                         phone: details.phone,
                         tier: details.tier
                     }))
-                    .catch(reject)
+                    .catch(reject)//TODO:"'Cannot read property \\'id\\' of undefined'"
                     .then(resolve);
             } else {
                 if (details.password !== details.password2)

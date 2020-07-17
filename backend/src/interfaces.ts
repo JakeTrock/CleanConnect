@@ -1,5 +1,5 @@
 import { Types, Document, Model } from 'mongoose';
-import { BraintreeGateway } from 'braintree';
+import { BraintreeGateway, Customer, Subscription } from 'braintree';
 import { Request } from "express";
 
 //Mongoose Document Interfaces
@@ -232,4 +232,14 @@ export interface changePassInterface {
     password1: string,
     password2: string,
     phone: ifUserDocument["phone"]
+}
+
+export interface custresInterface {
+    customer: Customer
+    success: boolean
+}
+
+export interface subresInterface {
+    subscription: Subscription
+    success: boolean
 }
