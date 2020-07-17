@@ -32,7 +32,7 @@ export default {
     rmUndef: (obj: any) => {
         Object.keys(obj)
             .forEach(key => {
-                if (obj[key]==undefined||obj[key]==null) {
+                if (obj[key] == undefined || obj[key] == null) {
                     delete obj[key]
                 }
             });
@@ -90,14 +90,14 @@ export default {
         });
     },
     scadd: function (dat: any) {
-        dat["success"]=true;
+        dat["success"] = true;
         return dat;
     },
     blankres: {
         success: true
     },
     erep: function (err: any) {
-        const ptx = inspect(err);
+        const ptx: string = inspect((err.message) ? err.message : err);
         logger.error(ptx);
         return {
             message: ptx,
