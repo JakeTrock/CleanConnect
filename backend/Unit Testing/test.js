@@ -5,7 +5,6 @@ const mongoose = require('mongoose');
 const defaultBody = {
     "content-type": "application/json"
 };
-//TODO: https://github.com/vlucas/frisby
 var authNoBody, authBody, token, verlnk, userDetails, userInv, userTags;
 
 function request(reqType, url, headers, bodyType, reqBody, callback) {
