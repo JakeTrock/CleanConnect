@@ -58,7 +58,7 @@ exports.default = {
                 token: token
             }).then((index) => {
                 if (!index)
-                    return reject("no token found");
+                    return reject({ ie: true, message: "no token found" });
                 else
                     return index;
             }).then((index) => asyncpromise_1.default.parallel({

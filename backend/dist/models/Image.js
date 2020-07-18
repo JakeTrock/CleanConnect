@@ -26,7 +26,7 @@ const storage = new multer_gridfs_storage_1.default({
                 });
             }
             else
-                reject("Invalid filetype(we allow png, jpg, jpeg, webp, gif, tiff, mp4 and webm uploads up to 5.1 MB)");
+                reject({ ie: true, message: "Invalid filetype(we allow png, jpg, jpeg, webp, gif, tiff, mp4 and webm uploads up to 5.1 MB)" });
         });
     }
 });

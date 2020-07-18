@@ -15,7 +15,7 @@ exports.default = {
                 .then((cmt) => {
                 if (cmt)
                     resolve(cmt);
-                reject("No such comment exists!");
+                reject({ ie: true, message: "No such comment exists!" });
             });
         });
     },
@@ -45,7 +45,7 @@ exports.default = {
     new: (details, tag) => {
         return new Promise((resolve, reject) => {
             if (details.text.toLowerCase().split(" ").some((r) => cuss_1.default[r] == 2))
-                reject("You'll have to clean up your language before we clean up this room.");
+                reject({ ie: true, message: "You'll have to clean up your language before we clean up this room." });
             else {
                 Comment_1.default.create(helpers_1.default.rmUndef(details))
                     .then((newDoc) => tag.comments.push(newDoc._id))

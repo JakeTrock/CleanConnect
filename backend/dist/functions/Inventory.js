@@ -18,7 +18,7 @@ exports.default = {
                 .then((inv) => {
                 if (inv)
                     resolve(inv);
-                reject("No such inventory exists!");
+                reject({ ie: true, message: "No such inventory exists!" });
             });
         });
     },

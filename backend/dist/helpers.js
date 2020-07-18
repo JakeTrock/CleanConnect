@@ -35,7 +35,7 @@ exports.default = {
         });
         return obj;
     },
-    sendMail: function (pf, token, to) {
+    sendMail: (pf, token, to) => {
         return new Promise((resolve, reject) => {
             if (process.env.NODE_ENV !== "development") {
                 if (pf == "resetPass")
@@ -90,22 +90,23 @@ exports.default = {
             }
         });
     },
-    scadd: function (dat) {
+    scadd: (dat) => {
         dat["success"] = true;
         return dat;
     },
     blankres: {
         success: true
     },
-    erep: function (err) {
-        const ptx = util_1.inspect((err.message) ? err.message : err);
-        logger.error(ptx);
+    erep: (err) => {
+        const ptx = util_1.inspect(err);
+        if (!err.ie)
+            logger.error(ptx);
         return {
-            message: ptx,
+            message: (err.message) ? err.message : ptx,
             success: false
         };
     },
-    passport: function (req, res, next) {
+    passport: (req, res, next) => {
         const authHeader = req.headers.authorization;
         if (authHeader) {
             const token = authHeader.split(' ')[1];

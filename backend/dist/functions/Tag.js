@@ -18,7 +18,7 @@ exports.default = {
                 .then((tag) => {
                 if (tag)
                     resolve(tag);
-                reject("No such tag exists!");
+                reject({ ie: true, message: "No such tag exists!" });
             });
         });
     },
