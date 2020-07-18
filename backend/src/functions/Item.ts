@@ -9,7 +9,7 @@ export default {
             Item.findById(id)
                 .then((inv: ifItemDocument) => {
                     if (inv) resolve(inv);
-                    reject("No such tag exists!");
+                    reject({ ie: true, message: "No such tag exists!"});
                 });
         });
     },

@@ -10,7 +10,7 @@ export default {
         return new Promise((resolve, reject) => {
             UserIndex.exists({
                 token: token
-            }).then((exists:boolean) => {
+            }).then((exists: boolean) => {
                 if (exists) resolve();
                 reject('No user exists with this token');
             });
@@ -34,7 +34,7 @@ export default {
             UserIndex.findOne({
                 token: token
             }).then((index: ifUserIndexDocument) => {
-                if (!index) return reject("no token found");
+                if (!index) return reject({ ie: true, message: "no token found" });
                 else return index;
             }).then((index: ifUserIndexDocument) => async.parallel({
                 findUser: (callback) => {

@@ -14,7 +14,7 @@ export default {
             Tag.findById(id)
                 .then((tag: ifTagDocument) => {
                     if (tag) resolve(tag);
-                    reject("No such tag exists!");
+                    reject({ ie: true, message: "No such tag exists!" });
                 });
         });
     },

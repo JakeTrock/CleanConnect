@@ -20,7 +20,7 @@ const storage = new GridFsStorage({
                     bucketName: 'uploads'
                 });
             } else
-                reject("Invalid filetype(we allow png, jpg, jpeg, webp, gif, tiff, mp4 and webm uploads up to 5.1 MB)");
+                reject({ ie: true, message: "Invalid filetype(we allow png, jpg, jpeg, webp, gif, tiff, mp4 and webm uploads up to 5.1 MB)" });
         });
     }
 });

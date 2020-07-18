@@ -15,7 +15,7 @@ export default {
             User.findById(id)
                 .then((user: ifUserDocument) => {
                     if (user) resolve(user);
-                    reject("No such user exists!");
+                    reject({ ie: true, message: "No such user exists!" });
                 });
         });
     },
@@ -54,9 +54,9 @@ export default {
                             }, keys.secretOrKey, {
                                 expiresIn: "1d",
                             }).then((tk: String) => resolve(`Bearer ${tk}`));
-                        else reject("Incorrect password");
+                        else reject({ ie: true, message: "Incorrect password" });
                     });
-                else reject("User of this name/email cannot be found");
+                else reject({ ie: true, message: "User of this name/email cannot be found" });
             })
                 .catch(reject);
         });
@@ -100,7 +100,7 @@ export default {
     },
     changePass: (info: changePassInterface) => {
         return new Promise((resolve, reject) => {
-            if (!info.password1 && !info.password2 && !(info.password1 === info.password2)) reject("password error");
+            if (!info.password1 && !info.password2 && !(info.password1 === info.password2)) reject({ ie: true, message: "password error" });
             bcrypt.hash(info.password1, 10).then((hash: string) =>
                 User.findOneAndUpdate({
                     email: info.email,
@@ -161,11 +161,11 @@ export default {
                                     callback(null, tmp);
                                 }).catch(err => callback(err, null));
                         } else {
-                            if (details.email.match(/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/))
-                                callback("Missing/bad email", null);
-                            else if (details.phone.match(/^[\+]?[(]?[0-9]{3}[)]?[.]?[0-9]{3}[.]?[0-9]{4,6}$/))
-                                callback("Missing/bad phone number", null);
-                            else callback("Missing name", null);
+                            if (!details.email.match(/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/))
+                                callback({ ie: true, message: "Missing/bad email" }, null);
+                            else if (!details.phone.match(/^[\+]?[(]?[0-9]{3}[)]?[.]?[0-9]{3}[.]?[0-9]{4,6}$/))
+                                callback({ ie: true, message: "Missing/bad phone number" }, null);
+                            else callback({ ie: true, message: "Missing name" }, null);
                         }
                     }
                 })
@@ -184,9 +184,9 @@ export default {
                     .then(resolve);
             } else {
                 if (details.password !== details.password2)
-                    reject("Passwords don't match");
+                    reject({ ie: true, message: "Passwords don't match" });
                 if (!details.payment_method_nonce)
-                    reject("No payment information provided!");
+                    reject({ ie: true, message: "No payment information provided!" });
             }
         });
     }

@@ -38,7 +38,7 @@ export default {
             });
         return obj;
     },
-    sendMail: function (pf: string, token: string, to: string) {
+    sendMail: (pf: string, token: string, to: string) => {
         return new Promise((resolve, reject) => {
             if (process.env.NODE_ENV !== "development") {
                 if (pf == "resetPass") pf = "Reset Password of";
@@ -89,22 +89,22 @@ export default {
             }
         });
     },
-    scadd: function (dat: any) {
+    scadd: (dat: any) => {
         dat["success"] = true;
         return dat;
     },
     blankres: {
         success: true
     },
-    erep: function (err: any) {//TODO:create internal/external bool to toggle logging
-        const ptx: string = inspect((err.message) ? err.message : err);
-        logger.error(ptx);
+    erep: (err: any) => {//TODO:create internal/external bool to toggle logging
+        const ptx: string = inspect(err);
+        if (!err.ie) logger.error(ptx);
         return {
-            message: ptx,
+            message: (err.message) ? err.message : ptx,
             success: false
         };
     },
-    passport: function (req: Request, res: Response, next: NextFunction) {
+    passport: (req: Request, res: Response, next: NextFunction) => {
         const authHeader = req.headers.authorization;
         if (authHeader) {
             const token = authHeader.split(' ')[1];

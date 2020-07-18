@@ -13,7 +13,7 @@ export default {
                 .then((cmt: ifCommentDocument) => {
                     if (cmt)
                         resolve(cmt);
-                    reject("No such comment exists!");
+                    reject({ ie: true, message: "No such comment exists!" });
                 });
         });
     },
@@ -42,7 +42,7 @@ export default {
     },
     new: (details: CommentInputData, tag: ifTagDocument) => {
         return new Promise((resolve, reject) => {
-            if (details.text.toLowerCase().split(" ").some((r) => cuss[r] == 2)) reject("You'll have to clean up your language before we clean up this room.");
+            if (details.text.toLowerCase().split(" ").some((r) => cuss[r] == 2)) reject({ ie: true, message: "You'll have to clean up your language before we clean up this room." });
             else {
                 Comment.create(helpers.rmUndef(details))
                     .then((newDoc: ifCommentDocument) => tag.comments.push(newDoc._id))
