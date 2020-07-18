@@ -56,7 +56,8 @@ schedule.scheduleJob("00 00 00 * * *", () => {
     asyncpromise_1.default.parallel({
         oneWeek: (callback) => {
             d.setDate(d.getDate() - 7);
-            UserIndex_1.default.listPrunable(d).then((list) => asyncpromise_1.default.each(list, (elem, callback) => {
+            UserIndex_1.default.listPrunable(d)
+                .then((list) => asyncpromise_1.default.each(list, (elem, callback) => {
                 User_1.default.findById(elem._userId).then((user) => asyncpromise_1.default.parallel({
                     payCancel: (cb) => express_conf_1.default.gateway.subscription.cancel(user.PayToken)
                         .then(cb())
@@ -78,8 +79,8 @@ schedule.scheduleJob("00 00 00 * * *", () => {
                         .then(cb())
                         .catch(cb)
                 }))
-                    .catch(e => callback(e))
-                    .then(callback());
+                    .then(callback())
+                    .catch(console.log);
             }))
                 .then(callback(null, true))
                 .catch(e => callback(e, false));
@@ -99,6 +100,6 @@ schedule.scheduleJob("00 00 00 * * *", () => {
                 .then(callback(null, true))
                 .catch(e => callback(e, false));
         }
-    }).then(console.log)
-        .catch(helpers_1.default.erep);
+    }).then(out => console.log(out))
+        .catch(console.log);
 });

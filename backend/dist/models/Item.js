@@ -41,6 +41,7 @@ const ItemSchema = new mongoose_1.Schema({
     },
     ip: {
         type: String,
+        required: true
     }
 }, {
     timestamps: true,
