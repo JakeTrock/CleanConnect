@@ -138,27 +138,35 @@ export default {
                             }, err => callback(err, null))
                     },
                     payment: (callback) => {
-                        let tmp: PaymentReturnInterface = {
-                            custID: undefined,
-                            PayToken: undefined
-                        };
-                        gateway.customer.create({
-                            email: details.email,
-                            company: details.name,
-                            phone: details.phone,
-                            paymentMethodNonce: details.payment_method_nonce
-                        })
-                            .then((customerResult: custresInterface) => {
-                                tmp.custID = customerResult.customer.id;
-                                return gateway.subscription.create({
-                                    paymentMethodToken: customerResult.customer.paymentMethods[0].token,
-                                    planId: keys.tierID[details.tier]
-                                });
+                        if (details.email.match(/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/) && details.name && details.phone.match(/^[\+]?[(]?[0-9]{3}[)]?[.]?[0-9]{3}[.]?[0-9]{4,6}$/)) {
+                            let tmp: PaymentReturnInterface = {
+                                custID: undefined,
+                                PayToken: undefined
+                            };
+                            gateway.customer.create({
+                                email: details.email,
+                                company: details.name,
+                                phone: details.phone,
+                                paymentMethodNonce: details.payment_method_nonce
                             })
-                            .then((subscriptionResult: subresInterface) => {
-                                tmp.PayToken = subscriptionResult.subscription.id;
-                                callback(null, tmp);
-                            }).catch(err => callback(err, null));
+                                .then((customerResult: custresInterface) => {
+                                    tmp.custID = customerResult.customer.id;
+                                    return gateway.subscription.create({
+                                        paymentMethodToken: customerResult.customer.paymentMethods[0].token,
+                                        planId: keys.tierID[details.tier]
+                                    });
+                                })
+                                .then((subscriptionResult: subresInterface) => {
+                                    tmp.PayToken = subscriptionResult.subscription.id;
+                                    callback(null, tmp);
+                                }).catch(err => callback(err, null));
+                        } else {
+                            if (details.email.match(/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/))
+                                callback("Missing/bad email", null);
+                            else if (details.phone.match(/^[\+]?[(]?[0-9]{3}[)]?[.]?[0-9]{3}[.]?[0-9]{4,6}$/))
+                                callback("Missing/bad phone number", null);
+                            else callback("Missing name", null);
+                        }
                     }
                 })
                     .then(out => User.create({
@@ -172,7 +180,7 @@ export default {
                         phone: details.phone,
                         tier: details.tier
                     }))
-                    .catch(reject)//TODO:"'Cannot read property \\'id\\' of undefined'"
+                    .catch(reject)
                     .then(resolve);
             } else {
                 if (details.password !== details.password2)

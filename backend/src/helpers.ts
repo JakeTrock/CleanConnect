@@ -96,7 +96,7 @@ export default {
     blankres: {
         success: true
     },
-    erep: function (err: any) {
+    erep: function (err: any) {//TODO:create internal/external bool to toggle logging
         const ptx: string = inspect((err.message) ? err.message : err);
         logger.error(ptx);
         return {
