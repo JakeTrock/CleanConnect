@@ -13,16 +13,14 @@ const codecs: Array<string> = [
 ];
 const storage = new GridFsStorage({
     url: keys.url,
-    file: (req, file) => {
-        return new Promise((resolve, reject) => {
-            if (codecs.indexOf(file.mimetype) >= 0) {
-                resolve({
-                    bucketName: 'uploads'
-                });
-            } else
-                reject({ ie: true, message: "Invalid filetype(we allow png, jpg, jpeg, webp, gif, tiff, mp4 and webm uploads up to 5.1 MB)" });
-        });
-    }
+    file: (req, file) => new Promise((resolve, reject) => {
+        if (codecs.indexOf(file.mimetype) >= 0)
+            resolve({
+                bucketName: 'uploads'
+            });
+        else
+            reject({ ie: true, message: "Invalid filetype(we allow png, jpg, jpeg, webp, gif, tiff, mp4 and webm uploads up to 5.1 MB)" });
+    })
 });
 export default multer({
     storage,

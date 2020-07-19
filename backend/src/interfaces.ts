@@ -40,7 +40,6 @@ export interface ifUserIndexModel extends Model<ifUserIndexDocument> {
     get: (token: string) => Promise<ifUserIndexDocument>;
     createIndex: (info: UserIndexCreateFields) => Promise<mailOut>;
     confirm: (token: string) => Promise<ifUserDocument>;
-    listPrunable: (date: Date) => Promise<Array<ifUserIndexDocument>>;
 }
 
 export interface ifTagDocument extends Document {
