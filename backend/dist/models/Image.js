@@ -18,17 +18,14 @@ const codecs = [
 ];
 const storage = new multer_gridfs_storage_1.default({
     url: keys_json_1.default.url,
-    file: (req, file) => {
-        return new Promise((resolve, reject) => {
-            if (codecs.indexOf(file.mimetype) >= 0) {
-                resolve({
-                    bucketName: 'uploads'
-                });
-            }
-            else
-                reject({ ie: true, message: "Invalid filetype(we allow png, jpg, jpeg, webp, gif, tiff, mp4 and webm uploads up to 5.1 MB)" });
-        });
-    }
+    file: (req, file) => new Promise((resolve, reject) => {
+        if (codecs.indexOf(file.mimetype) >= 0)
+            resolve({
+                bucketName: 'uploads'
+            });
+        else
+            reject({ ie: true, message: "Invalid filetype(we allow png, jpg, jpeg, webp, gif, tiff, mp4 and webm uploads up to 5.1 MB)" });
+    })
 });
 exports.default = multer_1.default({
     storage,

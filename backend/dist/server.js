@@ -56,8 +56,12 @@ schedule.scheduleJob("00 00 00 * * *", () => {
     asyncpromise_1.default.parallel({
         oneWeek: (callback) => {
             d.setDate(d.getDate() - 7);
-            UserIndex_1.default.listPrunable(d)
-                .then((list) => asyncpromise_1.default.each(list, (elem, callback) => {
+            UserIndex_1.default.find({
+                isCritical: true,
+                createdAt: {
+                    $lt: d
+                }
+            }).then((list) => asyncpromise_1.default.each(list, (elem, callback) => {
                 User_1.default.findById(elem._userId).then((user) => asyncpromise_1.default.parallel({
                     payCancel: (cb) => express_conf_1.default.gateway.subscription.cancel(user.PayToken)
                         .then(cb())
