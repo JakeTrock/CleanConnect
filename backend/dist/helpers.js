@@ -109,24 +109,22 @@ exports.default = {
     passport: (req, res, next) => {
         const authHeader = req.headers.authorization;
         if (authHeader) {
-            const token = authHeader.split(' ')[1];
-            jwt_then_1.default.verify(token, keys_json_1.default.secretOrKey)
-                .then((user) => mongoose_1.default.model('User').exists({
-                _id: user._id
+            jwt_then_1.default.verify(authHeader.split(' ')[1], keys_json_1.default.secretOrKey)
+                .then((out) => new Promise((resolve, reject) => {
+                if (typeof out == "string")
+                    reject(out);
+                else
+                    resolve(out);
+            })).then((out) => mongoose_1.default.model('User').exists({
+                _id: out._id
             }).then((ex) => {
-                return {
-                    pass: ex,
-                    usr: user
-                };
-            }))
-                .then((dat) => {
-                if (dat.pass) {
-                    req.user = dat.usr;
+                if (ex) {
+                    req.user = out;
                     next();
                 }
                 else
                     res.sendStatus(403);
-            })
+            }))
                 .catch(err => next(err));
         }
         else {

@@ -68,15 +68,15 @@ exports.default = {
             Item: (cb) => Item_1.default.deleteMany({
                 inventory: id
             })
-                .then(cb())
+                .then(() => cb())
                 .catch(cb),
             Tag: (cb) => Inventory_1.default.deleteOne({
                 _id: id
             })
-                .then(cb())
+                .then(() => cb())
                 .catch(cb),
             User: (cb) => User_1.default.removeItem(user._id, id, "invs")
-                .then(cb())
+                .then(() => cb())
                 .catch(cb)
         }).then(() => resolve())
             .catch(reject);
@@ -88,13 +88,13 @@ exports.default = {
             Items: (cb) => Item_1.default.deleteMany({
                 inventory: value._id
             })
-                .then(cb())
+                .then(() => cb())
                 .catch(cb),
             Invs: (cb) => Inventory_1.default.findByIdAndDelete(value._id).
-                then(cb())
+                then(() => cb())
                 .catch(cb),
             User: (cb) => User_1.default.removeItem(userID, value._id, "invs")
-                .then(cb())
+                .then(() => cb())
                 .catch(cb)
         })
             .then(callback())

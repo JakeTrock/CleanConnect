@@ -19,22 +19,25 @@ exports.default = {
     }),
     rmImageDelete: (id) => new Promise((resolve, reject) => {
         Comment_1.default.find().or([{
-                tag: id
+                tag: new helpers_1.default.toObjID(id)
             }, {
-                _id: id
-            }]).then((cmt) => asyncpromise_1.default.forEachOf(cmt, (value, key, callback) => asyncpromise_1.default.parallel({
+                _id: new helpers_1.default.toObjID(id)
+            }])
+            .then((cmt) => asyncpromise_1.default.forEachOf(cmt, (value, key, callback) => asyncpromise_1.default.parallel({
             imageDeletion: (cb) => {
                 if (value.img)
                     express_conf_1.default.gfs.delete(new helpers_1.default.toObjID(value.img))
-                        .then(cb())
+                        .then(() => cb())
                         .catch((e) => cb(e));
             },
             commentDeletion: (cb) => {
                 value.deleteOne()
-                    .then(cb())
-                    .catch(e => cb(e));
+                    .then(() => cb())
+                    .catch((e) => cb(e));
             },
-        }).catch(callback)))
+        })
+            .then(() => callback())
+            .catch(callback)))
             .then(() => resolve())
             .catch(reject);
     }),

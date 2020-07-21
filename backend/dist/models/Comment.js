@@ -44,14 +44,4 @@ const CommentSchema = new mongoose_1.Schema({
 });
 const Comment_1 = __importDefault(require("../functions/Comment"));
 CommentSchema.statics = Comment_1.default;
-CommentSchema.pre("save", function (next) {
-    this.validate(function (err) {
-        if (err)
-            throw err;
-        if (err)
-            next(err);
-        else
-            next();
-    });
-});
 exports.default = mongoose_1.model('Comment', CommentSchema);

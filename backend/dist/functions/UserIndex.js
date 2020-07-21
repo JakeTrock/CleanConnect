@@ -51,11 +51,6 @@ exports.default = {
     confirm: (token) => new Promise((resolve, reject) => {
         UserIndex_1.default.findOne({
             token: token
-        }).then((index) => {
-            if (!index)
-                return reject({ ie: true, message: "no token found" });
-            else
-                return index;
         }).then((index) => asyncpromise_1.default.parallel({
             findUser: (callback) => {
                 User_1.default.findOne({

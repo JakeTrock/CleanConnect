@@ -98,12 +98,4 @@ const UserSchema = new mongoose_1.Schema({
 });
 const User_1 = __importDefault(require("../functions/User"));
 UserSchema.statics = User_1.default;
-UserSchema.pre("save", function (next) {
-    this.validate(function (err) {
-        if (err)
-            next(err);
-        else
-            next();
-    });
-});
 exports.default = mongoose_1.model('User', UserSchema);

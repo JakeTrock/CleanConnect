@@ -34,12 +34,4 @@ const InventorySchema = new mongoose_1.Schema({
 });
 const Inventory_1 = __importDefault(require("../functions/Inventory"));
 InventorySchema.statics = Inventory_1.default;
-InventorySchema.pre("save", function (next) {
-    this.validate(function (err) {
-        if (err)
-            next(err);
-        else
-            next();
-    });
-});
 exports.default = mongoose_1.model('Inventory', InventorySchema);

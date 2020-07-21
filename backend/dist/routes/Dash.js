@@ -22,8 +22,8 @@ router.get('/:dash', (req, res) => {
                 .then((out) => callback(null, out))
                 .catch(err => callback(err, null))
         })
-            .then(out => res.json(helpers_1.default.scadd(out)))
-            .catch(e => res.json(helpers_1.default.erep(e)));
+            .then((out) => res.json(helpers_1.default.scadd(out)))
+            .catch((e) => res.json(helpers_1.default.erep(e)));
     });
 });
 exports.default = router;

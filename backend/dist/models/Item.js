@@ -48,12 +48,4 @@ const ItemSchema = new mongoose_1.Schema({
 });
 const Item_1 = __importDefault(require("../functions/Item"));
 ItemSchema.statics = Item_1.default;
-ItemSchema.pre("save", function (next) {
-    this.validate(function (err) {
-        if (err)
-            next(err);
-        else
-            next();
-    });
-});
 exports.default = mongoose_1.model('Item', ItemSchema);

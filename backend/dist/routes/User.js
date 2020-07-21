@@ -8,13 +8,18 @@ const express_conf_1 = __importDefault(require("../config/express.conf"));
 const helpers_1 = __importDefault(require("../helpers"));
 const User_1 = __importDefault(require("../models/User"));
 const UserIndex_1 = __importDefault(require("../models/UserIndex"));
-const Inventory_1 = __importDefault(require("../models/Inventory"));
-const Tag_1 = __importDefault(require("../models/Tag"));
-const asyncpromise_1 = __importDefault(require("../asyncpromise"));
 let router = express_1.Router();
 router.get("/test", (req, res) => res.send("User Works"));
 router.post("/register", (req, res) => {
-    User_1.default.new(req.body, express_conf_1.default.gateway)
+    User_1.default.new({
+        name: req.body.name,
+        email: req.body.email,
+        password: req.body.password,
+        password2: req.body.password2,
+        payment_method_nonce: req.body.payment_method_nonce,
+        phone: req.body.phone,
+        tier: req.body.tier,
+    }, express_conf_1.default.gateway)
         .then((user) => UserIndex_1.default.createIndex({
         _id: user._id,
         email: user.email,
@@ -101,34 +106,14 @@ router.delete("/deleteinfo", helpers_1.default.passport, (req, res) => {
 });
 router.get("/delete/:token", helpers_1.default.passport, (req, res) => {
     UserIndex_1.default.confirm(req.params.token)
-        .then((user) => {
+        .then((user) => new Promise((resolve, reject) => {
         if (user._id.toString() != req.user._id.toString())
-            res.json("email token does not match current user cookie, please log into this computer to load the cookie into your memory");
+            reject({ ie: true, message: "email token does not match current user cookie, please log into this computer to load the cookie into your memory" });
         else
-            asyncpromise_1.default.parallel({
-                delUser: (callback) => User_1.default.findByIdAndDelete(req.user._id)
-                    .then(callback())
-                    .catch(callback),
-                payCancel: (callback) => express_conf_1.default.gateway.subscription.cancel(user.PayToken)
-                    .then(callback())
-                    .catch(callback),
-                delIndexes: (callback) => UserIndex_1.default.deleteMany({
-                    _userId: user._id,
-                }).then(() => UserIndex_1.default.deleteMany({
-                    email: user.email,
-                }))
-                    .then(callback())
-                    .catch(callback),
-                delTags: (callback) => Tag_1.default.purge(user._id)
-                    .then(callback())
-                    .catch(callback),
-                delInvs: (callback) => Inventory_1.default.purge(user._id)
-                    .then(callback())
-                    .catch(callback)
-            })
-                .then(() => res.json(helpers_1.default.blankres))
-                .catch(e => res.json(helpers_1.default.erep(e)));
-    });
+            resolve(user);
+    })).then((user) => User_1.default.purge(user))
+        .then(() => res.json(helpers_1.default.blankres))
+        .catch((e) => res.json(helpers_1.default.erep(e)));
 });
 router.get("/isValid/:token", (req, res) => {
     UserIndex_1.default.exists({
@@ -148,7 +133,7 @@ router.get("/current", helpers_1.default.passport, (req, res) => {
         name: profile.name,
         email: profile.email,
     })))
-        .catch(e => res.json(helpers_1.default.erep(e)));
+        .catch((e) => res.json(helpers_1.default.erep(e)));
 });
 router.get("/getClientToken", (req, res) => {
     express_conf_1.default.gateway.clientToken.generate({})

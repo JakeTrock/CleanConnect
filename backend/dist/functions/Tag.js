@@ -65,15 +65,15 @@ exports.default = {
     removal: (id, uid) => new Promise((resolve, reject) => {
         asyncpromise_1.default.parallel({
             Comment: (cb) => Comment_1.default.rmImageDelete(id)
-                .then(cb())
+                .then(() => cb())
                 .catch(cb),
             Tag: (cb) => Tag_1.default.deleteOne({
                 _id: id
             })
-                .then(cb())
+                .then(() => cb())
                 .catch(cb),
             User: (cb) => User_1.default.removeItem(id, uid, "tags")
-                .then(cb())
+                .then(() => cb())
                 .catch(cb)
         }).then(() => resolve())
             .catch(reject);
@@ -84,16 +84,16 @@ exports.default = {
         }).then((inv) => asyncpromise_1.default.forEachOf(inv, (value, key, callback) => {
             asyncpromise_1.default.parallel({
                 Comments: (cb) => Comment_1.default.rmImageDelete(value._id)
-                    .then(cb())
+                    .then(() => cb())
                     .catch(cb),
                 Tag: (cb) => Tag_1.default.findByIdAndDelete(value._id)
-                    .then(cb())
+                    .then(() => cb())
                     .catch(cb),
                 User: (cb) => User_1.default.removeItem(userID, value._id, "tags")
-                    .then(cb())
+                    .then(() => cb())
                     .catch(cb)
             })
-                .then(callback())
+                .then(() => callback())
                 .catch(callback);
         }))
             .then(() => resolve())

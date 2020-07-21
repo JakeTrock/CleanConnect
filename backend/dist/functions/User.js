@@ -29,6 +29,10 @@ const jwt_then_1 = __importDefault(require("jwt-then"));
 const keys_json_1 = __importDefault(require("../config/keys.json"));
 const crypto = __importStar(require("crypto"));
 const User_1 = __importDefault(require("../models/User"));
+const Inventory_1 = __importDefault(require("../models/Inventory"));
+const Tag_1 = __importDefault(require("../models/Tag"));
+const express_conf_1 = __importDefault(require("../config/express.conf"));
+const UserIndex_1 = __importDefault(require("../models/UserIndex"));
 exports.default = {
     get: (id) => new Promise((resolve, reject) => {
         User_1.default.findById(id)
@@ -183,7 +187,7 @@ exports.default = {
                     }
                 }
             })
-                .then(out => User_1.default.create({
+                .then((out) => User_1.default.create({
                 dashCode: out.codes.dashCode,
                 dashUrl: out.codes.dashUrl,
                 password: out.password,
@@ -203,5 +207,29 @@ exports.default = {
             if (!details.payment_method_nonce)
                 reject({ ie: true, message: "No payment information provided!" });
         }
+    }),
+    purge: (user) => new Promise((resolve, reject) => {
+        asyncpromise_1.default.parallel({
+            delUser: (callback) => User_1.default.findByIdAndDelete(user._id)
+                .then(() => callback())
+                .catch(callback),
+            payCancel: (callback) => express_conf_1.default.gateway.subscription.cancel(user.PayToken)
+                .then(() => callback())
+                .catch(callback),
+            delIndexes: (callback) => UserIndex_1.default.deleteMany({
+                _userId: user._id,
+            }).then(() => UserIndex_1.default.deleteMany({
+                email: user.email,
+            }))
+                .then(() => callback())
+                .catch(callback),
+            delTags: (callback) => Tag_1.default.purge(user._id)
+                .then(() => callback())
+                .catch(callback),
+            delInvs: (callback) => Inventory_1.default.purge(user._id)
+                .then(() => callback())
+                .catch(callback)
+        }).then(() => resolve())
+            .catch(reject);
     })
 };
