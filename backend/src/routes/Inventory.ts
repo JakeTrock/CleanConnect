@@ -46,7 +46,7 @@ router.post('/new', helpers.passport, (req: Request, res: Response) => {
     User.findOne({
         _id: req.user._id
     })
-        .then((usr: ifUserDocument) => Inventory.new(req.body.name, usr))
+        .then((usr: ifUserDocument | null) => Inventory.new(req.body.name, usr))
         .then(() => res.json(helpers.blankres))
         .catch(e => res.json(helpers.erep(e)));
 });
@@ -70,7 +70,7 @@ router.delete('/delete/:id', helpers.passport, (req: Request, res: Response) => 
     User.findOne({
         _id: req.user._id
     })
-        .then((usr: ifUserDocument) => Inventory.removal(new helpers.toObjID(req.params.id), usr))
+        .then((usr: ifUserDocument | null) => Inventory.removal(new helpers.toObjID(req.params.id), usr))
         .then(() => res.json(helpers.blankres))
         .catch(e => res.json(helpers.erep(e)));
 });
@@ -78,7 +78,7 @@ router.delete('/delete/:id', helpers.passport, (req: Request, res: Response) => 
 
 router.post('/newItem/:id', (req: Request, res: Response) => {
     Inventory.findById(req.params.id)
-        .then((inv: ifInventoryDocument) => Item.new(inv, {
+        .then((inv: ifInventoryDocument | null) => Item.new(inv, {
             name: req.body.name,
             inventory: inv._id,
             maxQuant: req.body.maxQuant,

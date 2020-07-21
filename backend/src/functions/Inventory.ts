@@ -11,7 +11,7 @@ import keys from '../config/keys.json';
 export default {
     get: (id: string) => new Promise((resolve, reject) => {
         Inventory.findById(id)
-            .then((inv: ifInventoryDocument) => {
+            .then((inv: ifInventoryDocument | null) => {
                 if (inv) resolve(inv);
                 reject({ ie: true, message: "No such inventory exists!" });
             });
@@ -28,7 +28,7 @@ export default {
                     }
                 }
             })
-            .then((user: ifUserDocument) => resolve(user.invs))
+            .then((user: ifUserDocument | null) => resolve(user.invs))
             .catch(reject);
     }),
     new: (name: String, user: ifUserDocument) => new Promise((resolve, reject) => {
@@ -60,18 +60,18 @@ export default {
     }),
     removal: (id: Types.ObjectId, user: ifUserDocument) => new Promise((resolve, reject) => {
         async.parallel({
-            Item: (cb) => Item.deleteMany({
+            Item: (cb: (err?: Error) => void) => Item.deleteMany({
                 inventory: id
             })
-                .then(cb())
+                .then(() => cb())
                 .catch(cb),
-            Tag: (cb) => Inventory.deleteOne({
+            Tag: (cb: (err?: Error) => void) => Inventory.deleteOne({
                 _id: id
             })
-                .then(cb())
+                .then(() => cb())
                 .catch(cb),
-            User: (cb) => User.removeItem(user._id, id, "invs")
-                .then(cb())
+            User: (cb: (err?: Error) => void) => User.removeItem(user._id, id, "invs")
+                .then(() => cb())
                 .catch(cb)
         }).then(() => resolve())
             .catch(reject);
@@ -80,18 +80,18 @@ export default {
         Inventory.find({
             user: userID
         }).then((inv: ifInventoryDocument[]) =>
-            async.forEachOf(inv, (value: ifInventoryDocument, key: Number, callback) =>
+            async.forEachOf(inv, (value: ifInventoryDocument, key: Number, callback: (err?: Error) => void) =>
                 async.parallel({
-                    Items: (cb) => Item.deleteMany({
+                    Items: (cb: (err?: Error) => void) => Item.deleteMany({
                         inventory: value._id
                     })
-                        .then(cb())
+                        .then(() => cb())
                         .catch(cb),
-                    Invs: (cb) => Inventory.findByIdAndDelete(value._id).
-                        then(cb())
+                    Invs: (cb: (err?: Error) => void) => Inventory.findByIdAndDelete(value._id).
+                        then(() => cb())
                         .catch(cb),
-                    User: (cb) => User.removeItem(userID, value._id, "invs")
-                        .then(cb())
+                    User: (cb: (err?: Error) => void) => User.removeItem(userID, value._id, "invs")
+                        .then(() => cb())
                         .catch(cb)
                 })
                     .then(callback())

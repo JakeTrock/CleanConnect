@@ -26,6 +26,7 @@ export interface ifUserModel extends Model<ifUserDocument> {
     changeInfo: (usr: Types.ObjectId, changeFields: UserChangeFields, gateway: BraintreeGateway) => Promise<void>;
     changePass: (info: changePassInterface) => Promise<void>;
     new: (details: UserNewInterface, gateway: BraintreeGateway) => Promise<ifUserDocument>;
+    purge: (user: ifUserDocument) => Promise<void>;
 }
 
 export interface ifUserIndexDocument extends Document {
@@ -205,8 +206,8 @@ export interface UserNewInterface {
 }
 
 export interface PaymentReturnInterface {
-    custID: string;
-    PayToken: string;
+    custID: string | undefined;
+    PayToken: string | undefined;
 }
 
 export interface JWTuser {
@@ -217,28 +218,43 @@ export interface JWTuser {
     dash: ifUserDocument["dashCode"];
 }
 
-export interface JWTreg {
-    pass: boolean;
-    usr: JWTuser;
-}
-
 export interface RequestWithFiles extends Request {
-    files: any
+    files: any;
 }
 
 export interface changePassInterface {
-    email: ifUserDocument["email"],
-    password1: string,
-    password2: string,
-    phone: ifUserDocument["phone"]
+    email: ifUserDocument["email"];
+    password1: string;
+    password2: string;
+    phone: ifUserDocument["phone"];
 }
 
 export interface custresInterface {
-    customer: Customer
-    success: boolean
+    customer: Customer;
+    success: boolean;
 }
 
 export interface subresInterface {
-    subscription: Subscription
-    success: boolean
+    subscription: Subscription;
+    success: boolean;
+}
+
+export interface cronOutInterface {
+    oneWeek: boolean;
+    oneMonth: boolean;
+}
+
+export interface qdashgenInterface {
+    dashCode: ifUserDocument["dashCode"];
+    dashUrl: ifUserDocument["dashUrl"];
+}
+
+export interface exterr {
+    ie: boolean;
+    message: string;
+}
+
+export interface dashOutInterface {
+    tags: ifTagDocument[];
+    inventories: ifInventoryDocument[];
 }

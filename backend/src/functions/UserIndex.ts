@@ -28,20 +28,17 @@ export default {
     confirm: (token: string) => new Promise((resolve, reject) => {
         UserIndex.findOne({
             token: token
-        }).then((index: ifUserIndexDocument) => {
-            if (!index) return reject({ ie: true, message: "no token found" });
-            else return index;
-        }).then((index: ifUserIndexDocument) => async.parallel({
-            findUser: (callback) => {
+        }).then((index: ifUserIndexDocument | null) => async.parallel({
+            findUser: (callback: (err: Error | null, res: ifUserDocument | null) => void) => {
                 User.findOne({
                     _id: index._userId
                 })
-                    .then((usr: ifUserDocument) => callback(null, usr))
+                    .then((usr: ifUserDocument | null) => callback(null, usr))
                     .catch(err => callback(err, null));
             },
-            delIndex: (callback) => {
+            delIndex: (callback: (err: Error | null, res: ifUserIndexDocument | null) => void) => {
                 index.deleteOne()
-                    .then((out: ifUserIndexDocument) => callback(null, out))
+                    .then((out: ifUserIndexDocument | null) => callback(null, out))
                     .catch(err => callback(err, null));
             }
         })).then((user: UserIndexCfOut) => {

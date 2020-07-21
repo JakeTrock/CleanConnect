@@ -11,7 +11,7 @@ import keys from '../config/keys.json';
 export default {
     get: (id: string) => new Promise((resolve, reject) => {
         Tag.findById(id)
-            .then((tag: ifTagDocument) => {
+            .then((tag: ifTagDocument | null) => {
                 if (tag) resolve(tag);
                 reject({ ie: true, message: "No such tag exists!" });
             });
@@ -28,7 +28,7 @@ export default {
                     }
                 }
             })
-            .then((user: ifUserDocument) => resolve(user.tags))
+            .then((user: ifUserDocument | null) => resolve(user.tags))
             .catch(reject);
     }),
     new: (name: string, user: ifUserDocument) => new Promise((resolve, reject) => {
@@ -59,16 +59,16 @@ export default {
     }),
     removal: (id: Types.ObjectId, uid: Types.ObjectId) => new Promise((resolve, reject) => {
         async.parallel({
-            Comment: (cb) => Comment.rmImageDelete(id)
-                .then(cb())
+            Comment: (cb: (err?: Error) => void) => Comment.rmImageDelete(id)
+                .then(() => cb())
                 .catch(cb),
-            Tag: (cb) => Tag.deleteOne({
+            Tag: (cb: (err?: Error) => void) => Tag.deleteOne({
                 _id: id
             })
-                .then(cb())
+                .then(() => cb())
                 .catch(cb),
-            User: (cb) => User.removeItem(id, uid, "tags")
-                .then(cb())
+            User: (cb: (err?: Error) => void) => User.removeItem(id, uid, "tags")
+                .then(() => cb())
                 .catch(cb)
         }).then(() => resolve())
             .catch(reject);
@@ -77,19 +77,19 @@ export default {
         Tag.find({
             user: userID
         }).then((inv: ifTagDocument[]) =>
-            async.forEachOf(inv, (value: ifTagDocument, key: Number, callback) => {
+            async.forEachOf(inv, (value: ifTagDocument, key: Number, callback: (err?: Error) => void) => {
                 async.parallel({
-                    Comments: (cb) => Comment.rmImageDelete(value._id)
-                        .then(cb())
+                    Comments: (cb: (err?: Error) => void) => Comment.rmImageDelete(value._id)
+                        .then(() => cb())
                         .catch(cb),
-                    Tag: (cb) => Tag.findByIdAndDelete(value._id)
-                        .then(cb())
+                    Tag: (cb: (err?: Error) => void) => Tag.findByIdAndDelete(value._id)
+                        .then(() => cb())
                         .catch(cb),
-                    User: (cb) => User.removeItem(userID, value._id, "tags")
-                        .then(cb())
+                    User: (cb: (err?: Error) => void) => User.removeItem(userID, value._id, "tags")
+                        .then(() => cb())
                         .catch(cb)
                 })
-                    .then(callback())
+                    .then(() => callback())
                     .catch(callback);
             }))
             .then(() => resolve())

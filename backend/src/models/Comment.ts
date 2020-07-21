@@ -1,6 +1,7 @@
 import { Schema, Types, model } from 'mongoose';
 import { ifCommentDocument, ifCommentModel } from '../interfaces';
-import { NextFunction } from 'express';
+// import { NextFunction } from 'express';
+
 const CommentSchema: Schema = new Schema({
   tag: {
     type: Types.ObjectId,
@@ -43,13 +44,12 @@ const CommentSchema: Schema = new Schema({
 import cmtFunctions from '../functions/Comment';
 CommentSchema.statics = cmtFunctions;
 
-CommentSchema.pre("save", function (next: NextFunction) {
-  this.validate(function (err) {
-    if (err) throw err;
-    if (err)
-      next(err);
-    else
-      next();
-  });
-});
+// CommentSchema.pre(['updateOne', 'findOneAndUpdate', 'save'], (next: NextFunction) => {
+//   this.validate((err: Error) => {
+//     if (err)
+//       next(err);
+//     else
+//       next();
+//   });
+// });
 export default model<ifCommentDocument, ifCommentModel>('Comment', CommentSchema);

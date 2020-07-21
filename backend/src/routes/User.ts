@@ -8,9 +8,7 @@ import econf from '../config/express.conf';
 import helpers from '../helpers';
 import User from '../models/User';
 import UserIndex from '../models/UserIndex';
-import Inventory from '../models/Inventory';
-import Tag from '../models/Tag';
-import async from '../asyncpromise';
+
 import { ifUserDocument } from "../interfaces";
 let router = Router();
 
@@ -22,8 +20,16 @@ router.get("/test", (req: Request, res: Response) => res.send("User Works"));
 // ROUTE: POST user/register
 // DESCRIPTION: sends registration email to user
 // INPUT: user name, email and password(all as strings), via json body
-router.post("/register", (req: Request, res: Response) => {
-    User.new(req.body, econf.gateway)
+router.post("/register", (req: Request, res: Response) => {//TODO:has a slight lag? can this be helped?
+    User.new({
+        name: req.body.name,
+        email: req.body.email,
+        password: req.body.password,
+        password2: req.body.password2,
+        payment_method_nonce: req.body.payment_method_nonce,
+        phone: req.body.phone,
+        tier: req.body.tier,
+    }, econf.gateway)
         .then((user: ifUserDocument) =>
             UserIndex.createIndex({
                 _id: user._id,
@@ -40,7 +46,7 @@ router.post("/register", (req: Request, res: Response) => {
 router.post("/resend", (req: Request, res: Response) => {
     User.findOne({
         email: req.body.email,
-    }).then((user: ifUserDocument) => {
+    }).then((user: ifUserDocument | null) => {
         if (!user)
             res.json("Unable to find user with this email");
         else if (user.isVerified)
@@ -138,34 +144,13 @@ router.delete("/deleteinfo", helpers.passport, (req: Request, res: Response) => 
 // INPUT: token value via url bar
 router.get("/delete/:token", helpers.passport, (req: Request, res: Response) => {
     UserIndex.confirm(req.params.token)
-        .then((user: ifUserDocument) => {
+        .then((user: ifUserDocument) => new Promise((resolve, reject) => {
             if (user._id.toString() != req.user._id.toString())
-                res.json("email token does not match current user cookie, please log into this computer to load the cookie into your memory");
-            else
-                async.parallel({
-                    delUser: (callback) => User.findByIdAndDelete(req.user._id)
-                        .then(callback())
-                        .catch(callback),
-                    payCancel: (callback) => econf.gateway.subscription.cancel(user.PayToken)
-                        .then(callback())
-                        .catch(callback),
-                    delIndexes: (callback) => UserIndex.deleteMany({
-                        _userId: user._id,
-                    }).then(() => UserIndex.deleteMany({
-                        email: user.email,
-                    }))
-                        .then(callback())
-                        .catch(callback),
-                    delTags: (callback) => Tag.purge(user._id)
-                        .then(callback())
-                        .catch(callback),
-                    delInvs: (callback) => Inventory.purge(user._id)
-                        .then(callback())
-                        .catch(callback)
-                })
-                    .then(() => res.json(helpers.blankres))
-                    .catch(e => res.json(helpers.erep(e)));
-        });
+                reject({ ie: true, message: "email token does not match current user cookie, please log into this computer to load the cookie into your memory" });
+            else resolve(user);
+        })).then((user: ifUserDocument) => User.purge(user))
+        .then(() => res.json(helpers.blankres))
+        .catch((e: Error) => res.json(helpers.erep(e)));
 });
 // ROUTE: POST user/isValid/:token
 // DESCRIPTION: checks if token is still valid
@@ -192,7 +177,7 @@ router.get("/current", helpers.passport, (req: Request, res: Response) => {
                 name: profile.name,
                 email: profile.email,
             })))
-        .catch(e => res.json(helpers.erep(e)));
+        .catch((e: Error) => res.json(helpers.erep(e)));
 });
 
 // ROUTE: GET user/getClientToken

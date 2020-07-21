@@ -1,6 +1,6 @@
 import { Schema, Types, model } from 'mongoose';
 import { ifItemDocument, ifItemModel } from '../interfaces';
-import { NextFunction } from 'express';
+// import { NextFunction } from 'express';
 
 const ItemSchema: Schema = new Schema({
     inventory: {
@@ -48,12 +48,12 @@ const ItemSchema: Schema = new Schema({
 import itmFunctions from '../functions/Item';
 ItemSchema.statics = itmFunctions;
 
-ItemSchema.pre("save", function (next: NextFunction) {
-    this.validate(function (err) {
-        if (err)
-            next(err);
-        else
-            next();
-    });
-});
+// ItemSchema.pre("save", function (next: NextFunction) {
+//     this.validate(function (err) {
+//         if (err)
+//             next(err);
+//         else
+//             next();
+//     });
+// });
 export default model<ifItemDocument, ifItemModel>('Item', ItemSchema);

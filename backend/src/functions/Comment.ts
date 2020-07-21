@@ -5,11 +5,10 @@ import { ifCommentDocument, ifTagDocument, CommentInputData, CommentMarkFindPara
 import { Types } from 'mongoose';
 import Comment from '../models/Comment';
 import helpers from '../helpers';
-
 export default {
     get: (id: string) => new Promise((resolve, reject) => {
         Comment.findById(id)
-            .then((cmt: ifCommentDocument) => {
+            .then((cmt: ifCommentDocument | null) => {
                 if (cmt)
                     resolve(cmt);
                 reject({ ie: true, message: "No such comment exists!" });
@@ -17,22 +16,26 @@ export default {
     }),
     rmImageDelete: (id: Types.ObjectId) => new Promise((resolve, reject) => {
         Comment.find().or([{
-            tag: id
+            tag: new helpers.toObjID(id)
         }, {
-            _id: id
-        }]).then((cmt: Array<ifCommentDocument>) => async.forEachOf(cmt, (value: ifCommentDocument, key: Number, callback) => async.parallel({
-            imageDeletion: (cb) => {
-                if (value.img)
-                    econf.gfs.delete(new helpers.toObjID(value.img))
-                        .then(cb())
-                        .catch((e) => cb(e))
-            },
-            commentDeletion: (cb) => {
-                value.deleteOne()
-                    .then(cb())
-                    .catch(e => cb(e));
-            },
-        }).catch(callback)))
+            _id: new helpers.toObjID(id)
+        }])
+            .then((cmt: Array<ifCommentDocument>) => async.forEachOf(cmt, (value: ifCommentDocument, key: Number, callback: (err?: Error) => void) => async.parallel({
+                imageDeletion: (cb: (err?: Error) => void) => {
+                    if (value.img)
+                        econf.gfs.delete(new helpers.toObjID(value.img))
+                            .then(() => cb())
+                            .catch((e: Error) => cb(e))
+                },
+                commentDeletion: (cb: (err?: Error) => void) => {
+                    value.deleteOne()
+                        .then(() => cb())
+                        .catch((e: Error) => cb(e));
+                },
+            })
+                .then(() => callback())
+                .catch(callback)
+            ))
             .then(() => resolve())
             .catch(reject);
     }),

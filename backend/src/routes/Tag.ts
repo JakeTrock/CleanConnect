@@ -18,7 +18,7 @@ router.get("/test", (req: Request, res: Response) => res.send("Tag Works"));
 // INPUT: requires a user name to link back to, and a unique room name
 router.post("/new", helpers.passport, (req: Request, res: Response) => {
     User.findById(req.user._id)
-        .then((usr: ifUserDocument) => Tag.new(req.body.name, usr))
+        .then((usr: ifUserDocument | null) => Tag.new(req.body.name, usr))
         .then(() => res.json(helpers.blankres))
         .catch(e => res.json(helpers.erep(e)));
 });
@@ -63,7 +63,7 @@ router.post("/edit/:id", helpers.passport, (req: Request, res: Response) => {
 
 router.delete("/delete/:id", helpers.passport, (req: Request, res: Response) => {
     User.findById(req.user._id)
-        .then((usr: ifUserDocument) => Tag.removal(new helpers.toObjID(req.params.id), usr._id))
+        .then((usr: ifUserDocument | null) => Tag.removal(new helpers.toObjID(req.params.id), usr._id))
         .then(() => res.json(helpers.blankres))
         .catch(e => res.json(helpers.erep(e)));
 });

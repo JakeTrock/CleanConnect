@@ -6,7 +6,7 @@ import helpers from '../helpers';
 export default {
     get: (id: string) => new Promise((resolve, reject) => {
         Item.findById(id)
-            .then((inv: ifItemDocument) => {
+            .then((inv: ifItemDocument | null) => {
                 if (inv) resolve(inv);
                 reject({ ie: true, message: "No such tag exists!" });
             });

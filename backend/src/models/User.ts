@@ -1,7 +1,7 @@
 import { Schema, Types, model } from 'mongoose';
 import * as crypto from 'crypto';
 import { ifUserDocument, ifUserModel } from '../interfaces';
-import { NextFunction } from 'express';
+// import { NextFunction } from 'express';
 
 // Create Schema
 const UserSchema: Schema = new Schema({
@@ -80,13 +80,13 @@ const UserSchema: Schema = new Schema({
 import usrFunctions from '../functions/User';
 UserSchema.statics = usrFunctions;
 
-UserSchema.pre("save", function (next: NextFunction) {
-  this.validate(function (err) {
-    if (err)
-      next(err);
-    else
-      next();
-  });
-});
+// UserSchema.pre("save", function (next: NextFunction) {
+//   this.validate(function (err) {
+//     if (err)
+//       next(err);
+//     else
+//       next();
+//   });
+// });
 
 export default model<ifUserDocument, ifUserModel>('User', UserSchema);

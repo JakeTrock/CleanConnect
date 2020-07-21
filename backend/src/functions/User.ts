@@ -2,17 +2,21 @@ import QRCode from 'qrcode';
 import async from '../asyncpromise';
 import bcrypt from 'bcryptjs';
 import jwt from 'jwt-then';
-import { ifUserDocument, UserChangeFields, UserNewInterface, PaymentReturnInterface, changePassInterface, custresInterface, subresInterface } from '../interfaces';
+import { ifUserDocument, UserChangeFields, UserNewInterface, PaymentReturnInterface, changePassInterface, custresInterface, subresInterface, qdashgenInterface, exterr } from '../interfaces';
 import { BraintreeGateway } from 'braintree';
 import { Types } from 'mongoose';
 import keys from '../config/keys.json';
 import * as crypto from 'crypto';
 import User from '../models/User';
+import Inventory from '../models/Inventory';
+import Tag from '../models/Tag';
+import econf from '../config/express.conf';
+import UserIndex from '../models/UserIndex';
 
 export default {
     get: (id: string) => new Promise((resolve, reject) => {
         User.findById(id)
-            .then((user: ifUserDocument) => {
+            .then((user: ifUserDocument | null) => {
                 if (user) resolve(user);
                 reject({ ie: true, message: "No such user exists!" });
             });
@@ -57,7 +61,7 @@ export default {
     }),
     changeInfo: (usr: Types.ObjectId, changeFields: UserChangeFields, gateway: BraintreeGateway) => new Promise((resolve, reject) => {
         User.findById(usr)
-            .then((user: ifUserDocument) => {
+            .then((user: ifUserDocument | null) => {
                 if (changeFields.tier) {
                     gateway.subscription.update(user.PayToken, {
                         planId: keys.tierID[changeFields.tier],
@@ -109,7 +113,7 @@ export default {
     new: (details: UserNewInterface, gateway: BraintreeGateway) => new Promise((resolve, reject) => {
         if (details.payment_method_nonce && details.password === details.password2) {
             async.parallel({
-                codes: (callback) => {
+                codes: (callback: (err: Error | null, res: qdashgenInterface | null) => void) => {
                     const dc = crypto.randomBytes(16).toString("hex").substring(8);
                     QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + "/dash/" + dc)
                         .then((url: string) => {
@@ -119,14 +123,14 @@ export default {
                             });
                         }, err => callback(err, null))
                 },
-                password: (callback) => {
+                password: (callback: (err: Error | null, res: string | null) => void) => {
                     bcrypt.hash(details.password, 10)
                         .then((pw: string) => {
                             details.password = pw;
                             callback(null, pw);
                         }, err => callback(err, null))
                 },
-                payment: (callback) => {
+                payment: (callback: (err: Error | exterr | null, res: PaymentReturnInterface | null) => void) => {
                     if (details.email.match(/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/) && details.name && details.phone.match(/^[\+]?[(]?[0-9]{3}[)]?[.]?[0-9]{3}[.]?[0-9]{4,6}$/)) {
                         let tmp: PaymentReturnInterface = {
                             custID: undefined,
@@ -158,7 +162,7 @@ export default {
                     }
                 }
             })
-                .then(out => User.create({
+                .then((out: any) => User.create({//TODO:interface this
                     dashCode: out.codes.dashCode,
                     dashUrl: out.codes.dashUrl,
                     password: out.password,
@@ -177,5 +181,29 @@ export default {
             if (!details.payment_method_nonce)
                 reject({ ie: true, message: "No payment information provided!" });
         }
+    }),
+    purge: (user: ifUserDocument) => new Promise((resolve, reject) => {
+        async.parallel({
+            delUser: (callback: (err?: Error) => void) => User.findByIdAndDelete(user._id)
+                .then(() => callback())
+                .catch(callback),
+            payCancel: (callback: (err?: Error) => void) => econf.gateway.subscription.cancel(user.PayToken)
+                .then(() => callback())
+                .catch(callback),
+            delIndexes: (callback: (err?: Error) => void) => UserIndex.deleteMany({
+                _userId: user._id,
+            }).then(() => UserIndex.deleteMany({
+                email: user.email,
+            }))
+                .then(() => callback())
+                .catch(callback),
+            delTags: (callback: (err?: Error) => void) => Tag.purge(user._id)
+                .then(() => callback())
+                .catch(callback),
+            delInvs: (callback: (err?: Error) => void) => Inventory.purge(user._id)
+                .then(() => callback())
+                .catch(callback)
+        }).then(() => resolve())
+            .catch(reject);
     })
 };

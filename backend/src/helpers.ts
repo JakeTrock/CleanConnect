@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import shell from 'shelljs.exec'
 import jwt from 'jwt-then';
-import { JWTuser, JWTreg } from './interfaces';
+import { JWTuser, exterr } from './interfaces';
 import conf from './config/keys.json';
 import {
     Request,
@@ -96,7 +96,7 @@ export default {
     blankres: {
         success: true
     },
-    erep: (err: any) => {
+    erep: (err: Error | exterr | any) => {
         const ptx: string = inspect(err);
         if (!err.ie) logger.error(ptx);
         return {
@@ -107,23 +107,19 @@ export default {
     passport: (req: Request, res: Response, next: NextFunction) => {
         const authHeader = req.headers.authorization;
         if (authHeader) {
-            const token = authHeader.split(' ')[1];
-            jwt.verify(token, conf.secretOrKey)
-                .then((user: JWTuser) =>
+            jwt.verify(authHeader.split(' ')[1], conf.secretOrKey)
+                .then((out: string | object): Promise<JWTuser> => new Promise((resolve, reject) => {
+                    if (typeof out == "string") reject(out);
+                    else resolve(out as JWTuser);
+                })).then((out: JWTuser) =>
                     mongoose.model('User').exists({
-                        _id: user._id
+                        _id: out._id
                     }).then((ex: Boolean) => {
-                        return {
-                            pass: ex,
-                            usr: user
-                        };
+                        if (ex) {
+                            req.user = out;
+                            next();
+                        } else res.sendStatus(403);
                     }))
-                .then((dat: JWTreg) => {
-                    if (dat.pass) {
-                        req.user = dat.usr;
-                        next();
-                    } else res.sendStatus(403);
-                })
                 .catch(err => next(err));
         } else {
             res.sendStatus(401);

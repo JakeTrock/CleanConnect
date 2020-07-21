@@ -1,5 +1,6 @@
 import { Schema, Types, model } from 'mongoose';
 import { ifInventoryDocument, ifInventoryModel } from '../interfaces';
+// import { NextFunction } from 'express';
 
 const InventorySchema: Schema = new Schema({
     user: {
@@ -33,12 +34,12 @@ const InventorySchema: Schema = new Schema({
 import invFunctions from '../functions/Inventory';
 InventorySchema.statics = invFunctions;
 
-InventorySchema.pre("save", function (next) {
-    this.validate(function (err) {
-        if (err)
-            next(err);
-        else
-            next();
-    });
-});
+// InventorySchema.pre("save", function (next: NextFunction) {
+//     this.validate(function (err) {
+//         if (err)
+//             next(err);
+//         else
+//             next();
+//     });
+// });
 export default model<ifInventoryDocument, ifInventoryModel>('Inventory', InventorySchema);

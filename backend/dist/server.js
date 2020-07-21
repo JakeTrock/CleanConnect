@@ -28,8 +28,6 @@ const asyncpromise_1 = __importDefault(require("./asyncpromise"));
 const User_1 = __importDefault(require("./models/User"));
 const UserIndex_1 = __importDefault(require("./models/UserIndex"));
 const Comment_1 = __importDefault(require("./models/Comment"));
-const Tag_1 = __importDefault(require("./models/Tag"));
-const Inventory_1 = __importDefault(require("./models/Inventory"));
 const helpers_1 = __importDefault(require("./helpers"));
 const keys_json_1 = __importDefault(require("./config/keys.json"));
 const util_1 = require("util");
@@ -61,35 +59,14 @@ schedule.scheduleJob("00 00 00 * * *", () => {
                 createdAt: {
                     $lt: d
                 }
-            }).then((list) => asyncpromise_1.default.each(list, (elem, callback) => {
-                User_1.default.findById(elem._userId).then((user) => asyncpromise_1.default.parallel({
-                    payCancel: (cb) => express_conf_1.default.gateway.subscription.cancel(user.PayToken)
-                        .then(cb())
-                        .catch(cb),
-                    userRemove: (cb) => User_1.default.findOneAndRemove({
-                        _id: user._id,
-                    })
-                        .then(cb())
-                        .catch(cb),
-                    indexRemove: (cb) => UserIndex_1.default.deleteMany({
-                        _userId: user._id,
-                    })
-                        .then(cb())
-                        .catch(cb),
-                    tagPurge: (cb) => Tag_1.default.purge(user._id)
-                        .then(cb())
-                        .catch(cb),
-                    invPurge: (cb) => Inventory_1.default.purge(user._id)
-                        .then(cb())
-                        .catch(cb)
-                }))
-                    .then(callback())
-                    .catch(console.log);
-            }))
-                .then(callback(null, true))
+            }).then((list) => asyncpromise_1.default.each(list, (elem, callback) => User_1.default.findById(elem._userId)
+                .then((user) => User_1.default.purge(user))
+                .then(() => callback())
+                .catch(e => callback(e))))
+                .then(() => callback(null, true))
                 .catch(e => callback(e, false));
         },
-        oneMonth: callback => {
+        oneMonth: (callback) => {
             d.setDate(d.getDate() - 23);
             Comment_1.default.find({
                 markedForDeletion: true,
@@ -98,12 +75,12 @@ schedule.scheduleJob("00 00 00 * * *", () => {
                 }
             }).then((list) => asyncpromise_1.default.each(list, (elem, callback) => {
                 Comment_1.default.rmImageDelete(elem._id)
-                    .then(callback())
+                    .then(() => callback())
                     .catch(e => callback(e));
             }))
-                .then(callback(null, true))
+                .then(() => callback(null, true))
                 .catch(e => callback(e, false));
         }
-    }).then(out => console.log(out))
-        .catch(console.log);
+    }).then((out) => console.log(out))
+        .catch((err) => helpers_1.default.erep(err));
 });
