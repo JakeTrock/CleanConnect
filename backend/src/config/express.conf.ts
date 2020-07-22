@@ -17,7 +17,7 @@ import keys from '../config/keys.json';//secret generator:dd if=/dev/random bs=2
 class ExpressConfiguration {
     public app: express.Application;
     public dbUrl: string = config.url;
-    public gfs: any;//TODO:typeme?
+    public gfs: any;
     public gateway = braintree.connect({
         environment: braintree.Environment.Sandbox,
         merchantId: keys.mid,

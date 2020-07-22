@@ -2,7 +2,7 @@ import QRCode from 'qrcode';
 import async from '../asyncpromise';
 import bcrypt from 'bcryptjs';
 import jwt from 'jwt-then';
-import { ifUserDocument, UserChangeFields, UserNewInterface, PaymentReturnInterface, changePassInterface, custresInterface, subresInterface, qdashgenInterface, exterr } from '../interfaces';
+import { ifUserDocument, UserChangeFields, UserNewInterface, PaymentReturnInterface, changePassInterface, custresInterface, subresInterface, qdashgenInterface, exterr, userCreationInfoInterface } from '../interfaces';
 import { BraintreeGateway } from 'braintree';
 import { Types } from 'mongoose';
 import keys from '../config/keys.json';
@@ -111,7 +111,7 @@ export default {
             .catch(reject);
     }),
     new: (details: UserNewInterface, gateway: BraintreeGateway) => new Promise((resolve, reject) => {
-        if (details.payment_method_nonce && details.password === details.password2) {
+        if (details.payment_method_nonce && details.password === details.password2 && details.email.match(/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/) && details.name && details.phone.match(/^[\+]?[(]?[0-9]{3}[)]?[.]?[0-9]{3}[.]?[0-9]{4,6}$/)) {
             async.parallel({
                 codes: (callback: (err: Error | null, res: qdashgenInterface | null) => void) => {
                     const dc = crypto.randomBytes(16).toString("hex").substring(8);
@@ -131,38 +131,30 @@ export default {
                         }, err => callback(err, null))
                 },
                 payment: (callback: (err: Error | exterr | null, res: PaymentReturnInterface | null) => void) => {
-                    if (details.email.match(/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/) && details.name && details.phone.match(/^[\+]?[(]?[0-9]{3}[)]?[.]?[0-9]{3}[.]?[0-9]{4,6}$/)) {
-                        let tmp: PaymentReturnInterface = {
-                            custID: undefined,
-                            PayToken: undefined
-                        };
-                        gateway.customer.create({
-                            email: details.email,
-                            company: details.name,
-                            phone: details.phone,
-                            paymentMethodNonce: details.payment_method_nonce
+                    let tmp: PaymentReturnInterface = {
+                        custID: undefined,
+                        PayToken: undefined
+                    };
+                    gateway.customer.create({
+                        email: details.email,
+                        company: details.name,
+                        phone: details.phone,
+                        paymentMethodNonce: details.payment_method_nonce
+                    })
+                        .then((customerResult: custresInterface) => {
+                            tmp.custID = customerResult.customer.id;
+                            return gateway.subscription.create({
+                                paymentMethodToken: customerResult.customer.paymentMethods[0].token,
+                                planId: keys.tierID[details.tier]
+                            });
                         })
-                            .then((customerResult: custresInterface) => {
-                                tmp.custID = customerResult.customer.id;
-                                return gateway.subscription.create({
-                                    paymentMethodToken: customerResult.customer.paymentMethods[0].token,
-                                    planId: keys.tierID[details.tier]
-                                });
-                            })
-                            .then((subscriptionResult: subresInterface) => {
-                                tmp.PayToken = subscriptionResult.subscription.id;
-                                callback(null, tmp);
-                            }).catch(err => callback(err, null));
-                    } else {
-                        if (!details.email.match(/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/))
-                            callback({ ie: true, message: "Missing/bad email" }, null);
-                        else if (!details.phone.match(/^[\+]?[(]?[0-9]{3}[)]?[.]?[0-9]{3}[.]?[0-9]{4,6}$/))
-                            callback({ ie: true, message: "Missing/bad phone number" }, null);
-                        else callback({ ie: true, message: "Missing name" }, null);
-                    }
+                        .then((subscriptionResult: subresInterface) => {
+                            tmp.PayToken = subscriptionResult.subscription.id;
+                            callback(null, tmp);
+                        }).catch(err => callback(err, null));
                 }
             })
-                .then((out: any) => User.create({//TODO:interface this
+                .then((out: userCreationInfoInterface) => User.create({
                     dashCode: out.codes.dashCode,
                     dashUrl: out.codes.dashUrl,
                     password: out.password,
@@ -178,8 +170,13 @@ export default {
         } else {
             if (details.password !== details.password2)
                 reject({ ie: true, message: "Passwords don't match" });
-            if (!details.payment_method_nonce)
+            else if (!details.payment_method_nonce)
                 reject({ ie: true, message: "No payment information provided!" });
+            else if (!details.email.match(/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/))
+                reject({ ie: true, message: "Missing/bad email" });
+            else if (!details.phone.match(/^[\+]?[(]?[0-9]{3}[)]?[.]?[0-9]{3}[.]?[0-9]{4,6}$/))
+                reject({ ie: true, message: "Missing/bad phone number" });
+            else reject({ ie: true, message: "Missing name" });
         }
     }),
     purge: (user: ifUserDocument) => new Promise((resolve, reject) => {

@@ -20,7 +20,7 @@ router.get("/test", (req: Request, res: Response) => res.send("User Works"));
 // ROUTE: POST user/register
 // DESCRIPTION: sends registration email to user
 // INPUT: user name, email and password(all as strings), via json body
-router.post("/register", (req: Request, res: Response) => {//TODO:has a slight lag? can this be helped?
+router.post("/register", (req: Request, res: Response) => {
     User.new({
         name: req.body.name,
         email: req.body.email,

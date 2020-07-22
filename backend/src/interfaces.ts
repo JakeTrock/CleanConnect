@@ -101,7 +101,6 @@ export interface ifCommentDocument extends Document {
     markedForDeletion?: boolean;
     ip?: string;
     tag: Types.ObjectId;
-    // img?: Types.ObjectId;
     img?: string;
     text: string;
     sev: number;
@@ -257,4 +256,13 @@ export interface exterr {
 export interface dashOutInterface {
     tags: ifTagDocument[];
     inventories: ifInventoryDocument[];
+}
+
+export interface userCreationInfoInterface {
+    codes: {
+        dashCode: string,
+        dashUrl: string
+    },
+    password: string,
+    payment: PaymentReturnInterface
 }

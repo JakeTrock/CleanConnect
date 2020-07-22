@@ -70,7 +70,7 @@ schedule.scheduleJob("00 00 00 * * *", () => {
                     $lt: d
                 }
             }).then((list: Array<ifCommentDocument>) =>
-                async.each(list, (elem: ifCommentDocument, callback: ((err?: Error) => void)) => {
+                async.each(list, (elem: ifCommentDocument, callback: (err?: Error) => void) => {
                     Comment.rmImageDelete(elem._id)
                         .then(() => callback())
                         .catch(e => callback(e))
