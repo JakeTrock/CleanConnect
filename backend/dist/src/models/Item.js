@@ -1,10 +1,12 @@
-import { Schema, Types, model } from 'mongoose';
-import { ifItemDocument, ifItemModel } from '../interfaces';
-// import { NextFunction } from 'express';
-
-const ItemSchema: Schema = new Schema({
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const mongoose_1 = require("mongoose");
+const ItemSchema = new mongoose_1.Schema({
     inventory: {
-        type: Types.ObjectId,
+        type: mongoose_1.Types.ObjectId,
         ref: 'Inventory',
         index: true
     },
@@ -44,8 +46,6 @@ const ItemSchema: Schema = new Schema({
 }, {
     timestamps: true,
 });
-
-import itmFunctions from '../functions/Item';
-ItemSchema.statics = itmFunctions;
-
-export default model<ifItemDocument, ifItemModel>('Item', ItemSchema);
+const Item_1 = __importDefault(require("../functions/Item"));
+ItemSchema.statics = Item_1.default;
+exports.default = mongoose_1.model('Item', ItemSchema);

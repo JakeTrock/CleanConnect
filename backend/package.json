@@ -6,7 +6,8 @@
     "scripts": {
         "test": "ts-node src/server.ts",
         "start": "nodemon ./dist/server.js",
-        "build": "tsc -p tsconfig.json"
+        "build": "tsc -p tsconfig.json",
+        "deploy": "tsc -p tsconfig.json && serverless deploy"
     },
     "author": "Jacob Trock",
     "license": "UNLICENSED",
@@ -42,7 +43,7 @@
         "@types/gridfs-stream": "^0.5.33",
         "@types/helmet": "0.0.47",
         "@types/jwt-then": "^1.0.0",
-        "@types/mongoose": "^5.7.27",
+        "@types/mongoose": "^5.7.32",
         "@types/multer": "^1.4.3",
         "@types/multer-gridfs-storage": "^4.0.1",
         "@types/node": "^14.0.14",
@@ -53,6 +54,8 @@
         "@types/xss-filters": "0.0.27",
         "async-waterfall": "^0.1.5",
         "nodemon": "^2.0.2",
+        "serverless-offline": "^6.5.0",
+        "serverless-plugin-typescript": "^1.1.9",
         "typescript": "^3.9.5",
         "unirest": "^0.6.0"
     }

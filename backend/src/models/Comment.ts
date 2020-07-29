@@ -44,12 +44,4 @@ const CommentSchema: Schema = new Schema({
 import cmtFunctions from '../functions/Comment';
 CommentSchema.statics = cmtFunctions;
 
-// CommentSchema.pre(['updateOne', 'findOneAndUpdate', 'save'], (next: NextFunction) => {
-//   this.validate((err: Error) => {
-//     if (err)
-//       next(err);
-//     else
-//       next();
-//   });
-// });
 export default model<ifCommentDocument, ifCommentModel>('Comment', CommentSchema);

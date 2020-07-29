@@ -32,8 +32,8 @@ In production, most likely, we would store the bearer key in a cookie. The beare
 * https://github.com/codemix/fast.js/tree/master
 
 ## Issue board (Jake)
-* migrate from DO to https://developers.cloudflare.com/workers/ https://dzone.com/articles/comparing-serverless-architecture-providers-aws-az
 * change mail system
+* https://blog.shovonhasan.com/deploying-a-typescript-node-aws-lambda-function-with-serverless/
 
 ## Notes to Jake from Justin
 * Going to need list of payment costs and what they'll give you even if temporary

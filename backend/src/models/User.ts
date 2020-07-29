@@ -80,13 +80,4 @@ const UserSchema: Schema = new Schema({
 import usrFunctions from '../functions/User';
 UserSchema.statics = usrFunctions;
 
-// UserSchema.pre("save", function (next: NextFunction) {
-//   this.validate(function (err) {
-//     if (err)
-//       next(err);
-//     else
-//       next();
-//   });
-// });
-
 export default model<ifUserDocument, ifUserModel>('User', UserSchema);

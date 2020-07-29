@@ -24,7 +24,7 @@
     // "outFile": "./dist/server.js",         /* Concatenate and emit output to single file. */
     "outDir": "./dist",
     /* Redirect output structure to the directory. */
-    "rootDir": "./src",
+    "rootDir": "./",
     /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
     // "composite": true,                     /* Enable project compilation */
     // "tsBuildInfoFile": "./",               /* Specify file to store incremental compilation information */
@@ -84,6 +84,6 @@
     "src/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules","dist","unitTests"
   ]
 }

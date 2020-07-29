@@ -34,12 +34,4 @@ const InventorySchema: Schema = new Schema({
 import invFunctions from '../functions/Inventory';
 InventorySchema.statics = invFunctions;
 
-// InventorySchema.pre("save", function (next: NextFunction) {
-//     this.validate(function (err) {
-//         if (err)
-//             next(err);
-//         else
-//             next();
-//     });
-// });
 export default model<ifInventoryDocument, ifInventoryModel>('Inventory', InventorySchema);

@@ -31,12 +31,4 @@ const TagSchema: Schema = new Schema({
 import tagFunctions from '../functions/Tag';
 TagSchema.statics = tagFunctions;
 
-// TagSchema.pre("save", function (next: NextFunction) {
-//     this.validate(function (err) {
-//         if (err)
-//             next(err);
-//         else
-//             next();
-//     });
-// });
 export default model<ifTagDocument, ifTagModel>('Tag', TagSchema);

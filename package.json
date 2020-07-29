@@ -23,7 +23,8 @@
     },
     "homepage": "https://github.com/hokuco/CleanConnect#readme",
     "dependencies": {
-        "concurrently": "^5.0.0"
+        "concurrently": "^5.0.0",
+        "serverless-http": "^2.5.0"
     },
     "devDependencies": {
         "eslint": "^6.8.0",
