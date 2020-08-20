@@ -10,7 +10,6 @@ const CommentSchema: Schema = new Schema({
   },
   img: {
     type: String,
-    data: Buffer,
   },
   text: {
     type: String,
