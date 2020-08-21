@@ -2,7 +2,7 @@ import { Schema, Types, model } from 'mongoose';
 import { ifUserIndexDocument, ifUserIndexModel } from '../interfaces';
 
 const UserIndexSchema: Schema = new Schema({
-    _userId: {
+    userID: {
         type: Types.ObjectId,
         ref: 'User'
     },

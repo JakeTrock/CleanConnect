@@ -19,7 +19,7 @@ export default {
             token: crypto.randomBytes(16).toString("hex"),
             isCritical: info.ic,
             email: info.email,
-            _userId: info._id || undefined
+            userID: info._id || undefined
         }))
             .then((doc: ifUserIndexDocument) => helpers.sendMail(info.prefix, doc.token, info.email))
             .then(resolve)
@@ -31,7 +31,7 @@ export default {
         }).then((index: ifUserIndexDocument | null) => async.parallel({
             findUser: (callback: (err: Error | null, res: ifUserDocument | null) => void) => {
                 User.findOne({
-                    _id: index._userId
+                    _id: index.userID
                 })
                     .then((usr: ifUserDocument | null) => callback(null, usr))
                     .catch(err => callback(err, null));

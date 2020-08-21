@@ -34,7 +34,7 @@ export interface ifUserIndexDocument extends Document {
     token: string;
     isCritical: boolean;
     email: string;
-    _userId?: Types.ObjectId;
+    userID?: Types.ObjectId;
 }
 //static function interfaces
 export interface ifUserIndexModel extends Model<ifUserIndexDocument> {

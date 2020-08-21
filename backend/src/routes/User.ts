@@ -53,7 +53,7 @@ router.post("/resend", (req: Request, res: Response) => {
             res.json("This user is already verified");
         else {
             UserIndex.deleteOne({
-                _userId: user._id
+                userID: user._id
             }).then(() => UserIndex.createIndex({
                 _id: user._id,
                 email: user.email,

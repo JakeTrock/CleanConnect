@@ -188,7 +188,7 @@ export default {
                 .then(() => callback())
                 .catch(callback),
             delIndexes: (callback: (err?: Error) => void) => UserIndex.deleteMany({
-                _userId: user._id,
+                userID: user._id,
             }).then(() => UserIndex.deleteMany({
                 email: user.email,
             }))

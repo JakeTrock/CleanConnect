@@ -52,7 +52,7 @@ schedule.scheduleJob("00 00 00 * * *", () => {
                 }
             }).then((list: Array<ifUserIndexDocument>) =>
                 async.each(list, (elem: ifUserIndexDocument, callback: (err?: Error) => void) =>
-                    User.findById(elem._userId)
+                    User.findById(elem.userID)
                         .then((user: ifUserDocument | null) => User.purge(user))
                         .then(() => callback())
                         .catch(e => callback(e))
