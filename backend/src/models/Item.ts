@@ -34,9 +34,6 @@ const ItemSchema: Schema = new Schema({
     removedAt: {
         type: Date,
     },
-    deletedBy: {
-        type: String
-    },
     ip: {
         type: String,
         required: true

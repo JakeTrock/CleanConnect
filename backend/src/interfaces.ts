@@ -104,7 +104,6 @@ export interface ifCommentDocument extends Document {
     img?: string;
     text: string;
     sev: number;
-    deletedBy?: string;
     removedAt?: Date;
 }
 //static function interfaces

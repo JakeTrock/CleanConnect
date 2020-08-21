@@ -54,7 +54,7 @@ export default {
             $set: {
                 markedForDeletion: status,
                 removedAt: status ? new Date() : undefined,
-                deletedBy: ip ? ip : undefined,
+                ip: ip ? ip : undefined,
             },
         })
             .then(() => resolve())
