@@ -4,13 +4,10 @@
   "description": "",
   "main": "handler.js",
   "scripts": {
-    "sequelize:setup":
-      "node_modules/.bin/sequelize init --force && node_modules/.bin/sequelize model:create --name book --attributes \"title:STRING\",\"author:STRING\",\"year:INTEGER\",\"pages:STRING\"",
-      "db:config": "node -e 'require(\"fs\").writeFile(\"sequelize-config.json\", JSON.stringify({\"development\": {\"username\": process.env.dbUser,\"password\": process.env.dbPass,\"database\": process.env.dbName,\"host\": process.env.dbHost,\"dialect\": \"postgres\"},\"test\": {\"username\": process.env.dbUser,\"password\": process.env.dbPass,\"database\": process.env.dbName,\"host\": process.env.dbHost,\"dialect\": \"postgres\"},\"production\": {\"username\": process.env.dbUser,\"password\": process.env.dbPass,\"database\": process.env.dbName,\"host\": process.env.dbHost,\"dialect\": \"postgres\"}}), function(err, data){ if(err){process.exit(1)}else{process.exit(0)}});'",
-    "db:migrate":
-      "npm run sequelize:setup && npm run db:config && node_modules/.bin/sequelize db:migrate --config sequelize-config.json",
-    "migrate":
-      "node_modules/.bin/sequelize db:migrate --config sequelize-config.json"
+    "sequelize:setup": "node_modules/.bin/sequelize init --force && node_modules/.bin/sequelize model:create --name book --attributes \"title:STRING\",\"author:STRING\",\"year:INTEGER\",\"pages:STRING\"",
+    "db:config": "node -e 'require(\"fs\").writeFile(\"sequelize-config.json\", JSON.stringify({\"development\": {\"username\": process.env.dbUser,\"password\": process.env.dbPass,\"database\": process.env.dbName,\"host\": process.env.dbHost,\"dialect\": \"postgres\"},\"test\": {\"username\": process.env.dbUser,\"password\": process.env.dbPass,\"database\": process.env.dbName,\"host\": process.env.dbHost,\"dialect\": \"postgres\"},\"production\": {\"username\": process.env.dbUser,\"password\": process.env.dbPass,\"database\": process.env.dbName,\"host\": process.env.dbHost,\"dialect\": \"postgres\"}}), function(err, data){ if(err){process.exit(1)}else{process.exit(0)}});'",
+    "db:migrate": "npm run sequelize:setup && npm run db:config && node_modules/.bin/sequelize db:migrate --config sequelize-config.json",
+    "migrate": "node_modules/.bin/sequelize db:migrate --config sequelize-config.json"
   },
   "keywords": [],
   "author": "Rahul Barick<libra2rahul@gmail.com>",
