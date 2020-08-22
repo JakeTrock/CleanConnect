@@ -1,2 +1,0 @@
-{"_id":{"$oid":"5f406705c0496a6d1642dd2e"},"token":"63f6c3c0bb0b0e8985412bbec0f5411f","isCritical":false,"email":"fake2@test.com","createdAt":{"$date":"2020-08-22T00:29:57.837Z"},"updatedAt":{"$date":"2020-08-22T00:29:57.837Z"},"__v":0}
- 
