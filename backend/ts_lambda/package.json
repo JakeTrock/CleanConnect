@@ -3,26 +3,40 @@
   "version": "1.0.0",
   "description": "",
   "main": "handler.js",
-  "scripts": {
-    "sequelize:setup": "node_modules/.bin/sequelize init --force && node_modules/.bin/sequelize model:create --name book --attributes \"title:STRING\",\"author:STRING\",\"year:INTEGER\",\"pages:STRING\"",
-    "db:config": "node -e 'require(\"fs\").writeFile(\"sequelize-config.json\", JSON.stringify({\"development\": {\"username\": process.env.dbUser,\"password\": process.env.dbPass,\"database\": process.env.dbName,\"host\": process.env.dbHost,\"dialect\": \"postgres\"},\"test\": {\"username\": process.env.dbUser,\"password\": process.env.dbPass,\"database\": process.env.dbName,\"host\": process.env.dbHost,\"dialect\": \"postgres\"},\"production\": {\"username\": process.env.dbUser,\"password\": process.env.dbPass,\"database\": process.env.dbName,\"host\": process.env.dbHost,\"dialect\": \"postgres\"}}), function(err, data){ if(err){process.exit(1)}else{process.exit(0)}});'",
-    "db:migrate": "npm run sequelize:setup && npm run db:config && node_modules/.bin/sequelize db:migrate --config sequelize-config.json",
-    "migrate": "node_modules/.bin/sequelize db:migrate --config sequelize-config.json"
-  },
   "keywords": [],
   "author": "Jake Trock",
   "license": "",
+  "scripts": {
+    "deploy": "export AWS_ACCESS_KEY_ID=AKIAJI42CNK5UZNHHFNQ && export AWS_SECRET_ACCESS_KEY=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 && serverless deploy -v"
+  },
   "dependencies": {
-    "aws-sdk": "^2.212.1",
-    "lambda-env-vars": "^0.4.0",
+    "async": "^3.2.0",
+    "aws-lambda": "^1.0.6",
+    "aws-sdk": "^2.747.0",
+    "bcryptjs": "^2.4.3",
+    "braintree": "^2.24.0",
+    "cuss": "^1.21.0",
+    "jwt-then": "^1.0.1",
     "pg": "^7.4.1",
-    "pg-hstore": "^2.3.2",
-    "sequelize": "^4.37.3",
-    "sequelize-cli": "^4.0.0"
+    "qrcode": "^1.4.4",
+    "sequelize": "^6.3.4",
+    "serverless": "^1.80.0",
+    "uuid": "^8.3.0",
+    "xss-filters": "^1.2.7"
   },
   "devDependencies": {
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-stage-2": "^6.24.1",
-    "serverless-offline": "^3.18.0"
+    "@types/aws-lambda": "^8.10.17",
+    "@types/bcryptjs": "^2.4.2",
+    "@types/braintree": "^2.22.4",
+    "@types/cuss": "^1.20.0",
+    "@types/jwt-then": "^1.0.0",
+    "@types/node": "^10.12.18",
+    "@types/pg": "^7.14.4",
+    "@types/qrcode": "^1.3.4",
+    "@types/sequelize": "^4.28.9",
+    "@types/serverless": "^1.72.5",
+    "@types/uuid": "^8.3.0",
+    "@types/xss-filters": "0.0.27",
+    "serverless-offline": "^6.5.0"
   }
 }

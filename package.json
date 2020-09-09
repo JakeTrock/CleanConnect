@@ -23,7 +23,10 @@
     },
     "homepage": "https://github.com/hokuco/CleanConnect#readme",
     "dependencies": {
-        "concurrently": "^5.0.0"
+        "aws-sdk": "^2.738.0",
+        "concurrently": "^5.3.0",
+        "multer": "^1.4.2",
+        "multer-s3": "^2.9.0"
     },
     "devDependencies": {
         "eslint": "^6.8.0",
