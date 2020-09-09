@@ -10,15 +10,8 @@ Janitorial coordination system
     4. You're all set, go on to the usage instructions
     
 ## Usage instructions
-The api is seperated into 2 sections, these sections determine the proper input for each request:
+The api is seperated into multiple sections, these sections determine the proper input for each request. more info can be found in the insomnia file in the Unit testing dir.
 
-### Models
-* [Tag](/models/Tag.js)
-* [User](/models/User.js)
-
-### Routes
-* [Tag](/routes/tag.js)
-* [User](/routes/user.js)
     
 ## Views
 Note to Justin, As you are building the mid-end(basically the nodejs part which stacks on the backend to serve the page content), I've created a views directory for you to work in. It contains a HTML file and CSS file which you can use to model your work off of. Additionally, I've provided you insomnia files in /reqs/ to model the interactions between your frontend and my backend API. Insomnia files are for unit testing the backend, and contain sample JSON requests that you may re-mix to submit your own data. You can import the insomnia data in /reqs/ into insomnia by clicking the dropdown in the purple insomnia logobox and selecting import/export.
@@ -60,6 +53,46 @@ In production, most likely, we would store the bearer key in a cookie. The beare
         * restore route is /tag/restore/id
         * delete route changed to /tag/delete/id
     * p.s. all fields in the url that have a : before them are url variables
+* do qr on your end, remove qr from tag page, add camera to comment page. req/res may need to change too(json formatting)
+* new img upload
+```
+test('upload file', async () => {
+  // request the upload URL and POST policy
+  const { data, status } = await axios.post(
+    'https://your-api-id.execute-api.us-east-1.amazonaws.com/dev/createPostUploadUrl',
+    {
+      filename: 'my_rock_song.m4a',
+      tags: {
+        genre: 'rock',
+        year: '1994',
+      },
+    },
+  );
+
+  expect(status).toEqual(200);
+
+  // the form fields contains the policy fields and the file to upload.
+  const fields = {
+    ...data.fields,
+    file: fs.createReadStream('./file_to_upload.m4a'),
+  };
+
+  // use the npm package `form-data` to emulate the FormData Web API
+  const form = new FormData();
+  for (const [key, value] of Object.entries(fields)) {
+    form.append(key, value);
+  }
+
+  const { status: uploadStatusCode } = await axios.post(data.url, form, {
+    // AWS requires the Content-Length header
+    headers: {
+      ...form.getHeaders(),
+      'Content-Length': await getContentLength(form),
+    },
+  });
+  expect(uploadStatusCode).toEqual(204);
+});
+```
 
 
 ### future
