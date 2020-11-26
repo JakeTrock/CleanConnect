@@ -47,61 +47,12 @@ const serverlessConfiguration: Serverless = {
         ]
     },
     functions: {
-        //COMMENT
-        cmt: {
-            handler: 'handler.cmtRt',
-            name: 'cmt',
+        endpoint: {
+            handler: 'handler.endpt',
+            name: 'endpt',
             events: [{
                 http: {
-                    path: 'comment/{opname}/{id}/{comment_id}',
-                    method: 'post',
-                    cors: true
-                }
-            }]
-        },
-        //INVENTORY
-        inv: {
-            handler: 'handler.invRt',
-            name: 'inv',
-            events: [{
-                http: {
-                    path: 'inventory/{opname}/{id}',
-                    method: 'post',
-                    cors: true
-                }
-            }]
-        },
-        //ITEM
-        itm: {
-            handler: 'handler.itmRt',
-            name: 'itm',
-            events: [{
-                http: {
-                    path: 'item/{opname}/{id}/{item_id}',
-                    method: 'post',
-                    cors: true
-                }
-            }]
-        },
-        //TAG
-        tag: {
-            handler: 'handler.tagRt',
-            name: 'tag',
-            events: [{
-                http: {
-                    path: 'tag/{opname}/{id}',
-                    method: 'post',
-                    cors: true
-                }
-            }]
-        },
-        //USER
-        usr: {
-            handler: 'handler.usrRt',
-            name: 'usr',
-            events: [{
-                http: {
-                    path: 'usr/{opname}/{token}',
+                    path: '/backend',
                     method: 'post',
                     cors: true
                 }

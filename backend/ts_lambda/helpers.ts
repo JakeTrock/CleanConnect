@@ -71,7 +71,7 @@ export default {
                         Bucket: conf.bname,
                         Key: fname,
                         ContentType: type
-                    }, (err, data) =>{
+                    }, (err, data) => {
                         if (err) reject(err);
                         else resolve(data.Location);
                     })
@@ -155,22 +155,25 @@ export default {
     passport: (event: APIGatewayEvent): Promise<JWTuser> => {
         return new Promise((resolve, reject) => {
             var authHeader;
-            if (typeof event.headers === "string") authHeader = JSON.parse(event.headers).authorization;
-            else authHeader = event.headers.authorization;//TODO:https://kennbrodhagen.net/2015/12/02/how-to-access-http-headers-using-aws-api-gateway-and-lambda/
-            if (authHeader) {
-                jwt.verify(authHeader.split(' ')[1], conf.secretOrKey)
-                    .then((out: string | object): Promise<JWTuser> => new Promise((resolve, reject) => {
-                        if (typeof out == "string") reject(out);
-                        else resolve(out as JWTuser);
-                    })).then((out: JWTuser) =>
-                        User.findOne({
-                            where: { id: out.id }
-                        }).then((ex: User) => {
-                            if (ex) {
-                                resolve(out);
-                            } else reject(403);
-                        }))
-                    .catch(err => reject(err));
+            if (typeof event.headers === "string") {
+                authHeader = JSON.parse(event.body).authorization;
+                if (authHeader) {
+                    jwt.verify(authHeader.split(' ')[1], conf.secretOrKey)
+                        .then((out: string | object): Promise<JWTuser> => new Promise((resolve, reject) => {
+                            if (typeof out == "string") reject(out);
+                            else resolve(out as JWTuser);
+                        })).then((out: JWTuser) =>
+                            User.findOne({
+                                where: { id: out.id }
+                            }).then((ex: User) => {
+                                if (ex) {
+                                    resolve(out);
+                                } else reject(403);
+                            }))
+                        .catch(err => reject(err));
+                } else {
+                    reject(401);
+                }
             } else {
                 reject(401);
             }
