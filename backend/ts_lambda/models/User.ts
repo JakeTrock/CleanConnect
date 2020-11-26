@@ -90,13 +90,15 @@ User.init({
   tags: {
     type: Sequelize.VIRTUAL,
     get: () => Tag.findAll({
-      where: { user: this.id }
+      // @ts-ignore
+      where: { user: this.get('id') }
     })
   },
   invs: {
     type: Sequelize.VIRTUAL,
     get: () => Inventory.findAll({
-      where: { user: this.id }
+      // @ts-ignore
+      where: { user: this.get('id') }
     })
   },
   isVerified: {

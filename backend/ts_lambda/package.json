@@ -10,7 +10,6 @@
     "deploy": "export AWS_ACCESS_KEY_ID=AKIAJI42CNK5UZNHHFNQ && export AWS_SECRET_ACCESS_KEY=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 && serverless deploy -v"
   },
   "dependencies": {
-    "async": "^3.2.0",
     "aws-lambda": "^1.0.6",
     "aws-sdk": "^2.799.0",
     "bcryptjs": "^2.4.3",
@@ -20,7 +19,6 @@
     "pg": "^7.4.1",
     "qrcode": "^1.4.4",
     "sequelize": "^6.3.4",
-    "sequelize-typescript": "^1.1.0",
     "serverless": "^1.83.2",
     "uuid": "^8.3.1",
     "xss-filters": "^1.2.7"

@@ -1,9 +1,7 @@
 import QRCode from 'qrcode';
-import async from '../asyncpromise';
 import Comment from '../models/Comment';
 import User from '../models/User';
 import Tag from '../models/Tag';
-import { TagChangeInterface } from '../interfaces';
 import helpers from '../helpers';
 import keys from '../config/keys';
 import { v4 as uuidv4 } from 'uuid';
@@ -62,20 +60,19 @@ const purge = async (userID: string): Promise<any> => {
     return new Promise((resolve, reject) => {
         Tag.findAll({
             where: { user: userID }
-        }).then((inv: Tag[]) =>
-            async.forEachOf(inv, (value: Tag, key: number, callback: (err?: Error) => void) => {
+        }).then(async (inv: Tag[]) =>{
+            for await (const value of inv) {
                 Promise.allSettled([
                     Comment.rmImageDelete(value.id),
                     Tag.findOne({
                         where: { id: value.id }
                     }).then(tag => tag.destroy())
                 ])
-                    .then(() => callback())
-                    .catch(callback);
-            }))
+            }
+        })
             .then(() => resolve())
             .catch(reject);
     });
 }
 
-export { get, getall, newTag, change, removal, purge };
+export { get, getall, newTag, removal, purge };

@@ -1,4 +1,3 @@
-import async from '../asyncpromise';
 import helpers from '../helpers';
 import Comment from '../models/Comment';
 
@@ -35,21 +34,23 @@ const rmImageDelete = async (id: string): Promise<any> => {
                 }
                 ]
             }
-        }).then((cmt: Array<Comment>) => async.forEachOf(cmt, (value: Comment, key: number, callback: (err?: Error) => void) => Promise.allSettled([
-            new Promise((resolve, reject) => {
-                if (value.img)
-                    helpers.deleteImage(value.img)
-                        .then(() => resolve())
-                        .catch((e: Error) => reject(e))
-            }),
-            Comment.destroy({
-                where: {
-                    id: value.id
-                }
-            })
-        ])
-            .then(() => callback())
-            .catch(callback)))
+        }).then(async (cmt: Array<Comment>) => {
+            for await (const value of cmt) {
+                Promise.allSettled([
+                    new Promise((resolve, reject) => {
+                        if (value.img)
+                            helpers.deleteImage(value.img)
+                                .then(() => resolve())
+                                .catch((e: Error) => reject(e))
+                    }),
+                    Comment.destroy({
+                        where: {
+                            id: value.id
+                        }
+                    })
+                ])
+            }
+        })
             .then(() => resolve())
             .catch(reject);
     });

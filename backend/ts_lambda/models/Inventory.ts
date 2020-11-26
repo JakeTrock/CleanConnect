@@ -52,7 +52,8 @@ Inventory.init({
   items: {
     type: Sequelize.VIRTUAL,
     get: () => Item.findAll({
-      where: { inventory: this.id }
+      // @ts-ignore
+      where: { inventory: this.get('id') }
     })
   }
 }, {

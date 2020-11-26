@@ -6,7 +6,6 @@ import gateway from '../config/payconf';
 import { Callback } from 'aws-lambda';
 import { reqBody } from '../interfaces';
 // import { JWTuser } from "../interfaces";
-// import async from '../asyncpromise';
 
 const create = async (body: reqBody, callback: Callback): Promise<any> => {
     const { name, email, password, password2, payment_method_nonce, phone, tier } = body.data;

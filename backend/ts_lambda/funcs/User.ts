@@ -1,5 +1,4 @@
 import QRCode from 'qrcode';
-// import async from '../asyncpromise';
 import bcrypt from 'bcryptjs';
 import jwt from 'jwt-then';
 import { UserChangeFields, UserNewInterface, PaymentReturnInterface, changePassInterface, custresInterface, subresInterface } from '../interfaces';

@@ -2,7 +2,6 @@ import QRCode from 'qrcode';
 import Item from '../models/Item';
 import User from '../models/User';
 import Inventory from '../models/Inventory';
-import async from '../asyncpromise';
 import { InventoryChangeInterface } from '../interfaces';
 import helpers from '../helpers';
 import keys from '../config/keys';
@@ -73,8 +72,8 @@ const purge = async (userID: string): Promise<any> => {
     return new Promise((resolve, reject) => {
         Inventory.findAll({
             where: { user: userID }
-        }).then((inv: Inventory[]) =>
-            async.forEachOf(inv, (value: Inventory, key: number, callback: (err?: Error) => void) =>
+        }).then(async (inv: Inventory[]) => {
+            for await (const value of inv) {
                 Promise.allSettled([
                     Item.destroy({
                         where: { inventory: value.id }
@@ -83,8 +82,8 @@ const purge = async (userID: string): Promise<any> => {
                         where: { id: value.id }
                     })
                 ])
-                    .then(() => callback())
-                    .catch(callback)))
+            }
+        })
             .then(() => resolve())
             .catch(reject);
     });

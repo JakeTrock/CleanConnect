@@ -1,9 +1,8 @@
 import * as crypto from 'crypto';
 import helpers from '../helpers';
-import async from '../asyncpromise';
 import User from '../models/User';
 import UserIndex from '../models/UserIndex';
-import { UserIndexCreateFields, UserIndexCfOut } from '../interfaces';
+import { UserIndexCreateFields } from '../interfaces';
 
 
 const get = async (token: string): Promise<any> => {
@@ -37,10 +36,12 @@ const confirm = async (token: string): Promise<any> => {
             User.findOne({
                 where: { id: index.userID }
             }),
-            async.waterfall([
-                (cb) => UserIndex.findOne({ where: { id: index.id } }).then(ind => cb(null, ind)),
-                (ind, cb) => UserIndex.destroy({ where: { id: index.id } }).then(() => cb(null, ind))
-            ])
+            UserIndex.findOne({ where: { id: index.id } })
+                .then(ind => UserIndex.destroy({
+                    where: {
+                        id: index.id
+                    }
+                })),
         ])).then((user: Array<any>) => {//TODO:interface
             if (user[1].isCritical) {
                 user[0].update({
