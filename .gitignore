@@ -81,6 +81,7 @@ frontend/.env.production
 log.txt
 mykeys/CleanConnectKey
 mykeys/CleanConnectKey.pub
+backend/ts-lambda/dist/*
 backend/routes/sources/*
 backend/turbo-*
 mykeys/puttykey

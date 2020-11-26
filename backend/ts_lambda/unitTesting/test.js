@@ -9,7 +9,7 @@ const defaultBody = {
 var authNoBody, authBody, token, verlnk, userDetails, userInv, userTags;
 
 function request(reqBody, callback) {
-    console.log(url + "\n==================================\n");
+    console.log("{"+reqBody.routing.central + "/" + reqBody.routing.secondary + "\n==================================\n");
     var req = unirest("POST", prefix);
 
     req.headers(defaultBody);
@@ -19,7 +19,7 @@ function request(reqBody, callback) {
     req.end(function (res) {
         if (res.error) {
             console.log(res.body);
-            throw new Error(res.error); //FIXME:okay jake ykw to do, just fix all this junk so it works with the new generic format below
+            throw new Error(res.error);
         }
         console.log(JSON.stringify(res.body) + "\n==================================\n");
 
@@ -171,7 +171,7 @@ waterfall([
                 data: {
                     "email": "fake2@test.com",
                     "phone": "666.666.6667",
-                    "password1": "newpass1234",
+                    "password": "newpass1234",
                     "password2": "newpass1234"
                 },
             }, callback)
@@ -443,9 +443,9 @@ waterfall([
                         },
                         data: {
                             "name": "industrial strength cleanser " + i,
-                            "maxQuant": "100",
-                            "minQuant": "20",
-                            "curQuant": "37"
+                            "maxQuant": 100,
+                            "minQuant": 20,
+                            "curQuant": 37
                         },
                     }, () => {
                         if (i == 15) callback

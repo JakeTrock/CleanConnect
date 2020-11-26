@@ -11,18 +11,31 @@ import Tag from './models/Tag';
 //     value: any
 // }
 
-export interface imgUplDat {
-    "url": string,
-    "fields": {
-        "key": string,
-        "bucket": string,
-        "X-Amz-Algorithm": string,
-        "X-Amz-Credential": string,
-        "X-Amz-Date": string,
-        "X-Amz-Security-Token": string,
-        "Policy": string,
-        "X-Amz-Signature": string,
-        "tagging": string
+export interface reqBody {
+    routing: {
+        central: string,
+        secondary: string,
+        ip: string,
+        token1?: string,
+        token2?: string,
+        authorization?: string
+    },
+    data: {
+        name?: string,
+        email?: string,
+        password?: string,
+        password2?: string,
+        payment_method_nonce?: string,
+        phone?: string,
+        tier?: number,
+        showDead?: boolean,
+        image?: string,
+        text?: string,
+        sev?: number,
+        maxQuant?: number,
+        minQuant?: number,
+        curQuant?: number,
+        newVal?: number
     }
 }
 
@@ -116,7 +129,7 @@ export interface JWTuser {
 
 export interface changePassInterface {
     email: User["email"];
-    password1: string;
+    password: string;
     password2: string;
     phone: User["phone"];
 }

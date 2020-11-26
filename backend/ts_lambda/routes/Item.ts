@@ -1,56 +1,56 @@
 import helpers from '../helpers';
 import Inventory from '../models/Inventory';
 import Item from '../models/Item';
-import { APIGatewayEvent, Context, Callback } from 'aws-lambda';
+import { Callback } from 'aws-lambda';
+import { reqBody } from '../interfaces';
 
-const create = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
-    const body = JSON.parse(event.body);
-    Inventory.findOne({ where: { id: event.pathParameters.id } })
+const create = async (body: reqBody, callback: Callback): Promise<any> => {
+    Inventory.findOne({ where: { id: body.routing.token1 } })
         .then((inv: Inventory | null) =>
             Item.create(helpers.rmUndef({
-                name: body.name,
+                name: body.data.name,
                 inventory: inv.id,
-                maxQuant: body.maxQuant,
-                minQuant: body.minQuant,
-                curQuant: body.curQuant,
-                ip: event.requestContext.identity.sourceIp
+                maxQuant: body.data.maxQuant,
+                minQuant: body.data.minQuant,
+                curQuant: body.data.curQuant,
+                ip: body.routing.ip
             })))
         .then(() => callback(null, helpers.blankres))
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const remove = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const remove = async (body: reqBody, callback: Callback): Promise<any> => {
     Item.mark(
-        event.pathParameters.id,
-        event.pathParameters.item_id,
-        true, event.requestContext.identity.sourceIp)
+        body.routing.token1,
+        body.routing.token2,
+        true, body.routing.ip)
         .then(() => callback(null, helpers.blankres))
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const restore = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const restore = async (body: reqBody, callback: Callback): Promise<any> => {
     Item.mark(
-        event.pathParameters.id,
-        event.pathParameters.item_id,
-        false, event.requestContext.identity.sourceIp)
+        body.routing.token1,
+        body.routing.token2,
+        false, body.routing.ip)
         .then(() => callback(null, helpers.blankres))
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const updQnt = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const updQnt = async (body: reqBody, callback: Callback): Promise<any> => {
     Item.change(
-        event.pathParameters.id,
-        event.pathParameters.item_id,
-        JSON.parse(event.body), true)
+        body.routing.token1,
+        body.routing.token2,
+        body.data, true)
         .then(() => callback(null, helpers.blankres))
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const edit = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const edit = async (body: reqBody, callback: Callback): Promise<any> => {
     Item.change(
-        event.pathParameters.id,
-        event.pathParameters.item_id,
-    JSON.parse(event.body), false)
+        body.routing.token1,
+        body.routing.token2,
+        body.data, false)
         .then(() => callback(null, helpers.blankres))
         .catch(e => callback(null, helpers.erep(e)));
 }

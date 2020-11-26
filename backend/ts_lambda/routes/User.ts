@@ -3,12 +3,13 @@ import helpers from '../helpers';
 import User from '../models/User';
 import UserIndex from '../models/UserIndex';
 import gateway from '../config/payconf';
-import { APIGatewayEvent, Context, Callback } from 'aws-lambda';
+import { Callback } from 'aws-lambda';
+import { reqBody } from '../interfaces';
 // import { JWTuser } from "../interfaces";
 // import async from '../asyncpromise';
 
-const create = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
-    const { name, email, password, password2, payment_method_nonce, phone, tier } = JSON.parse(event.body);
+const create = async (body: reqBody, callback: Callback): Promise<any> => {
+    const { name, email, password, password2, payment_method_nonce, phone, tier } = body.data;
     User.newUsr({
         name: name,
         email: email,
@@ -28,9 +29,9 @@ const create = async (event: APIGatewayEvent, context: Context, callback: Callba
         .then(out => callback(null, helpers.scadd(out)))
         .catch(e => callback(null, helpers.erep(e)));
 }
-const resend = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const resend = async (body: reqBody, callback: Callback): Promise<any> => {
     User.findOne({
-        where: { email: JSON.parse(event.body).email }
+        where: { email: body.data.email }
     }).then((user: User | null) => {
         if (!user)
             callback(null, "Unable to find user with this email");
@@ -51,22 +52,22 @@ const resend = async (event: APIGatewayEvent, context: Context, callback: Callba
     });
 }
 
-const confirm = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
-    UserIndex.confirm(event.pathParameters.token)
+const confirm = async (body: reqBody, callback: Callback): Promise<any> => {
+    UserIndex.confirm(body.routing.token1)
         .then(() => callback(null, helpers.blankres))
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const login = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
-    User.login(JSON.parse(event.body).email, JSON.parse(event.body).password)
+const login = async (body: reqBody, callback: Callback): Promise<any> => {
+    User.login(body.data.email, body.data.password)
         .then(out => callback(null, helpers.scadd({
             token: out
         })))
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const changeReq = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
-    helpers.passport(event)
+const changeReq = async (body: reqBody, callback: Callback): Promise<any> => {
+    helpers.passport(body.routing.authorization)
         .then(usr => UserIndex.createIndex({
             id: usr.id,
             email: usr.email,
@@ -77,16 +78,16 @@ const changeReq = async (event: APIGatewayEvent, context: Context, callback: Cal
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const change = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
-    UserIndex.confirm(event.pathParameters.token)
-        .then((user: User) => User.changeInfo(user.id, JSON.parse(event.body), gateway))
+const change = async (body: reqBody, callback: Callback): Promise<any> => {
+    UserIndex.confirm(body.routing.token1)
+        .then((user: User) => User.changeInfo(user.id, body.data, gateway))
         .then(() => callback(null, helpers.blankres))
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const resetPassReq = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const resetPassReq = async (body: reqBody, callback: Callback): Promise<any> => {
     UserIndex.createIndex({
-        email: JSON.parse(event.body).email,
+        email: body.data.email,
         prefix: "resetPass",
         id: undefined,
         ic: false
@@ -95,14 +96,20 @@ const resetPassReq = async (event: APIGatewayEvent, context: Context, callback: 
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const resetPass = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
-    User.changePass(JSON.parse(event.body))
+const resetPass = async (body: reqBody, callback: Callback): Promise<any> => {
+    const { email, phone, password, password2 } = body.data;
+    User.changePass({
+        email: email,
+        phone: phone,
+        password: password,
+        password2: password2
+    })
         .then(() => callback(null, helpers.blankres))
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const removeReq = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
-    helpers.passport(event)
+const removeReq = async (body: reqBody, callback: Callback): Promise<any> => {
+    helpers.passport(body.routing.authorization)
         .then(usr => UserIndex.createIndex({
             id: usr.id,
             email: usr.email,
@@ -113,10 +120,10 @@ const removeReq = async (event: APIGatewayEvent, context: Context, callback: Cal
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const remove = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const remove = async (body: reqBody, callback: Callback): Promise<any> => {
     Promise.allSettled([
-        UserIndex.confirm(event.pathParameters.token),
-        helpers.passport(event)
+        UserIndex.confirm(body.routing.token1),
+        helpers.passport(body.routing.authorization)
     ])
         .then((doc: Array<any>) => new Promise((resolve, reject) => {//TODO:interface
             if (doc[0].id != doc[1].id)
@@ -128,16 +135,16 @@ const remove = async (event: APIGatewayEvent, context: Context, callback: Callba
         .catch((e: Error) => callback(null, helpers.erep(e)));
 }
 
-const isValid = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const isValid = async (body: reqBody, callback: Callback): Promise<any> => {
     UserIndex.count({
-        where: { token: event.pathParameters.token }
+        where: { token: body.routing.token1 }
     })
         .then((ex: number) => callback(null, JSON.stringify({ success: ex != 0 })))
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const current = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
-    helpers.passport(event)
+const current = async (body: reqBody, callback: Callback): Promise<any> => {
+    helpers.passport(body.routing.authorization)
         .then(usr => User.get(usr.id))
         .then((profile: User) =>
             callback(null, helpers.scadd({
@@ -152,15 +159,15 @@ const current = async (event: APIGatewayEvent, context: Context, callback: Callb
         .catch((e: Error) => callback(null, helpers.erep(e)));
 }
 
-const getClientToken = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const getClientToken = async (body: reqBody, callback: Callback): Promise<any> => {
     gateway.clientToken.generate({})
         .then((response: ClientToken) => callback(null, helpers.scadd({
             clientToken: response.clientToken
         }))).catch(e => callback(null, helpers.erep(e)));
 }
 
-const getAuthClientToken = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
-    helpers.passport(event)
+const getAuthClientToken = async (body: reqBody, callback: Callback): Promise<any> => {
+    helpers.passport(body.routing.authorization)
         .then(usr => User.get(usr.id))
         .then((usr: User) => gateway.clientToken.generate({
             customerId: usr.custID,

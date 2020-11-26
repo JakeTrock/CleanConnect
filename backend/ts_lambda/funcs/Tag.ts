@@ -47,15 +47,6 @@ const newTag = async (name: string, user: User): Promise<any> => {
             });
     });
 }
-const change = async (id: string, updated: TagChangeInterface): Promise<any> => {
-    return new Promise((resolve, reject) => {
-        Tag.findOne({ where: { id: id } }).then(tag => tag.update({
-            name: updated.name
-        }))
-            .then(() => resolve())
-            .catch(reject);
-    });
-}
 const removal = async (id: string, uid: string): Promise<any> => {
     return new Promise((resolve, reject) => {
         Promise.allSettled([

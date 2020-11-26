@@ -13,7 +13,8 @@ const rts = {
     user: User
 }
 const endpt = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
-    const body=JSON.parse(event.body);
-    rts[body.routing.central][body.routing.secondary](event, context, callback);
+    let body = JSON.parse(event.body);
+    body.routing.ip = body.routing.ip
+    rts[body.routing.central][body.routing.secondary](body, callback);
 };
 export { endpt };

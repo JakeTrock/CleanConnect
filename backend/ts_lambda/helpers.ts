@@ -4,9 +4,7 @@ import conf from './config/keys';
 import { inspect } from 'util';
 import * as crypto from 'crypto';
 import User from './models/User';
-import { APIGatewayEvent } from 'aws-lambda';
 import * as AWS from 'aws-sdk';
-import { substring } from 'sequelize/types/lib/operators';
 
 AWS.config.update({
     accessKeyId: conf.akid,
@@ -152,11 +150,11 @@ export default {
             body: (err.message) ? err.message : ptx
         };
     },
-    passport: (event: APIGatewayEvent): Promise<JWTuser> => {
+    passport: (auth): Promise<JWTuser> => {
         return new Promise((resolve, reject) => {
             var authHeader;
-            if (typeof event.headers === "string") {
-                authHeader = JSON.parse(event.body).authorization;
+            if (typeof auth === "string") {
+                authHeader = auth;
                 if (authHeader) {
                     jwt.verify(authHeader.split(' ')[1], conf.secretOrKey)
                         .then((out: string | object): Promise<JWTuser> => new Promise((resolve, reject) => {

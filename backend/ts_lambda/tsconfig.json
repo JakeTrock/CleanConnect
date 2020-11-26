@@ -2,11 +2,13 @@
   "compilerOptions": {
     "lib": ["es2020"],
     "removeComments": true,
-    "allowSyntheticDefaultImports":true,
-    "strictNullChecks": false,
+    "allowSyntheticDefaultImports": true,
+    // "strictNullChecks": false,
     "moduleResolution": "node",
     "noUnusedLocals": true,
     "noUnusedParameters": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "sourceMap": true,
     "target": "es2020",
     "outDir": "./lib"
@@ -14,6 +16,7 @@
   "include": ["./**/*.ts"],
   "exclude": [
     "node_modules/**/*",
+    "unitTesting/**/*",
     ".serverless/**/*",
     "_warmup/**/*",
     ".vscode/**/*"

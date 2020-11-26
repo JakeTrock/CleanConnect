@@ -94,17 +94,16 @@ const changeInfo = async (usr: string, changeFields: UserChangeFields, gateway: 
 }
 const changePass = async (info: changePassInterface): Promise<any> => {
     return new Promise((resolve, reject) => {
-        if (!info.password1 && !info.password2 && !(info.password1 === info.password2)) reject({ message: "password error" });
-        bcrypt.hash(info.password1, 10).then((hash: string) =>
+        if (!info.password && !info.password2 && !(info.password === info.password2)) reject({ message: "password error" });
+        bcrypt.hash(info.password, 10).then((hash: string) =>
             User.findOne({
                 where: {
                     email: info.email,
                     phone: info.phone
                 }
-            }).then(usr => usr.update(
-                {
-                    password: hash
-                })))
+            }).then(usr => usr.update({
+                password: hash
+            })))
             .then(() => resolve())
             .catch(reject);
     });
@@ -178,7 +177,7 @@ const purge = async (user: User): Promise<any> => {
     return new Promise((resolve, reject) => {
         Promise.allSettled([
             User.findOne({ where: { id: user.id } })
-            .then(usr => usr.destroy()),
+                .then(usr => usr.destroy()),
             gateway.subscription.cancel(user.PayToken),
             UserIndex.destroy({
                 where: { userID: user.id }
