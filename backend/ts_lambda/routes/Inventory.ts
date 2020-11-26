@@ -3,21 +3,21 @@ import Inventory from '../models/Inventory';
 import User from '../models/User';
 import { APIGatewayEvent, Context, Callback } from 'aws-lambda';
 
-const invGetAll = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const getAll = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     helpers.passport(event)
         .then(usr => Inventory.getall(usr.id, JSON.parse(event.body).showDead))
         .then(out => callback(null, helpers.scadd({ invs: out })))
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const invGetOne = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const getOne = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     helpers.passport(event)
         .then(() => Inventory.get(event.pathParameters.id))
         .then(out => callback(null, helpers.scadd(out)))
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const invExist = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const exists = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     Inventory.count({
         where: { id: event.pathParameters.id }
     })
@@ -25,7 +25,7 @@ const invExist = async (event: APIGatewayEvent, context: Context, callback: Call
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const invNew = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const create = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     helpers.passport(event)
         .then(() => User.findOne({
             where: { id: event.pathParameters.id }
@@ -35,7 +35,7 @@ const invNew = async (event: APIGatewayEvent, context: Context, callback: Callba
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const invEdit = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const edit = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     helpers.passport(event)
         .then(() => Inventory.update({
             where: { id: event.pathParameters.id }
@@ -44,7 +44,7 @@ const invEdit = async (event: APIGatewayEvent, context: Context, callback: Callb
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const invDelete = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const remove = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     helpers.passport(event)
         .then(usr => User.findOne({
             where: { id: usr.id }
@@ -55,4 +55,4 @@ const invDelete = async (event: APIGatewayEvent, context: Context, callback: Cal
 }
 
 
-export { invDelete, invEdit, invExist, invGetAll, invGetOne, invNew };
+export { remove, edit, exists, getAll, getOne, create };

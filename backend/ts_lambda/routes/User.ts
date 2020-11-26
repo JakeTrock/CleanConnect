@@ -7,7 +7,7 @@ import { APIGatewayEvent, Context, Callback } from 'aws-lambda';
 // import { JWTuser } from "../interfaces";
 // import async from '../asyncpromise';
 
-const usrCreate = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const create = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     const { name, email, password, password2, payment_method_nonce, phone, tier } = JSON.parse(event.body);
     User.newUsr({
         name: name,
@@ -28,7 +28,7 @@ const usrCreate = async (event: APIGatewayEvent, context: Context, callback: Cal
         .then(out => callback(null, helpers.scadd(out)))
         .catch(e => callback(null, helpers.erep(e)));
 }
-const usrResend = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const resend = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     User.findOne({
         where: { email: JSON.parse(event.body).email }
     }).then((user: User | null) => {
@@ -51,13 +51,13 @@ const usrResend = async (event: APIGatewayEvent, context: Context, callback: Cal
     });
 }
 
-const usrConfirm = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const confirm = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     UserIndex.confirm(event.pathParameters.token)
         .then(() => callback(null, helpers.blankres))
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const usrLogin = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const login = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     User.login(JSON.parse(event.body).email, JSON.parse(event.body).password)
         .then(out => callback(null, helpers.scadd({
             token: out
@@ -65,7 +65,7 @@ const usrLogin = async (event: APIGatewayEvent, context: Context, callback: Call
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const usrChangeToken = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const changeReq = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     helpers.passport(event)
         .then(usr => UserIndex.createIndex({
             id: usr.id,
@@ -77,14 +77,14 @@ const usrChangeToken = async (event: APIGatewayEvent, context: Context, callback
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const usrChange = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const change = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     UserIndex.confirm(event.pathParameters.token)
         .then((user: User) => User.changeInfo(user.id, JSON.parse(event.body), gateway))
         .then(() => callback(null, helpers.blankres))
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const usrResetPassToken = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const resetPassReq = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     UserIndex.createIndex({
         email: JSON.parse(event.body).email,
         prefix: "resetPass",
@@ -95,13 +95,13 @@ const usrResetPassToken = async (event: APIGatewayEvent, context: Context, callb
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const usrResetPass = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const resetPass = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     User.changePass(JSON.parse(event.body))
         .then(() => callback(null, helpers.blankres))
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const usrDeleteToken = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const removeReq = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     helpers.passport(event)
         .then(usr => UserIndex.createIndex({
             id: usr.id,
@@ -113,7 +113,7 @@ const usrDeleteToken = async (event: APIGatewayEvent, context: Context, callback
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const usrDelete = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const remove = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     Promise.allSettled([
         UserIndex.confirm(event.pathParameters.token),
         helpers.passport(event)
@@ -128,7 +128,7 @@ const usrDelete = async (event: APIGatewayEvent, context: Context, callback: Cal
         .catch((e: Error) => callback(null, helpers.erep(e)));
 }
 
-const usrIsValid = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const isValid = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     UserIndex.count({
         where: { token: event.pathParameters.token }
     })
@@ -136,7 +136,7 @@ const usrIsValid = async (event: APIGatewayEvent, context: Context, callback: Ca
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const usrCurrent = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const current = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     helpers.passport(event)
         .then(usr => User.get(usr.id))
         .then((profile: User) =>
@@ -152,14 +152,14 @@ const usrCurrent = async (event: APIGatewayEvent, context: Context, callback: Ca
         .catch((e: Error) => callback(null, helpers.erep(e)));
 }
 
-const usrGetClientToken = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const getClientToken = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     gateway.clientToken.generate({})
         .then((response: ClientToken) => callback(null, helpers.scadd({
             clientToken: response.clientToken
         }))).catch(e => callback(null, helpers.erep(e)));
 }
 
-const usrGetAuthClientToken = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const getAuthClientToken = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     helpers.passport(event)
         .then(usr => User.get(usr.id))
         .then((usr: User) => gateway.clientToken.generate({
@@ -171,4 +171,4 @@ const usrGetAuthClientToken = async (event: APIGatewayEvent, context: Context, c
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-export { usrCreate, usrResend, usrConfirm, usrLogin, usrChangeToken, usrChange, usrResetPassToken, usrResetPass, usrDeleteToken, usrDelete, usrIsValid, usrCurrent, usrGetClientToken, usrGetAuthClientToken };
+export { create, resend, confirm, login, changeReq, change, resetPassReq, resetPass, removeReq, remove, isValid, current, getClientToken, getAuthClientToken };

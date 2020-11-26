@@ -12,7 +12,7 @@
   "dependencies": {
     "async": "^3.2.0",
     "aws-lambda": "^1.0.6",
-    "aws-sdk": "^2.747.0",
+    "aws-sdk": "^2.799.0",
     "bcryptjs": "^2.4.3",
     "braintree": "^2.24.0",
     "cuss": "^1.21.0",
@@ -20,23 +20,23 @@
     "pg": "^7.4.1",
     "qrcode": "^1.4.4",
     "sequelize": "^6.3.4",
-    "serverless": "^1.80.0",
-    "uuid": "^8.3.0",
+    "serverless": "^1.83.2",
+    "uuid": "^8.3.1",
     "xss-filters": "^1.2.7"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.17",
+    "@types/aws-lambda": "^8.10.64",
     "@types/bcryptjs": "^2.4.2",
-    "@types/braintree": "^2.22.4",
+    "@types/braintree": "^2.22.6",
     "@types/cuss": "^1.20.0",
     "@types/jwt-then": "^1.0.0",
-    "@types/node": "^10.12.18",
-    "@types/pg": "^7.14.4",
+    "@types/node": "^10.17.47",
+    "@types/pg": "^7.14.7",
     "@types/qrcode": "^1.3.4",
     "@types/sequelize": "^4.28.9",
-    "@types/serverless": "^1.72.5",
+    "@types/serverless": "^1.78.11",
     "@types/uuid": "^8.3.0",
     "@types/xss-filters": "0.0.27",
-    "serverless-offline": "^6.5.0"
+    "serverless-offline": "^6.8.0"
   }
 }

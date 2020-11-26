@@ -5,6 +5,7 @@ const serverlessConfiguration: Serverless = {
     service: {
         name: 'cleanconnect'
     },
+    plugins: ["serverless-offline"],
     frameworkVersion: '>=1.72.0',
     provider: {
         name: 'aws',
@@ -14,7 +15,6 @@ const serverlessConfiguration: Serverless = {
         },
         environment: {
             testing: true,
-            url: "mongodb://localhost/CleanConnectDev",
             mid: "m2jfqj6kzbv9fjn3",
             pbk: "vvn3gp9tctxntj3w",
             prk: "d97c664a90d9bacc02eeec7af7dd630b",
@@ -24,11 +24,27 @@ const serverlessConfiguration: Serverless = {
             bname: "cleanconnectimages",
             domain: "https://cleanconnect.us",
             email: "'cleanconnect.us' <noreply@cleanconnect.us>",
-            dbName: "dbName",
-            dbUser: "dbUser",
-            dbPass: "dbPass",
-            dbHost: "dbHost"
+            dbName: "database-1",
+            dbUser: "ccdef",
+            dbPass: "Ly3v1372TJ4thXx0GSye",
+            dbHost: "database-1.ccgwsnlzm4yj.us-east-1.rds.amazonaws.com"
         },
+        iamRoleStatements: [
+            {
+                Effect: "Allow",
+                Action: [
+                    "s3:ListBucket"
+                ],
+                Resource: "arn:aws:s3:::cleanconnectimages"
+            },
+            {
+                Effect: "Allow",
+                Action: [
+                    "s3:PutObject"
+                ],
+                Resource: "arn:aws:s3:::cleanconnectimages/*"
+            }
+        ]
     },
     functions: {
         //COMMENT
@@ -43,7 +59,6 @@ const serverlessConfiguration: Serverless = {
                 }
             }]
         },
-
         //INVENTORY
         inv: {
             handler: 'handler.invRt',
@@ -56,7 +71,6 @@ const serverlessConfiguration: Serverless = {
                 }
             }]
         },
-
         //ITEM
         itm: {
             handler: 'handler.itmRt',
@@ -69,7 +83,6 @@ const serverlessConfiguration: Serverless = {
                 }
             }]
         },
-
         //TAG
         tag: {
             handler: 'handler.tagRt',
@@ -82,7 +95,6 @@ const serverlessConfiguration: Serverless = {
                 }
             }]
         },
-
         //USER
         usr: {
             handler: 'handler.usrRt',
@@ -95,7 +107,6 @@ const serverlessConfiguration: Serverless = {
                 }
             }]
         }
-
     }
 };
 module.exports = serverlessConfiguration;

@@ -18,6 +18,7 @@ const get = async (id: string): Promise<any> => {
             });
     });
 }
+
 const rmImageDelete = async (id: string): Promise<any> => {
     return new Promise((resolve, reject) => {
         Comment.findAll({

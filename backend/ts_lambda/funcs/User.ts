@@ -2,7 +2,7 @@ import QRCode from 'qrcode';
 // import async from '../asyncpromise';
 import bcrypt from 'bcryptjs';
 import jwt from 'jwt-then';
-import { UserChangeFields, UserNewInterface, PaymentReturnInterface, changePassInterface, custresInterface, subresInterface, qdashgenInterface, exterr, userCreationInfoInterface } from '../interfaces';
+import { UserChangeFields, UserNewInterface, PaymentReturnInterface, changePassInterface, custresInterface, subresInterface } from '../interfaces';
 import { BraintreeGateway } from 'braintree';
 import keys from '../config/keys';
 import * as crypto from 'crypto';

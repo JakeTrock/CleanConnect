@@ -3,7 +3,7 @@ import Inventory from '../models/Inventory';
 import Item from '../models/Item';
 import { APIGatewayEvent, Context, Callback } from 'aws-lambda';
 
-const itmNew = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const create = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     const body = JSON.parse(event.body);
     Inventory.findOne({ where: { id: event.pathParameters.id } })
         .then((inv: Inventory | null) =>
@@ -19,7 +19,7 @@ const itmNew = async (event: APIGatewayEvent, context: Context, callback: Callba
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const itmDel = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const remove = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     Item.mark(
         event.pathParameters.id,
         event.pathParameters.item_id,
@@ -28,7 +28,7 @@ const itmDel = async (event: APIGatewayEvent, context: Context, callback: Callba
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const itmRestore = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const restore = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     Item.mark(
         event.pathParameters.id,
         event.pathParameters.item_id,
@@ -37,7 +37,7 @@ const itmRestore = async (event: APIGatewayEvent, context: Context, callback: Ca
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const itmUpdQnt = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const updQnt = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     Item.change(
         event.pathParameters.id,
         event.pathParameters.item_id,
@@ -46,7 +46,7 @@ const itmUpdQnt = async (event: APIGatewayEvent, context: Context, callback: Cal
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-const itmChange = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
+const edit = async (event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> => {
     Item.change(
         event.pathParameters.id,
         event.pathParameters.item_id,
@@ -55,4 +55,4 @@ const itmChange = async (event: APIGatewayEvent, context: Context, callback: Cal
         .catch(e => callback(null, helpers.erep(e)));
 }
 
-export { itmNew, itmDel, itmRestore, itmUpdQnt, itmChange }
+export { create, edit, remove, restore, updQnt }

@@ -2,10 +2,11 @@ import jwt from 'jwt-then';
 import { JWTuser, exterr } from './interfaces';
 import conf from './config/keys';
 import { inspect } from 'util';
-// import * as crypto from 'crypto';
+import * as crypto from 'crypto';
 import User from './models/User';
 import { APIGatewayEvent } from 'aws-lambda';
 import * as AWS from 'aws-sdk';
+import { substring } from 'sequelize/types/lib/operators';
 
 AWS.config.update({
     accessKeyId: conf.akid,
@@ -60,43 +61,21 @@ export default {
             });
         return obj;
     },
-    uploadImage: (event: APIGatewayEvent) => {
+    uploadImage: (img, type) => {
         return new Promise((resolve, reject) => {
-            const body = JSON.parse(event.body || '');
-            if (body || (typeof body.filename === 'string')) {
-                const filename = body.filename;
-                const tags = body.tags;
-                const fex = filename.split('.')[filename.split('.').length];
-                if (codecs.indexOf(fex.mimetype) >= 0) {
-                    // const fname = crypto.randomBytes(16).toString("hex").substring(8) + fex;
-                    // missing proper error handling
-                    const postObj = s3.createPresignedPost({
+            if (img) {
+                if (codecs.indexOf(type) >= 0 && img.length * 3 / 4 < 6E7) {
+                    const fname = crypto.randomBytes(16).toString("hex").substring(8) + type.substring(6);
+                    s3.upload({
+                        Body: Buffer.from(img, 'base64'),
                         Bucket: conf.bname,
-                        Expires: 90, // expiration in seconds
-                        // matches any value for tagging
-                        Conditions: tags && [['starts-with', '$tagging', '']],
-                        Fields: {
-                            key: filename,//TODO:change to fname later
-                        },
-                    });
-
-                    resolve({
-                        url: postObj.url,
-                        fields: {
-                            ...postObj.fields,
-                            // augment post object with the tagging values
-                            tagging: tags ? (tagset: Record<string, string>): string => {
-                                const tags = Object.entries(tagset).reduce(
-                                    (acc, [key, value]) => `${acc}<Tag><Key>${key}</Key><Value>${value}</Value></Tag>`,
-                                    '',
-                                );
-
-                                return `<Tagging><TagSet>${tags}</TagSet></Tagging>`;
-                            } : undefined,
-                        },
-                    });
-
-                } else reject({ message: "Invalid filetype(we allow png, jpg, jpeg, webp, gif, tiff, mp4 and webm uploads up to 5.1 MB)" });
+                        Key: fname,
+                        ContentType: type
+                    }, (err, data) =>{
+                        if (err) reject(err);
+                        else resolve(data.Location);
+                    })
+                } else reject({ message: "Invalid filetype(we allow png, jpg, jpeg, webp, gif, tiff, mp4 and webm uploads up to 55 MB)" });
             } else resolve();
         });
     },
