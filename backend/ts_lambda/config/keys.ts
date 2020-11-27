@@ -1,6 +1,5 @@
 export default {
     testing: process.env.testing,
-    url: process.env.url,
     mid: process.env.mid,
     pbk: process.env.pbk,
     prk: process.env.prk,

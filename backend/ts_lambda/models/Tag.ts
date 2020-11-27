@@ -1,7 +1,7 @@
 import * as Sequelize from "sequelize";
 import sequelize from '../config/db';
 import Comment from "./Comment";
-import { get, getall, newTag, change, removal, purge } from '../funcs/Tag';
+import { get, getall, newTag, removal, purge } from '../funcs/Tag';
 
 class Tag extends Sequelize.Model {
   public id!: string;
@@ -12,7 +12,6 @@ class Tag extends Sequelize.Model {
   public static get = get;
   public static getall = getall;
   public static newTag = newTag;
-  public static change = change;
   public static removal = removal;
   public static purge = purge;
 }
@@ -36,7 +35,8 @@ Tag.init({
   comments: {
     type: Sequelize.VIRTUAL,
     get: () => Comment.findAll({
-      where: { tag: this.id }
+      // @ts-ignore
+      where: { tag: this.get('id') }
     })
   },
   name: {
