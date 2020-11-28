@@ -1,4 +1,6 @@
-import QRCode from 'qrcode';
+// import QRCode from 'qrcode';
+var QRCode = require('qrcode');
+
 import Item from '../models/Item';
 import User from '../models/User';
 import Inventory from '../models/Inventory';
@@ -32,7 +34,7 @@ const newInv = async (name: String, user: User): Promise<any> => {
             .then(invct => {
                 if (invct <= keys.tagCeilings[user.tier]) {
                     const id = uuidv4();
-                    QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + "/dash/inventory/" + id, { errorCorrectionLevel: 'H' })
+                    QRCode.toDataURL(process.env.domain + "/dash/inventory/" + id, { errorCorrectionLevel: 'H' })
                         .then(qr => Inventory.create(helpers.rmUndef({
                             id: id,
                             name: name,

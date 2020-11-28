@@ -1,4 +1,5 @@
-import QRCode from 'qrcode';
+// import QRCode from 'qrcode';
+var QRCode = require('qrcode');
 import bcrypt from 'bcryptjs';
 import jwt from 'jwt-then';
 import { UserChangeFields, UserNewInterface, PaymentReturnInterface, changePassInterface, custresInterface, subresInterface } from '../interfaces';
@@ -113,7 +114,7 @@ const newUsr = async (details: UserNewInterface, gateway: BraintreeGateway): Pro
             Promise.allSettled([
                 new Promise((resolve, reject) => {//TODO:convert these all and others to promise format
                     const dc = crypto.randomBytes(16).toString("hex").substring(8);
-                    QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + "/dash/" + dc)
+                    QRCode.toDataURL(process.env.domain + "/dash/" + dc)
                         .then((url: string) => {
                             resolve({
                                 dashCode: dc,

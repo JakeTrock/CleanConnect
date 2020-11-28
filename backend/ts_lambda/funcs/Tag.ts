@@ -1,4 +1,6 @@
-import QRCode from 'qrcode';
+// import QRCode from 'qrcode';
+var QRCode = require('qrcode');
+
 import Comment from '../models/Comment';
 import User from '../models/User';
 import Tag from '../models/Tag';
@@ -31,7 +33,7 @@ const newTag = async (name: string, user: User): Promise<any> => {
             .then(tagct => {
                 if (tagct <= keys.tagCeilings[user.tier]) {
                     const id = uuidv4();
-                    QRCode.toDataURL(process.env.domainPrefix + process.env.topLevelDomain + "/tag/" + id, { errorCorrectionLevel: 'H' })
+                    QRCode.toDataURL(process.env.domain + "/tag/" + id, { errorCorrectionLevel: 'H' })
                         .then(qr => Tag.create(helpers.rmUndef({
                             id: id,
                             name: name,

@@ -1,4 +1,6 @@
-import braintree from 'braintree';
+// import braintree from 'braintree';
+var braintree = require('braintree');
+
 import keys from './keys';
 
 export default new braintree.BraintreeGateway({
