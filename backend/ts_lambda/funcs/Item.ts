@@ -1,15 +1,9 @@
 import { ItemChangeInterface } from '../interfaces';
 import Item from '../models/Item';
+import { sharedGet } from './shared';
 
-const get = async (id: string): Promise<any> => {
-    return new Promise((resolve, reject) => {
-        Item.findOne({ where: { id: id } })
-            .then((inv: Item | null) => {
-                if (inv) resolve(inv);
-                reject({ message: "No such tag exists!" });
-            });
-    });
-}
+const get = async (id: string): Promise<any> => sharedGet(Item, id);
+
 const change = async (inv: string, itid: string, updated: ItemChangeInterface, qupdate: boolean): Promise<any> => {
     return new Promise((resolve, reject) => {
         if (qupdate) updated = {

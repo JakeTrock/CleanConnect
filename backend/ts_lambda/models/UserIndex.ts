@@ -1,10 +1,10 @@
 import * as Sequelize from "sequelize";
 import sequelize from '../config/db';
+import * as crypto from 'crypto';
 import { get, createIndex, confirm } from '../funcs/UserIndex';
 
 class UserIndex extends Sequelize.Model {
   public id!: string;
-  public token!: string;
   public isCritical!: boolean;
   public email!: string;
   public userID?: string;
@@ -15,8 +15,8 @@ class UserIndex extends Sequelize.Model {
 
 UserIndex.init({
   id: {
-    type: Sequelize.UUID,
-    defaultValue: Sequelize.UUIDV4,
+    type: Sequelize.STRING,
+    defaultValue: crypto.randomBytes(16).toString("hex"),
     allowNull: false,
     unique: true,
     primaryKey: true,
@@ -32,10 +32,6 @@ UserIndex.init({
     validate: {
       isEmail: { msg: 'Please provide valid e-mail address' }
     }
-  },
-  token: {
-    type: Sequelize.STRING,
-    allowNull: false
   },
   isCritical: {
     type: Sequelize.BOOLEAN,

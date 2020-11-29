@@ -4,30 +4,15 @@ var QRCode = require('qrcode');
 import Item from '../models/Item';
 import User from '../models/User';
 import Inventory from '../models/Inventory';
-import { InventoryChangeInterface } from '../interfaces';
 import helpers from '../helpers';
 import keys from '../config/keys';
 import { v4 as uuidv4 } from 'uuid';
+import { sharedGet, sharedGetAll } from './shared';
 
-const get = async (id: string): Promise<any> => {
-    return new Promise((resolve, reject) => {
-        Inventory.findOne({ where: { id: id } })
-            .then((inv: Inventory | null) => {
-                if (inv) resolve(inv);
-                reject({ message: "No such inventory exists!" });
-            });
-    });
-}
-const getall = async (userID: string, sd: boolean): Promise<any> => {
-    return new Promise((resolve, reject) => {
-        User.findOne({ where: { id: userID } })
-            .then(usr => {
-                return usr.invs.map(e => e.items.filter(a => a.markedForDeletion == sd))
-            })
-            .then(resolve)
-            .catch(reject);
-    });
-}
+const get = async (id: string): Promise<any> => sharedGet(Inventory, id);
+
+const getall = async (userID: string, sd: boolean): Promise<any> => sharedGetAll("invs", userID, sd);
+
 const newInv = async (name: String, user: User): Promise<any> => {
     return new Promise((resolve, reject) => {
         Inventory.count({ where: { user: user.id } })
@@ -48,15 +33,6 @@ const newInv = async (name: String, user: User): Promise<any> => {
             });
     });
 }
-const change = async (id: string, updated: InventoryChangeInterface): Promise<any> => {
-    return new Promise((resolve, reject) => {
-        Inventory.findOne({
-            where: { id: id }
-        }).then(inv => inv.update(updated))
-            .then(() => resolve())
-            .catch(reject);
-    });
-}
 const removal = async (id: string, user: User): Promise<any> => {
     return new Promise((resolve, reject) => {
         Promise.allSettled([
@@ -70,25 +46,5 @@ const removal = async (id: string, user: User): Promise<any> => {
             .catch(reject);
     });
 }
-const purge = async (userID: string): Promise<any> => {
-    return new Promise((resolve, reject) => {
-        Inventory.findAll({
-            where: { user: userID }
-        }).then(async (inv: Inventory[]) => {
-            for await (const value of inv) {
-                Promise.allSettled([
-                    Item.destroy({
-                        where: { inventory: value.id }
-                    }),
-                    Inventory.destroy({
-                        where: { id: value.id }
-                    })
-                ])
-            }
-        })
-            .then(() => resolve())
-            .catch(reject);
-    });
-}
 
-export { get, getall, newInv, change, removal, purge };
+export { get, getall, newInv, removal };

@@ -11,6 +11,8 @@ import Tag from './models/Tag';
 //     value: any
 // }
 
+// export type genericModel = User|UserIndex|Comment|Item|Inventory|Tag;
+
 export interface reqBody {
     routing: {
         central: string,

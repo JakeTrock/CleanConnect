@@ -1,22 +1,8 @@
 import helpers from '../helpers';
 import Comment from '../models/Comment';
+import { sharedGet } from './shared';
 
-const get = async (id: string): Promise<any> => {
-    return new Promise((resolve, reject) => {
-        Comment.findOne({
-            where: {
-                id: id
-            }
-        })
-            .then((cmt: Comment | null) => {
-                if (cmt)
-                    resolve(cmt);
-                reject({
-                    message: "No such comment exists!"
-                });
-            });
-    });
-}
+const get = async (id: string): Promise<any> => sharedGet(Comment, id);
 
 const rmImageDelete = async (id: string): Promise<any> => {
     return new Promise((resolve, reject) => {

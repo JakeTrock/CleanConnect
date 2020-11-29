@@ -11,17 +11,13 @@ import UserIndex from '../models/UserIndex';
 import User from '../models/User';
 import gateway from '../config/payconf';
 import Inventory from '../models/Inventory';
+import { sharedGet } from './shared';
+import Item from '../models/Item';
+import Comment from '../models/Comment';
 
 
-const get = async (id: string): Promise<any> => {
-    return new Promise((resolve, reject) => {
-        User.findOne({ where: { id: id } })
-            .then((user: User | null) => {
-                if (user) resolve(user);
-                reject({ message: "No such user exists!" });
-            });
-    });
-}
+const get = async (id: string): Promise<any> => sharedGet(User, id);
+
 const login = async (field1: string, field2: string): Promise<any> => {
     return new Promise((resolve, reject) => {
         User.findOne({
@@ -184,10 +180,35 @@ const purge = async (user: User): Promise<any> => {
             }).then(() => UserIndex.destroy({
                 where: { email: user.email }
             })),
-            Tag.purge(user.id),
-            Inventory.purge(user.id)
+            Tag.findAll({
+                where: { user: user.id }
+            }).then(async (inv: Tag[]) => {
+                for await (const value of inv) {
+                    Promise.allSettled([
+                        Comment.rmImageDelete(value.id),
+                        Tag.findOne({
+                            where: { id: value.id }
+                        }).then(tag => tag.destroy())
+                    ])
+                }
+            }),
+            Inventory.findAll({
+                where: { user: user.id }
+            }).then(async (inv: Inventory[]) => {
+                for await (const value of inv) {
+                    Promise.allSettled([
+                        Item.destroy({
+                            where: { inventory: value.id }
+                        }),
+                        Inventory.destroy({
+                            where: { id: value.id }
+                        })
+                    ])
+                }
+            })
         ]).then(() => resolve())
             .catch(reject);
     });
 }
+
 export { get, login, changeInfo, changePass, newUsr, purge };

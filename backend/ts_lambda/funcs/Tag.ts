@@ -7,26 +7,12 @@ import Tag from '../models/Tag';
 import helpers from '../helpers';
 import keys from '../config/keys';
 import { v4 as uuidv4 } from 'uuid';
+import { sharedGet, sharedGetAll } from './shared';
 
-const get = async (id: string): Promise<any> => {
-    return new Promise((resolve, reject) => {
-        Tag.findOne({ where: { id: id } })
-            .then((tag: Tag | null) => {
-                if (tag) resolve(tag);
-                reject({ message: "No such tag exists!" });
-            });
-    });
-}
-const getall = async (userID: string, sd: boolean): Promise<any> => {
-    return new Promise((resolve, reject) => {
-        User.findOne({ where: { id: userID } })
-            .then(usr => {
-                return usr.tags.map(e => e.comments.filter(a => a.markedForDeletion == sd))
-            })
-            .then(resolve)
-            .catch(reject)
-    });
-}
+const get = async (id: string): Promise<any> => sharedGet(Tag, id);
+
+const getall = async (userID: string, sd: boolean): Promise<any> => sharedGetAll("tags", userID, sd);
+
 const newTag = async (name: string, user: User): Promise<any> => {
     return new Promise((resolve, reject) => {
         Tag.count({ where: { user: user.id } })
@@ -58,23 +44,6 @@ const removal = async (id: string, uid: string): Promise<any> => {
             .catch(reject);
     });
 }
-const purge = async (userID: string): Promise<any> => {
-    return new Promise((resolve, reject) => {
-        Tag.findAll({
-            where: { user: userID }
-        }).then(async (inv: Tag[]) =>{
-            for await (const value of inv) {
-                Promise.allSettled([
-                    Comment.rmImageDelete(value.id),
-                    Tag.findOne({
-                        where: { id: value.id }
-                    }).then(tag => tag.destroy())
-                ])
-            }
-        })
-            .then(() => resolve())
-            .catch(reject);
-    });
-}
 
-export { get, getall, newTag, removal, purge };
+
+export { get, getall, newTag, removal };

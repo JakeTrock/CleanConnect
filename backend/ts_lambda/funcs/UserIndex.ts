@@ -18,12 +18,11 @@ const get = async (token: string): Promise<any> => {
 const createIndex = async (info: UserIndexCreateFields): Promise<any> => {
     return new Promise((resolve, reject) => {
         UserIndex.create(helpers.rmUndef({
-            token: crypto.randomBytes(16).toString("hex"),
             isCritical: info.ic,
             email: info.email,
             userID: info.id || undefined
         }))
-            .then((doc: UserIndex) => helpers.sendMail(info.prefix, doc.token, info.email))
+            .then((doc: UserIndex) => helpers.sendMail(info.prefix, doc.id, info.email))
             .then(resolve)
             .catch(reject);
     });
@@ -31,17 +30,12 @@ const createIndex = async (info: UserIndexCreateFields): Promise<any> => {
 const confirm = async (token: string): Promise<any> => {
     return new Promise((resolve, reject) => {
         UserIndex.findOne({
-            where: { token: token }
+            where: { id: token }
         }).then((index: UserIndex | null) => Promise.allSettled([
             User.findOne({
                 where: { id: index.userID }
             }),
-            UserIndex.findOne({ where: { id: index.id } })
-                .then(ind => UserIndex.destroy({
-                    where: {
-                        id: index.id
-                    }
-                })),
+            index.destroy(),
         ])).then((user: Array<any>) => {//TODO:interface
             if (user[1].isCritical) {
                 user[0].update({
