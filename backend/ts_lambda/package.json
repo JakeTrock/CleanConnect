@@ -36,6 +36,7 @@
     "@types/serverless": "^1.78.11",
     "@types/uuid": "^8.3.0",
     "@types/xss-filters": "0.0.27",
+    "sequelize-mock": "^0.10.2",
     "serverless-offline": "^6.8.0"
   }
 }

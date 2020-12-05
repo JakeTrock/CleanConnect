@@ -24,8 +24,8 @@ const serverlessConfiguration: Serverless = {
             bname: "cleanconnectimages",
             domain: "https://cleanconnect.us",
             email: "'cleanconnect.us' <noreply@cleanconnect.us>",
-            dbName: "database-1",
-            dbUser: "ccdef",
+            dbName: "ccdev",
+            dbUser: "postgres",
             dbPass: "Ly3v1372TJ4thXx0GSye",
             dbHost: "database-1.ccgwsnlzm4yj.us-east-1.rds.amazonaws.com"
         },

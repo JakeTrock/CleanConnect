@@ -1,7 +1,19 @@
-import { Sequelize } from 'sequelize';
+//testing only
+///*
+const SequelizeMock = require('sequelize-mock');
 
+export default new SequelizeMock();
+//*/
+//
+
+//production
+//
+/*
+import { Sequelize } from 'sequelize';
 export default new Sequelize(process.env.dbName, process.env.dbUser, process.env.dbPass, {
   host: process.env.dbHost,
   port: 5432,
   dialect: 'postgres'
 });
+//*/
+//

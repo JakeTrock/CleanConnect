@@ -29,7 +29,7 @@ class User extends Sequelize.Model {
 
 
 
-User.init({
+User.init({//TODO: switch to this eventually https://sequelize.org/master/manual/assocs.html
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV4,

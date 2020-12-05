@@ -1,6 +1,5 @@
 // import QRCode from 'qrcode';
-var QRCode = require('qrcode');
-
+const QRCode = require('qrcode');
 import Comment from '../models/Comment';
 import User from '../models/User';
 import Tag from '../models/Tag';

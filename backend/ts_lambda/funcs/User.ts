@@ -1,5 +1,5 @@
 // import QRCode from 'qrcode';
-var QRCode = require('qrcode');
+const QRCode = require('qrcode');
 import bcrypt from 'bcryptjs';
 import jwt from 'jwt-then';
 import { UserChangeFields, UserNewInterface, PaymentReturnInterface, changePassInterface, custresInterface, subresInterface } from '../interfaces';
@@ -106,7 +106,16 @@ const changePass = async (info: changePassInterface): Promise<any> => {
 }
 const newUsr = async (details: UserNewInterface, gateway: BraintreeGateway): Promise<any> => {
     return new Promise((resolve, reject) => {
-        if (details.payment_method_nonce && details.password === details.password2 && details.email.match(/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/) && details.name && details.phone.match(/^[\+]?[(]?[0-9]{3}[)]?[.]?[0-9]{3}[.]?[0-9]{4,6}$/)) {
+        if (details.password !== details.password2)
+            reject({ message: "Passwords don't match" });
+        else if (!details.payment_method_nonce)
+            reject({ message: "No payment information provided!" });
+        else if (!details.email.match(/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/))
+            reject({ message: "Missing/bad email" });
+        else if (!details.phone.match(/^[\+]?[(]?[0-9]{3}[)]?[.]?[0-9]{3}[.]?[0-9]{4,6}$/))
+            reject({ message: "Missing/bad phone number" });
+        else if (!details.name) reject({ message: "Missing name" });
+        else {
             Promise.allSettled([
                 new Promise((resolve, reject) => {//TODO:convert these all and others to promise format
                     const dc = crypto.randomBytes(16).toString("hex").substring(8);
@@ -156,16 +165,6 @@ const newUsr = async (details: UserNewInterface, gateway: BraintreeGateway): Pro
                 }))
                 .catch(reject)
                 .then(resolve);
-        } else {
-            if (details.password !== details.password2)
-                reject({ message: "Passwords don't match" });
-            else if (!details.payment_method_nonce)
-                reject({ message: "No payment information provided!" });
-            else if (!details.email.match(/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/))
-                reject({ message: "Missing/bad email" });
-            else if (!details.phone.match(/^[\+]?[(]?[0-9]{3}[)]?[.]?[0-9]{3}[.]?[0-9]{4,6}$/))
-                reject({ message: "Missing/bad phone number" });
-            else reject({ message: "Missing name" });
         }
     });
 }

@@ -1,7 +1,7 @@
 import * as Sequelize from "sequelize";
 import sequelize from '../config/db';
 import Item from "./Item";
-import { get, getall, newInv, change, removal, purge } from '../funcs/Inventory';
+import { get, getall, newInv, removal } from '../funcs/Inventory';
 
 class Inventory extends Sequelize.Model {
   public id!: string;
@@ -13,9 +13,7 @@ class Inventory extends Sequelize.Model {
   public static get = get;
   public static getall = getall;
   public static newInv = newInv;
-  public static change = change;
   public static removal = removal;
-  public static purge = purge;
 }
 
 Inventory.init({

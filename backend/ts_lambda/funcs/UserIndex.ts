@@ -1,4 +1,3 @@
-import * as crypto from 'crypto';
 import helpers from '../helpers';
 import User from '../models/User';
 import UserIndex from '../models/UserIndex';
