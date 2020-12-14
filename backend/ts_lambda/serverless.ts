@@ -15,19 +15,19 @@ const serverlessConfiguration: Serverless = {
         },
         environment: {
             testing: true,
-            mid: "m2jfqj6kzbv9fjn3",
-            pbk: "vvn3gp9tctxntj3w",
-            prk: "d97c664a90d9bacc02eeec7af7dd630b",
+            mid: "braintree",
+            pbk: "braintree",
+            prk: "braintree",
             secretOrKey: "78:5f:4d:4e:a8:6a",
-            akid: "AKIAJI42CNK5UZNHHFNQ",
-            ask: "dZ2wImeIcKINRjowW0NSRCLc+NoVyDBbDuIFES+v",
-            bname: "cleanconnectimages",
+            akid: "",
+            ask: "",
+            bname: "BUCKETNAME",
             domain: "https://cleanconnect.us",
             email: "'cleanconnect.us' <noreply@cleanconnect.us>",
             dbName: "ccdev",
             dbUser: "postgres",
-            dbPass: "Ly3v1372TJ4thXx0GSye",
-            dbHost: "database-1.ccgwsnlzm4yj.us-east-1.rds.amazonaws.com"
+            dbPass: "",
+            dbHost: ""
         },
         iamRoleStatements: [
             {
@@ -35,14 +35,14 @@ const serverlessConfiguration: Serverless = {
                 Action: [
                     "s3:ListBucket"
                 ],
-                Resource: "arn:aws:s3:::cleanconnectimages"
+                Resource: "arn:aws:s3:::BNAME"
             },
             {
                 Effect: "Allow",
                 Action: [
                     "s3:PutObject"
                 ],
-                Resource: "arn:aws:s3:::cleanconnectimages/*"
+                Resource: "arn:aws:s3:::BUCKETNAME/*"
             }
         ]
     },
