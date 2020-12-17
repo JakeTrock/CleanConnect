@@ -1,5 +1,8 @@
 # CleanConnect
 Janitorial coordination system
+# video demo
+
+https://cleanconnect.us/images/JakeCleanConn.mp4
 
 # install
 1. clone this repo
