@@ -1,4 +1,0 @@
- dbName: "database-1",
-            dbUser: "ccdef",
-            dbPass: "Ly3v1372TJ4thXx0GSye",
-            dbHost: "database-1.ccgwsnlzm4yj.us-east-1.rds.amazonaws.com"

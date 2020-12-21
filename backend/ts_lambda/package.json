@@ -7,7 +7,7 @@
   "author": "Jake Trock",
   "license": "",
   "scripts": {
-    "deploy": "export AWS_ACCESS_KEY_ID=AKIAJI42CNK5UZNHHFNQ && export AWS_SECRET_ACCESS_KEY=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 && serverless deploy -v"
+    "deploy": "export AWS_ACCESS_KEY_ID= && export AWS_SECRET_ACCESS_KEY= && serverless deploy -v"
   },
   "dependencies": {
     "aws-lambda": "^1.0.6",
@@ -36,7 +36,6 @@
     "@types/serverless": "^1.78.11",
     "@types/uuid": "^8.3.0",
     "@types/xss-filters": "0.0.27",
-    "sequelize-mock": "^0.10.2",
     "serverless-offline": "^6.8.0"
   }
 }
