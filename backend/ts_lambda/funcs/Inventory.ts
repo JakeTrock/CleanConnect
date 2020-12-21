@@ -26,7 +26,7 @@ const newInv = async (name: String, user: User): Promise<any> => {
                             user: user.id,
                             qrcode: qr
                         })))
-                        .then(() => resolve())
+                        .then(() => resolve(true))
                         .catch(reject);
                 } else
                     reject('You have hit the inventory limit for this tier, please consider upgrading');
@@ -42,7 +42,7 @@ const removal = async (id: string, user: User): Promise<any> => {
             Inventory.destroy({
                 where: { id: id }
             }),
-        ]).then(() => resolve())
+        ]).then(() => resolve(true))
             .catch(reject);
     });
 }

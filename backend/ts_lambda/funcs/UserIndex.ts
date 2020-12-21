@@ -9,7 +9,7 @@ const get = async (token: string): Promise<any> => {
         UserIndex.findOne({
             where: { token: token }
         }).then((exists: UserIndex | null) => {
-            if (exists) resolve();
+            if (exists) resolve(true);
             reject('No user exists with this token');
         });
     });
@@ -39,7 +39,7 @@ const confirm = async (token: string): Promise<any> => {
             if (user[1].isCritical) {
                 user[0].update({
                     isVerified: true
-                }).then(() => resolve());
+                }).then(() => resolve(true));
             } else {
                 resolve(user[0]);
             }

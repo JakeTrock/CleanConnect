@@ -25,7 +25,7 @@ const newTag = async (name: string, user: User): Promise<any> => {
                             user: user.id,
                             qrcode: qr
                         })))
-                        .then(() => resolve())
+                        .then(() => resolve(true))
                         .catch(reject);
                 } else
                     reject('You have hit the tag limit for this tier, please consider upgrading');
@@ -39,7 +39,7 @@ const removal = async (id: string, uid: string): Promise<any> => {
             Tag.destroy({
                 where: { id: id }
             })
-        ]).then(() => resolve())
+        ]).then(() => resolve(true))
             .catch(reject);
     });
 }

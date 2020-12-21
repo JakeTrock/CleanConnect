@@ -26,7 +26,7 @@ const rmImageDelete = async (id: string): Promise<any> => {
                     new Promise((resolve, reject) => {
                         if (value.img)
                             helpers.deleteImage(value.img)
-                                .then(() => resolve())
+                                .then(() => resolve(true))
                                 .catch((e: Error) => reject(e))
                     }),
                     Comment.destroy({
@@ -37,7 +37,7 @@ const rmImageDelete = async (id: string): Promise<any> => {
                 ])
             }
         })
-            .then(() => resolve())
+            .then(() => resolve(true))
             .catch(reject);
     });
 }
@@ -53,7 +53,7 @@ const mark = async (id: string, tag: string, status: boolean, ip: string): Promi
             removedAt: status ? new Date() : undefined,
             ip: ip ? ip : undefined,
         }))
-            .then(() => resolve())
+            .then(() => resolve(true))
             .catch(reject);
     })
 }

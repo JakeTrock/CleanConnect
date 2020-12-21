@@ -84,7 +84,7 @@ const changeInfo = async (usr: string, changeFields: UserChangeFields, gateway: 
                 })
                     .catch(reject);
             })
-            .then(() => resolve())
+            .then(() => resolve(true))
             .catch(reject);
     });
 }
@@ -100,7 +100,7 @@ const changePass = async (info: changePassInterface): Promise<any> => {
             }).then(usr => usr.update({
                 password: hash
             })))
-            .then(() => resolve())
+            .then(() => resolve(true))
             .catch(reject);
     });
 }
@@ -205,7 +205,7 @@ const purge = async (user: User): Promise<any> => {
                     ])
                 }
             })
-        ]).then(() => resolve())
+        ]).then(() => resolve(true))
             .catch(reject);
     });
 }

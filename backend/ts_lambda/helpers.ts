@@ -74,7 +74,7 @@ export default {
                         else resolve(data.Location);
                     })
                 } else reject({ message: "Invalid filetype(we allow png, jpg, jpeg, webp, gif, tiff, mp4 and webm uploads up to 55 MB)" });
-            } else resolve();
+            } else resolve(true);
         });
     },
     deleteImage: (imageName: string) => {
@@ -84,7 +84,7 @@ export default {
                 Key: imageName
             }, function (err, data) {
                 if (err) reject(err);
-                else resolve();
+                else resolve(true);
             })
         });
     },

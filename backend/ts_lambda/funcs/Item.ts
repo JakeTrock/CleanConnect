@@ -15,7 +15,7 @@ const change = async (inv: string, itid: string, updated: ItemChangeInterface, q
         Item.findOne({
             where: { inventory: inv, id: itid }
         }).then(itm => itm.update(updated))
-            .then(() => resolve())
+            .then(() => resolve(true))
             .catch(reject);
     });
 }
@@ -31,7 +31,7 @@ const mark = async (invid: string, id: string, status: boolean, ip: string): Pro
             removedAt: status ? new Date() : undefined,
             ip: ip ? ip : undefined
         }))
-            .then(() => resolve())
+            .then(() => resolve(true))
             .catch(reject);
     });
 }
