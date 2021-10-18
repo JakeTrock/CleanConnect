@@ -5,16 +5,16 @@ Janitorial coordination system. Cooperative business idea to solve problem of is
 https://cleanconnect.us/images/JakeCleanConn.mp4
 
 ## Beauty shots:
-![](/ccsceens/Screenshot_20211018_115926.png)
-![](/ccsceens/Screenshot_20211018_115935.png)
-![](/ccsceens/Screenshot_20211018_115949.png)
-![](/ccsceens/Screenshot_20211018_120002.png)
-![](/ccsceens/Screenshot_20211018_120028.png)
-![](/ccsceens/Screenshot_20211018_120030.png)
-![](/ccsceens/Screenshot_20211018_120056.png)
-![](/ccsceens/Screenshot_20211018_120116.png)
-![](/ccsceens/Screenshot_20211018_120128.png)
-![](/ccsceens/Screenshot_20211018_120144.png)
+![](/ccscreens/Screenshot_20211018_115926.png)
+![](/ccscreens/Screenshot_20211018_115935.png)
+![](/ccscreens/Screenshot_20211018_115949.png)
+![](/ccscreens/Screenshot_20211018_120002.png)
+![](/ccscreens/Screenshot_20211018_120028.png)
+![](/ccscreens/Screenshot_20211018_120030.png)
+![](/ccscreens/Screenshot_20211018_120056.png)
+![](/ccscreens/Screenshot_20211018_120116.png)
+![](/ccscreens/Screenshot_20211018_120128.png)
+![](/ccscreens/Screenshot_20211018_120144.png)
 
 # Install
 1. clone this repo
