@@ -4,6 +4,18 @@ Janitorial coordination system. Cooperative business idea to solve problem of is
 # Video Demo
 https://cleanconnect.us/images/JakeCleanConn.mp4
 
+## Beauty shots:
+[](./ccsceens/Screenshot_20211018_115926.png)
+[](./ccsceens/Screenshot_20211018_115935.png)
+[](./ccsceens/Screenshot_20211018_115949.png)
+[](./ccsceens/Screenshot_20211018_120002.png)
+[](./ccsceens/Screenshot_20211018_120028.png)
+[](./ccsceens/Screenshot_20211018_120030.png)
+[](./ccsceens/Screenshot_20211018_120056.png)
+[](./ccsceens/Screenshot_20211018_120116.png)
+[](./ccsceens/Screenshot_20211018_120128.png)
+[](./ccsceens/Screenshot_20211018_120144.png)
+
 # Install
 1. clone this repo
 2. required software
@@ -14,4 +26,3 @@ https://cleanconnect.us/images/JakeCleanConn.mp4
     
 ## Usage Instructions
 The api is seperated into multiple sections, these sections determine the proper input for each request. more info can be found in the insomnia file in the Unit testing dir.
-
