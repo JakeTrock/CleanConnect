@@ -19,7 +19,7 @@
     "pg": "^7.4.1",
     "qrcode": "^1.4.4",
     "sequelize": "^6.3.4",
-    "serverless": "^1.83.2",
+    "serverless": "^3.27.0",
     "uuid": "^8.3.1",
     "xss-filters": "^1.2.7"
   },
